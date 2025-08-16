@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DevoidStarter": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
