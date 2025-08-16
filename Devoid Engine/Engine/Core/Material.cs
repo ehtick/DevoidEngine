@@ -85,7 +85,7 @@ namespace DevoidEngine.Engine.Core
         {
             base.Apply();
             this.Buffer.Bind(1, ShaderStage.Fragment);
-            //Shader.Use();
+            Shader.Use();
         }
     }
 }
