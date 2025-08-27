@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using DevoidEngine.Engine.Imgui;
 using DevoidEngine.Engine.Rendering;
+using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
+using ImGuiNET;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -37,6 +40,8 @@ namespace DevoidEngine.Engine.Core
 
         public LayerHandler LayerHandler;
         public ApplicationSpecification AppSpec;
+
+        public ImGuiRenderer ImGuiRenderer;
 
         public void Create(ApplicationSpecification appSpec)
         {
@@ -91,16 +96,22 @@ namespace DevoidEngine.Engine.Core
             MainWindow.MouseWheel += OnMouseWheel;
 
             windowManager.RegisterWindow(MainWindow);
+
+            ImGuiRenderer = new ImGuiRenderer(graphicsDevice);
+            ImGuiRenderer.Initialize();
         }
 
         private void OnMouseMove(OpenTK.Windowing.Common.MouseMoveEventArgs obj)
         {
             LayerHandler.OnMouseMoveEvent(obj);
+            InternalInputState.SetMousePosition(TypeHelper.ToNumerics2(obj.Position));
+            InternalInputState.SetMouseDelta(TypeHelper.ToNumerics2(obj.Delta));
         }
 
         private void OnMouseWheel(OpenTK.Windowing.Common.MouseWheelEventArgs obj)
         {
             LayerHandler.OnMouseWheelEvent(obj);
+            InternalInputState.SetMouseScroll(TypeHelper.ToNumerics2(obj.Offset));
         }
 
         private void OnMouseLeave()
@@ -116,15 +127,18 @@ namespace DevoidEngine.Engine.Core
         private void OnMouseInput(OpenTK.Windowing.Common.MouseButtonEventArgs obj)
         {
             LayerHandler.OnMouseButtonEvent(obj);
+            InternalInputState.SetMouseButton((int)(obj.Button), obj.IsPressed);
         }
 
         private void OnTextInput(OpenTK.Windowing.Common.TextInputEventArgs obj)
         {
             LayerHandler.TextInput(obj.Unicode);
+            
         }
 
         private void OnResize(OpenTK.Windowing.Common.ResizeEventArgs obj)
         {
+            graphicsDevice.MainSurface.Resize(obj.Width, obj.Height);
             LayerHandler.ResizeLayers(obj.Width, obj.Height);
         }
 
@@ -151,10 +165,13 @@ namespace DevoidEngine.Engine.Core
         {
             LayerHandler.AddLayer(layer);
         }
-
         private void OnRenderFrame()
         {
-            ExampleRenderer.Render();
+            ImGuiRenderer.PerFrame();
+
+            LayerHandler.OnGUILayers();
+
+            //ExampleRenderer.Render();
             LayerHandler.RenderLayers();
             graphicsDevice.MainSurface.Present();
         }
@@ -162,6 +179,7 @@ namespace DevoidEngine.Engine.Core
         private void OnUpdateFrame(double deltaTime)
         {
             LayerHandler.UpdateLayers((float)deltaTime);
+            Input.Update();
         }
     }
 }

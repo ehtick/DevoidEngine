@@ -13,10 +13,11 @@ namespace DevoidGPU.DX11
         public static InputElement[] CreateInputElements(VertexInfo vertexInfo)
         {
             InputElement[] InputLayoutElements = new InputElement[vertexInfo.VertexAttributes.Length];
+            Console.WriteLine("#############");
             for (int i = 0; i < InputLayoutElements.Length; i++)
             {
                 VertexAttribute attribute = vertexInfo.VertexAttributes[i];
-
+                Console.WriteLine(MapDXGIComponentCountToFormat(attribute));
                 InputLayoutElements[i] = new InputElement()
                 {
                     SemanticName = attribute.Name,
@@ -33,13 +34,34 @@ namespace DevoidGPU.DX11
 
         public static Format MapDXGIComponentCountToFormat(VertexAttribute attr)
         {
-            return attr.ComponentCount switch
+            return attr.Type switch
             {
-                1 => Format.R32_Float,
-                2 => Format.R32G32_Float,
-                3 => Format.R32G32B32_Float,
-                4 => Format.R32G32B32A32_Float,
-                _ => throw new ArgumentException("Unsupported component count")
+                VertexAttribType.Float => attr.ComponentCount switch
+                {
+                    1 => Format.R32_Float,
+                    2 => Format.R32G32_Float,
+                    3 => Format.R32G32B32_Float,
+                    4 => Format.R32G32B32A32_Float,
+                    _ => throw new ArgumentException("Unsupported float component count")
+                },
+
+                VertexAttribType.UnsignedByte => attr.ComponentCount switch
+                {
+                    4 when attr.Normalized => Format.R8G8B8A8_UNorm,
+                    4 => Format.R8G8B8A8_UInt,
+                    _ => throw new ArgumentException("Unsupported byte component count")
+                },
+
+                VertexAttribType.Int => attr.ComponentCount switch
+                {
+                    1 => Format.R32_SInt,
+                    2 => Format.R32G32_SInt,
+                    3 => Format.R32G32B32_SInt,
+                    4 => Format.R32G32B32A32_SInt,
+                    _ => throw new ArgumentException("Unsupported int component count")
+                },
+
+                _ => throw new ArgumentException("Unsupported attribute type")
             };
         }
 

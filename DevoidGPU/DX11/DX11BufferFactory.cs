@@ -24,9 +24,9 @@ namespace DevoidGPU.DX11
             return new DX11UniformBuffer(device, deviceContext, Marshal.SizeOf<T>());
         }
 
-        public IIndexBuffer CreateIndexBuffer()
+        public IIndexBuffer CreateIndexBuffer(int indexCount, BufferUsage usage, bool is16Bit = false)
         {
-            throw new NotImplementedException();
+            return new DX11IndexBuffer(device, deviceContext, indexCount, usage, is16Bit);
         }
 
         public IVertexBuffer CreateVertexBuffer(BufferUsage bufferUsage, VertexInfo vertexInfo, int vertexCount)

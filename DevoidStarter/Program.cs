@@ -1,5 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-using DevoidGPU.DX11;
+﻿using Elemental;
 
 namespace DevoidStarter
 {
@@ -7,20 +6,8 @@ namespace DevoidStarter
     {
         static void Main(string[] args)
         {
-            ApplicationSpecification applicationSpecification = new ApplicationSpecification()
-            {
-                Height = 500,
-                Width = 500,
-                forceVsync = true,
-                Name = "Devoid D3D11",
-            
-                graphicsDevice = new DX11GraphicsDevice()
-            };
-
-
-            Application application  = new Application();
-            application.Create(applicationSpecification);
-            application.Run();
+            ElementalEditor editor = new ElementalEditor();
+            editor.Create();
         }
     }
 }

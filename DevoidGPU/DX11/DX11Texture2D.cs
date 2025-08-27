@@ -10,8 +10,12 @@ using Device = SharpDX.Direct3D11.Device;
 
 namespace DevoidGPU.DX11
 {
-    internal class DX11Texture2D : ITexture2D
+    internal class DX11Texture2D : ITexture2D, IDisposable
     {
+        private static readonly Dictionary<IntPtr, ShaderResourceView> Registry = new();
+        private static int nextId = 1;
+        private IntPtr handle;
+
         public TextureType Type => TextureType.Texture2D;
         public int Width { get; set; }
 
@@ -26,6 +30,7 @@ namespace DevoidGPU.DX11
         public Texture2D Texture { get; set; }
         public RenderTargetView RenderTargetView { get; set; }
         public DepthStencilView DepthStencilView { get; set; }
+        public ShaderResourceView ShaderResourceView { get; set; }
 
         private readonly Device device;
         private readonly DeviceContext deviceContext;
@@ -66,6 +71,9 @@ namespace DevoidGPU.DX11
 
             RenderTargetView = IsRenderTarget ? new RenderTargetView(device, Texture) : null;
             DepthStencilView = IsDepthStencil ? new DepthStencilView(device, Texture) : null;
+            ShaderResourceView = new ShaderResourceView(device, this.Texture);
+
+            handle = TextureManager.Register(this);
         }
 
         public void SetData(byte[] data)
@@ -74,6 +82,28 @@ namespace DevoidGPU.DX11
             var handle = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0);
             var box = new DataBox(handle, rowPitch, 0);
             deviceContext.UpdateSubresource(box, Texture, 0);
+        }
+
+        public IntPtr GetHandle() => handle;
+
+        public void Dispose()
+        {
+            DepthStencilView?.Dispose();
+            RenderTargetView?.Dispose();
+            ShaderResourceView?.Dispose();
+            Texture?.Dispose();
+
+            DepthStencilView = null;
+            RenderTargetView = null;
+            ShaderResourceView = null;
+            Texture = null;
+            handle = IntPtr.Zero;
+            TextureManager.Unregister(handle);
+        }
+
+        public void Bind(int slot)
+        {
+            deviceContext.PixelShader.SetShaderResource(slot, ShaderResourceView);
         }
     }
 }

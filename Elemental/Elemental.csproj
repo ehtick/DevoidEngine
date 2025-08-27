@@ -7,4 +7,12 @@
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Devoid Engine\DevoidEngine.csproj" />
+  </ItemGroup>
+
 </Project>

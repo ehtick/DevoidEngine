@@ -16,9 +16,9 @@ namespace DevoidGPU.DX11
             this.device = device;
             this.deviceContext = deviceContext;
         }
-        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool isDepth)
+        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool isDepth, bool isRenderTarget)
         {
-            DX11Texture2D texture = new DX11Texture2D(device, deviceContext, !isDepth, isDepth);
+            DX11Texture2D texture = new DX11Texture2D(device, deviceContext, isRenderTarget, isDepth);
             texture.Create(width, height, DX11TextureFormat.ToDXGIFormat(format));
             return texture;
         }

@@ -49,19 +49,36 @@ namespace DevoidGPU
 
     }
 
+    public enum VertexAttribType
+    {
+        Float,
+        UnsignedByte,
+        Int,
+    }
+
     public readonly struct VertexAttribute
     {
         public readonly string Name;
         public readonly int Index;
         public readonly int ComponentCount;
         public readonly int Offset;
+        public readonly VertexAttribType Type;
+        public readonly bool Normalized;
 
-        public VertexAttribute(string name, int index, int componentcount, int offset)
+        public VertexAttribute(
+            string name,
+            int index,
+            int componentCount,
+            int offset,
+            VertexAttribType type = VertexAttribType.Float,
+            bool normalized = false)
         {
             Name = name;
             Index = index;
-            ComponentCount = componentcount;
+            ComponentCount = componentCount;
             Offset = offset;
+            Type = type;
+            Normalized = normalized;
         }
     }
 
@@ -80,9 +97,10 @@ namespace DevoidGPU
             for (int i = 0; i < VertexAttributes.Length; i++)
             {
                 VertexAttribute attribute = this.VertexAttributes[i];
-                this.SizeInBytes += attribute.ComponentCount * sizeof(float);
+                this.SizeInBytes += attribute.ComponentCount * Utils.GetTypeSize(attribute.Type);
             }
         }
     }
+
 
 }

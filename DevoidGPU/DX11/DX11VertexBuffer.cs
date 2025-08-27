@@ -29,7 +29,8 @@ namespace DevoidGPU.DX11
             this.VertexCount = vertexCount;
             this.Usage = usage;
             this.Stride = layout.SizeInBytes;
-            
+
+            Console.WriteLine("VERTEX BUFFER STRIDE: " + this.Stride);
 
             BufferDescription bufferDescription = new BufferDescription()
             {
@@ -64,8 +65,64 @@ namespace DevoidGPU.DX11
         public void UpdatePartial<T>(T[] vertices, int startVertex, int vertexCount) where T : struct
         {
             int offsetInBytes = startVertex * Stride;
-            deviceContext.UpdateSubresource(vertices, buffer, 0, offsetInBytes, 0);
+
+            if (Usage == BufferUsage.Dynamic)
+            {
+                // Map/Unmap for dynamic buffers
+                DataStream stream;
+                deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out stream);
+
+                // Advance to correct offset
+                stream.Position = offsetInBytes;
+
+                // Write only the range
+                stream.WriteRange(vertices, startVertex, vertexCount);
+
+                deviceContext.UnmapSubresource(buffer, 0);
+                stream.Dispose();
+            }
+            else
+            {
+                // Default buffer: can use UpdateSubresource
+                deviceContext.UpdateSubresource(vertices, buffer, 0, offsetInBytes, 0);
+            }
         }
+
+        public void UpdatePartial(nint dataPtr, int startVertex, int vertexCount)
+        {
+            int sizeInBytes = vertexCount * Stride;
+            int offsetInBytes = startVertex * Stride;
+
+            if (Usage == BufferUsage.Dynamic)
+            {
+                DataStream stream;
+                deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out stream);
+
+                stream.Position = offsetInBytes;
+                stream.WriteRange(dataPtr, sizeInBytes);
+
+                deviceContext.UnmapSubresource(buffer, 0);
+                stream.Dispose();
+            }
+            else
+            {
+                var dataBox = new DataBox(dataPtr, 0, 0);
+                deviceContext.UpdateSubresource(
+                    dataBox,
+                    buffer,
+                    0,
+                    new ResourceRegion
+                    {
+                        Left = offsetInBytes,
+                        Right = offsetInBytes + sizeInBytes,
+                        Top = 0,
+                        Front = 0,
+                        Bottom = 1,
+                        Back = 1
+                    });
+            }
+        }
+
 
         public void Bind(int slot = 0, int offset = 0)
         {

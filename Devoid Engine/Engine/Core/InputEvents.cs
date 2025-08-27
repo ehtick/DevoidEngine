@@ -1,5 +1,4 @@
-﻿using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace DevoidEngine.Engine.Core
 {

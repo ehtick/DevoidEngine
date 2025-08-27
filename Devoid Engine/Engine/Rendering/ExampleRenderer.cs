@@ -44,7 +44,7 @@ namespace DevoidEngine.Engine.Rendering
 
             framebuffer = Renderer.graphicsDevice.BufferFactory.CreateFramebuffer();
 
-            ITexture2D texture2D = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(550, 550, TextureFormat.RGBA16_Float, false);
+            ITexture2D texture2D = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(550, 550, TextureFormat.RGBA16_Float, false, true);
             framebuffer.AddColorAttachment(texture2D);
 
             int width = 550;

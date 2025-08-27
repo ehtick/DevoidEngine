@@ -11,7 +11,7 @@ namespace DevoidGPU
         IUniformBuffer CreateUniformBuffer<T>() where T : struct;
 
         IVertexBuffer CreateVertexBuffer(BufferUsage bufferUsage, VertexInfo vertexInfo, int vertexCount);
-        IIndexBuffer CreateIndexBuffer();
+        IIndexBuffer CreateIndexBuffer(int indexCount, BufferUsage usage, bool is16Bit = false);
 
         IFramebuffer CreateFramebuffer();
     }

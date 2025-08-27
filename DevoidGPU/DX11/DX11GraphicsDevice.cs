@@ -64,9 +64,9 @@ namespace DevoidGPU.DX11
             TextureFactory = new DX11TextureFactory(device, deviceContext);
         }
 
-        public void DrawInstanced(int indexCount, int startIndexLocation, int baseVertexLocation)
+        public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
-            deviceContext.DrawIndexed(baseVertexLocation, indexCount, startIndexLocation);
+            deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
         }
 
         public void Draw(int vertexCount, int startVertex)
@@ -87,25 +87,233 @@ namespace DevoidGPU.DX11
             return new DX11InputLayout(device, deviceContext, vertexInfo, dxShader);
         }
 
-
-        public void SetBlendState()
+        public ISampler CreateSampler(SamplerDescription description)
         {
-            throw new NotImplementedException();
+            DX11Sampler sampler = new DX11Sampler(device, deviceContext, description);
+            return sampler;
         }
 
-        public void SetScissorState()
+        public ITexture GetTexture(nint handle)
         {
-            throw new NotImplementedException();
+            return TextureManager.Resolve(handle);
         }
 
-        public void SetAlphaBlendState()
+        
+
+
+
+
+        private readonly Dictionary<(BlendMode, bool), BlendState> blendCache = new();
+        private readonly Dictionary<(DepthTest, bool), DepthStencilState> depthCache = new();
+        private readonly Dictionary<(CullMode, FillMode), RasterizerState> rasterizerCache = new();
+        private readonly Dictionary<(int x, int y, int w, int h), SharpDX.Mathematics.Interop.RawRectangle> scissorCache = new();
+
+        private BlendState currentBlend;
+        private DepthStencilState currentDepthStencil;
+        private RasterizerState currentRasterizer;
+        private SharpDX.Mathematics.Interop.RawRectangle? currentScissor;
+
+
+
+        public void SetRasterizerState(CullMode cullMode, FillMode fillMode = FillMode.Solid)
         {
-            throw new NotImplementedException();
+            var key = (cullMode, fillMode);
+
+            if (!rasterizerCache.TryGetValue(key, out var state))
+            {
+                var desc = new RasterizerStateDescription
+                {
+                    CullMode = DX11StateMapper.ToDXCullMode(cullMode),
+                    FillMode = DX11StateMapper.ToDXFillMode(fillMode),
+                    IsFrontCounterClockwise = false,
+                    IsDepthClipEnabled = true
+                };
+
+                state = new RasterizerState(device, desc);
+                rasterizerCache[key] = state;
+            }
+
+            if (currentRasterizer == state) return;
+            deviceContext.Rasterizer.State = state;
+            currentRasterizer = state;
         }
 
-        public void SetRasterizerState()
+
+        public void SetBlendState(BlendMode mode, bool alphaToCoverage = false)
         {
-            throw new NotImplementedException();
+            var key = (mode, alphaToCoverage);
+
+            if (!blendCache.TryGetValue(key, out var state))
+            {
+                var desc = new BlendStateDescription
+                {
+                    AlphaToCoverageEnable = alphaToCoverage,
+                    IndependentBlendEnable = false
+                };
+
+                var rt = new RenderTargetBlendDescription
+                {
+                    IsBlendEnabled = (mode != BlendMode.Opaque),
+                    RenderTargetWriteMask = ColorWriteMaskFlags.All
+                };
+
+                switch (mode)
+                {
+                    case BlendMode.Opaque:
+                        rt.SourceBlend = BlendOption.One;
+                        rt.DestinationBlend = BlendOption.Zero;
+                        rt.BlendOperation = BlendOperation.Add;
+
+                        rt.SourceAlphaBlend = BlendOption.One;
+                        rt.DestinationAlphaBlend = BlendOption.Zero;
+                        rt.AlphaBlendOperation = BlendOperation.Add;
+                        break;
+
+                    case BlendMode.AlphaBlend:
+                        rt.SourceBlend = BlendOption.SourceAlpha;
+                        rt.DestinationBlend = BlendOption.InverseSourceAlpha;
+                        rt.BlendOperation = BlendOperation.Add;
+
+                        rt.SourceAlphaBlend = BlendOption.One;
+                        rt.DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
+                        rt.AlphaBlendOperation = BlendOperation.Add;
+                        break;
+
+                    case BlendMode.Additive:
+                        rt.SourceBlend = BlendOption.One;
+                        rt.DestinationBlend = BlendOption.One;
+                        rt.BlendOperation = BlendOperation.Add;
+
+                        rt.SourceAlphaBlend = BlendOption.One;
+                        rt.DestinationAlphaBlend = BlendOption.One;
+                        rt.AlphaBlendOperation = BlendOperation.Add;
+                        break;
+                }
+
+                desc.RenderTarget[0] = rt;
+                state = new BlendState(device, desc);
+                blendCache[key] = state;
+            }
+
+            if (currentBlend == state) return; // already bound
+            deviceContext.OutputMerger.SetBlendState(state);
+            currentBlend = state;
+        }
+
+
+        public void SetDepthState(DepthTest func, bool writeEnable)
+        {
+            var key = (func, writeEnable);
+
+            if (!depthCache.TryGetValue(key, out var state))
+            {
+                var desc = new DepthStencilStateDescription
+                {
+                    IsDepthEnabled = true,
+                    DepthComparison = DX11StateMapper.ToDXDepthFunc(func),
+                    DepthWriteMask = writeEnable ? DepthWriteMask.All : DepthWriteMask.Zero
+                };
+
+                state = new DepthStencilState(device, desc);
+                depthCache[key] = state;
+            }
+
+            if (currentDepthStencil == state) return;
+            deviceContext.OutputMerger.SetDepthStencilState(state);
+            currentDepthStencil = state;
+        }
+
+        // In DX11GraphicsDevice
+        private readonly Dictionary<(CullMode, FillMode, bool), RasterizerState> rasterizerCache2 = new();
+        private CullMode currentCull = CullMode.Back;
+        private FillMode currentFill = FillMode.Solid;
+        private bool currentScissorEnabled = false;
+
+        public void SetRasterizerState(CullMode cullMode, FillMode fillMode = FillMode.Solid, bool scissorEnabled = false)
+        {
+            currentCull = cullMode;
+            currentFill = fillMode;
+            currentScissorEnabled = scissorEnabled;
+
+            var key = (cullMode, fillMode, scissorEnabled);
+            if (!rasterizerCache2.TryGetValue(key, out var state))
+            {
+                var desc = new RasterizerStateDescription
+                {
+                    CullMode = DX11StateMapper.ToDXCullMode(cullMode),
+                    FillMode = DX11StateMapper.ToDXFillMode(fillMode),
+                    IsFrontCounterClockwise = false,
+                    IsDepthClipEnabled = true,
+                    IsScissorEnabled = scissorEnabled
+                };
+                state = new RasterizerState(device, desc);
+                rasterizerCache2[key] = state;
+            }
+            deviceContext.Rasterizer.State = state;
+        }
+
+        // Enable/disable scissor without obliterating cull/fill
+        public void SetScissorState(bool enable)
+        {
+            if (enable == currentScissorEnabled) return;
+            SetRasterizerState(currentCull, currentFill, enable);
+        }
+
+        // Set only the rectangle
+        public void SetScissorRectangle(int x, int y, int width, int height)
+        {
+            deviceContext.Rasterizer.SetScissorRectangle(x, y, x + width, y + height);
+        }
+
+
+        public void SetStencilState(
+            bool enable,
+            CompareFunc func,
+            int reference,
+            StencilOp stencilFail = StencilOp.Keep,
+            StencilOp depthFail = StencilOp.Keep,
+            StencilOp pass = StencilOp.Keep)
+        {
+            var desc = new DepthStencilStateDescription()
+            {
+                IsDepthEnabled = true,
+                DepthWriteMask = DepthWriteMask.All,
+                DepthComparison = Comparison.LessEqual,
+
+                IsStencilEnabled = enable,
+                StencilReadMask = 0xFF,
+                StencilWriteMask = 0xFF,
+
+                FrontFace = new DepthStencilOperationDescription()
+                {
+                    FailOperation = DX11StateMapper.ToDXStencilOp(stencilFail),
+                    DepthFailOperation = DX11StateMapper.ToDXStencilOp(depthFail),
+                    PassOperation = DX11StateMapper.ToDXStencilOp(pass),
+                    Comparison = DX11StateMapper.ToDXComparison(func)
+                },
+
+                BackFace = new DepthStencilOperationDescription()
+                {
+                    FailOperation = DX11StateMapper.ToDXStencilOp(stencilFail),
+                    DepthFailOperation = DX11StateMapper.ToDXStencilOp(depthFail),
+                    PassOperation = DX11StateMapper.ToDXStencilOp(pass),
+                    Comparison = DX11StateMapper.ToDXComparison(func)
+                }
+            };
+
+            var newState = new DepthStencilState(device, desc);
+
+            // Avoid rebinding the same state
+            if (currentDepthStencil != newState)
+            {
+                deviceContext.OutputMerger.SetDepthStencilState(newState, reference);
+                currentDepthStencil = newState;
+            }
+        }
+
+        public void SetPrimitiveType(PrimitiveType primitiveType)
+        {
+            deviceContext.InputAssembler.PrimitiveTopology = DX11StateMapper.ToDXPrimitiveType(primitiveType);
         }
     }
 }
