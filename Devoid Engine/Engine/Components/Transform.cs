@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DevoidEngine.Engine.Attributes;
+using System;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
@@ -76,6 +77,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnUpdate(float dt)
         {
+            return;
             if (
                 prev_position != position ||
                 prev_rotation != rotation ||

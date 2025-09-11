@@ -75,8 +75,7 @@ namespace DevoidEngine.Engine.Core
 
             graphicsDevice = appSpec.graphicsDevice;
             graphicsDevice.Initialize(MainWindow.GetWindowPtr(), presentationParameters);
-            Renderer.Initialize(graphicsDevice);
-            ExampleRenderer.Initialize();
+            Renderer.Initialize(graphicsDevice, appSpec.Width, appSpec.Height);
 
             MainWindow.OnLoad += OnLoad;
             MainWindow.OnUpdateFrame += OnUpdateFrame;
@@ -99,6 +98,7 @@ namespace DevoidEngine.Engine.Core
 
             ImGuiRenderer = new ImGuiRenderer(graphicsDevice);
             ImGuiRenderer.Initialize();
+            ImGuiRenderer.OnGUI += () => { LayerHandler.OnGUILayers(); };
         }
 
         private void OnMouseMove(OpenTK.Windowing.Common.MouseMoveEventArgs obj)
@@ -165,21 +165,30 @@ namespace DevoidEngine.Engine.Core
         {
             LayerHandler.AddLayer(layer);
         }
-        private void OnRenderFrame()
+        private void OnRenderFrame(double deltaTime)
         {
-            ImGuiRenderer.PerFrame();
+            ImGuiRenderer.PerFrame((float)deltaTime);
 
-            LayerHandler.OnGUILayers();
 
-            //ExampleRenderer.Render();
             LayerHandler.RenderLayers();
             graphicsDevice.MainSurface.Present();
+
+            RenderThreadDispatcher.ExecutePending();
         }
 
         private void OnUpdateFrame(double deltaTime)
         {
+            ImGuiRenderer.UpdateInput();
+
             LayerHandler.UpdateLayers((float)deltaTime);
-            Input.Update();
+            UpdateThreadDispatcher.ExecutePending();
+
+            //Input.Update();
+            RenderThreadDispatcher.Queue(() =>
+            {
+                InternalInputState.UpdateFrame();
+            });
+
         }
     }
 }

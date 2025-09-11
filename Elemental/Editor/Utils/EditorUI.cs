@@ -13,6 +13,7 @@ namespace Elemental.Editor.Utils
         public static ImFontPtr DefaultFontLarge;
         public static ImFontPtr DefaultFontMedium;
         public static ImFontPtr DefaultFontSmall;
+        public static ImFontPtr DefaultIconFont;
 
         public static Vector4 HeaderColor = new Vector4(new Vector3(0.247f), 0.5f);
         public static Vector4 DarkChildBg = new Vector4(new Vector3(0.12f), 1f);
@@ -63,7 +64,8 @@ namespace Elemental.Editor.Utils
             style.FrameRounding = 2f;
             style.ChildRounding = 2f;
             style.TabRounding = 2f;
-            style.PopupRounding = 3f;
+            style.PopupRounding = 1f;
+            style.PopupBorderSize = 2;
         }
 
 

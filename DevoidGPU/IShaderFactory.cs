@@ -11,5 +11,7 @@ namespace DevoidGPU
         IShader CreateShader(ShaderType shaderType, string source, string entrypoint);
         IShaderProgram CreateShaderProgram();
 
+        IComputeShader CreateComputeShader(string source, string entrypoint);
+
     }
 }

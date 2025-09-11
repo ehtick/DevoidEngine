@@ -17,6 +17,13 @@ namespace DevoidGPU.DX11
             this.deviceContext = deviceContext;
         }
 
+        public IComputeShader CreateComputeShader(string source, string entrypoint)
+        {
+            DX11ComputeShader shader = new DX11ComputeShader(device, deviceContext);
+            shader.Compile(source, entrypoint);
+            return shader;
+        }
+
         public IShader CreateShader(ShaderType shaderType, string source, string entrypoint)
         {
             DX11Shader shader = new DX11Shader(device, shaderType);

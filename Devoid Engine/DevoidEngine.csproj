@@ -39,4 +39,8 @@
     <ProjectReference Include="..\DevoidGPU\DevoidGPU.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Serializing\" />
+  </ItemGroup>
+
 </Project>

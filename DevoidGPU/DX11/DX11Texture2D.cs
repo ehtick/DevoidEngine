@@ -21,8 +21,6 @@ namespace DevoidGPU.DX11
 
         public int Height { get; set; }
 
-        public int Depth { get; set; }
-
         public bool IsRenderTarget { get; }
 
         public bool IsDepthStencil { get; }

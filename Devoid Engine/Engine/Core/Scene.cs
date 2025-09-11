@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Rendering;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -9,7 +10,7 @@ namespace DevoidEngine.Engine.Core
     {
         private bool _disposed;
 
-        public string Name;
+        public string Name = "Base Scene";
         public Guid Id = Guid.NewGuid();
 
         public List<GameObject> GameObjects { get; set; }
@@ -19,9 +20,8 @@ namespace DevoidEngine.Engine.Core
 
         public bool IsPlaying = false;
 
-        public event Action<Component> OnComponentAdded = (c) => {};
-
-        public event Action<Component> OnComponentRemoved = (c) => {};
+        public event Action<Component>? OnComponentAdded;
+        public event Action<Component>? OnComponentRemoved;
 
         public Scene()
         {
@@ -124,10 +124,8 @@ namespace DevoidEngine.Engine.Core
             {
                 if (i == index) { continue; }
 
-                this.Cameras[i].isDefault = false;
+                this.Cameras[i].IsDefault = false;
             }
-
-            //Renderer3D.SetRenderCamera(camera.camera);
         }
 
         public void AddCamera(CameraComponent3D camera)
@@ -157,10 +155,7 @@ namespace DevoidEngine.Engine.Core
             }
             foreach (CameraComponent3D camera in Cameras)
             {
-                if (camera.isDefault)
-                {
 
-                }
             }
         }
 
@@ -179,9 +174,21 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
+        public void OnRender()
+        {
+            foreach (CameraComponent3D camera in Cameras)
+            {
+                //Renderer3D.BeginRender(camera.Camera);
+
+                //Renderer3D.Render();
+
+                //Renderer3D.EndRender();
+            }
+        }
+
         public void ComponentAdded(Component component)
         {
-            OnComponentAdded.Invoke(component);
+            OnComponentAdded?.Invoke(component);
 
             if (IsPlaying)
             {
@@ -191,7 +198,7 @@ namespace DevoidEngine.Engine.Core
 
         public void ComponentRemoved(Component component)
         {
-            OnComponentRemoved.Invoke(component);
+            OnComponentRemoved?.Invoke(component);
         }
 
         public void OnResize(float width, float height)

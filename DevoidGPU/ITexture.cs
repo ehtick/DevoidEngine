@@ -18,7 +18,6 @@ namespace DevoidGPU
         TextureType Type { get; }
         int Width { get; }
         int Height { get; }
-        int Depth { get; }
 
         public bool IsRenderTarget { get; }
         public bool IsDepthStencil { get; }

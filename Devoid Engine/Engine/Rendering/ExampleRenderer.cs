@@ -21,7 +21,7 @@ namespace DevoidEngine.Engine.Rendering
     public static class ExampleRenderer
     {
         static Vertex[] Quad;
-        static IFramebuffer framebuffer;
+        public static IFramebuffer framebuffer;
         static IVertexBuffer VertexBuffer;
         static IInputLayout InputLayout;
         static IUniformBuffer uniformBuffer;
@@ -54,7 +54,7 @@ namespace DevoidEngine.Engine.Rendering
 
             Camera camera = new Camera();
             float aspectRatio = width / (float)height;
-            camera.UpdateViewMatrix();
+            //camera.UpdateView()
             camera.UpdateProjectionMatrix(aspectRatio);
 
 

@@ -32,6 +32,9 @@ namespace DevoidEngine.Engine.Core
         public void RunAll()
         {
 
+            float updateFixed = 1 / 60f;
+            float renderFixed = 1 / 60f;
+
             foreach (var wrs in windows)
                 wrs.window.Load();
 
@@ -72,6 +75,7 @@ namespace DevoidEngine.Engine.Core
 
             Stopwatch timer = Stopwatch.StartNew();
             double lastRender = timer.Elapsed.TotalSeconds;
+            double accumulated = 0f;
 
             while (_running && windows.Count > 0)
             {
@@ -79,6 +83,8 @@ namespace DevoidEngine.Engine.Core
 
                 double deltaTime = currentTime - lastRender;
                 lastRender = currentTime;
+
+                accumulated += deltaTime;
 
                 for (int i = windows.Count - 1; i >= 0; i--)
                 {
@@ -93,7 +99,11 @@ namespace DevoidEngine.Engine.Core
                     }
 
                     // Render
-                    wrs.window.Render();
+                    if (accumulated >= renderFixed)
+                    {
+                        wrs.window.Render(deltaTime);
+                        accumulated = 0;
+                    }
                 }
                 _running = windows.Count > 0;
             }

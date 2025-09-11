@@ -29,7 +29,7 @@ cbuffer CameraData : register(b0)
     float2 _padding1;
 };
 
-cbuffer ObjectData : register(b1)
+cbuffer MeshData : register(b1)
 {
     float4x4 Model;
 };

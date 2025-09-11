@@ -9,80 +9,43 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(CameraComponent3D);
 
-        public bool isDefault;
+        public bool IsDefault { get; set; }
 
-        internal Camera camera;
+        internal Camera Camera { get; private set; }
 
-        public Vector4 ClearColor
-        {
-            get => camera.ClearColor;
-            set => camera.SetClearColor(value);
-        }
-
-        public bool IsDefault
-        {
-            get => isDefault;
-            set => isDefault = value;
-        }
-
-        public float Fov
-        {
-            get => MathHelper.RadToDeg(camera.FovY);
-            set
-            {
-                float fovRad = MathHelper.DegToRad(value);
-                camera.FovY = Math.Clamp(fovRad, 0.01f, MathF.PI - 0.01f);
-                UpdateProjection();
-            }
-        }
-
-        public float NearPlane
-        {
-            get => camera.NearClip;
-            set { camera.NearClip = value; UpdateProjection(); }
-        }
-
-        public float FarPlane
-        {
-            get => camera.FarClip;
-            set { camera.FarClip = value; UpdateProjection(); }
-        }
-
-        private int width = 550, height = 550;
-        private int prevWidth, prevHeight;
+        private int width = 800;
+        private int height = 600;
 
         public CameraComponent3D()
         {
-            camera = new Camera();
+            Camera = new Camera();
             UpdateProjection();
         }
 
         public override void OnStart()
         {
-            gameObject.Scene.AddCamera(this);
+            //gameObject.Scene.AddCamera(this);
+            //if (IsDefault) gameObject.Scene.SetMainCamera(this);
         }
 
         public override void OnUpdate(float dt)
         {
-            // Update camera position and orientation from transform
-            camera.Position = gameObject.transform.Position;
+            //Pull transform data into camera
+            var pos = gameObject.transform.Position;
 
-            // Calculate camera basis vectors and view matrix
-            camera.UpdateCameraVectorsFromRotation(gameObject.transform.Rotation);
+            // Convert Euler rotation → forward vector
+            float pitch = MathHelper.DegToRad(gameObject.transform.Rotation.X);
+            float yaw = -MathHelper.DegToRad(gameObject.transform.Rotation.Y);
 
-            //// Handle screen resize
-            //width = Screen.Size.X;
-            //height = Screen.Size.Y;
-            //if (prevWidth != width || prevHeight != height)
-            //{
-            //    prevWidth = width;
-            //    prevHeight = height;
-            //    UpdateProjection();
-            //}
+            Vector3 front = new Vector3(
+                MathF.Cos(pitch) * MathF.Cos(yaw),
+                MathF.Sin(pitch),
+                MathF.Cos(pitch) * MathF.Sin(yaw)
+            );
 
-            // If default camera, set main
-            if (IsDefault)
-                gameObject.Scene.SetMainCamera(this);
+            Vector3 up = Vector3.UnitY;
+
+            Camera.UpdateView(pos, front, up);
         }
 
         public override void OnDestroy()
@@ -90,12 +53,42 @@ namespace DevoidEngine.Engine.Components
             gameObject.Scene.RemoveCamera(this);
         }
 
+        // --- API for projection ---
+        public float Fov
+        {
+            get => MathHelper.RadToDeg(Camera.FovY);
+            set
+            {
+                Camera.FovY = MathHelper.DegToRad(Math.Clamp(value, 1f, 179f));
+                UpdateProjection();
+            }
+        }
+
+        public float NearPlane
+        {
+            get => Camera.NearClip;
+            set { Camera.NearClip = value; UpdateProjection(); }
+        }
+
+        public float FarPlane
+        {
+            get => Camera.FarClip;
+            set { Camera.FarClip = value; UpdateProjection(); }
+        }
+
+        public void SetViewportSize(int newWidth, int newHeight)
+        {
+            if (newWidth == width && newHeight == height) return;
+
+            width = newWidth;
+            height = newHeight;
+            UpdateProjection();
+        }
+
         private void UpdateProjection()
         {
             float aspectRatio = (float)width / height;
-            camera.SetProjectionMatrix(
-                Matrix4x4.CreatePerspectiveFieldOfView(camera.FovY, aspectRatio, camera.NearClip, camera.FarClip)
-            );
+            Camera.UpdateProjectionMatrix(aspectRatio);
         }
     }
 }

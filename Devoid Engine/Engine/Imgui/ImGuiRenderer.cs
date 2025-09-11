@@ -5,6 +5,7 @@ using ImGuiNET;
 using OpenTK.Windowing.Desktop;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -58,6 +59,12 @@ namespace DevoidEngine.Engine.Imgui
 
         private float _scaleFactor = 1.0f;
 
+        private bool _fontsConfigured = false;
+        private int _fontsCount = -1;
+        private ImFontPtr DefaultFont;
+
+        public Action? OnGUI;
+
 
         public ImGuiRenderer(IGraphicsDevice graphicsDevice)
         {
@@ -68,6 +75,20 @@ namespace DevoidEngine.Engine.Imgui
             this.VertexBuffer = graphicsDevice.BufferFactory.CreateVertexBuffer(BufferUsage.Dynamic, ImGuiVertex.VertexInfo, vertexBufferSize);
             this.IndexBuffer = graphicsDevice.BufferFactory.CreateIndexBuffer(indexBufferSize, BufferUsage.Dynamic, true);
             this.InputLayout = graphicsDevice.CreateInputLayout(ImGuiVertex.VertexInfo, guiShader.vShader);
+
+            this._defaultSampler = Renderer.graphicsDevice.CreateSampler(new SamplerDescription()
+            {
+                MinFilter = TextureFilter.Linear,
+                MagFilter = TextureFilter.Linear,
+                MipFilter = MipFilter.None,
+                WrapU = TextureWrapMode.ClampToEdge,
+                WrapV = TextureWrapMode.ClampToEdge,
+                WrapW = TextureWrapMode.ClampToEdge,
+                MaxAnisotropy = 1,
+                MipLODBias = 0.0f,
+                MinLOD = 0.0f,
+                MaxLOD = 0.0f
+            });
         }
 
         private unsafe void DumpImGuiVertices(ImDrawDataPtr drawData, int count = 5)
@@ -99,6 +120,56 @@ namespace DevoidEngine.Engine.Imgui
             }
         }
 
+        public ImFontPtr AddFontFromFile(string path, float sizePixels)
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+            return io.Fonts.AddFontFromFileTTF(path, sizePixels);
+        }
+
+        public void AddDefaultFont()
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+            io.Fonts.AddFontDefault();
+        }
+
+        public void SetDefaultFont(ImFontPtr font)
+        {
+            this.DefaultFont = font;
+
+        }
+
+        public unsafe ImFontPtr LoadIconFont(string path, int size, (ushort, ushort) range)
+        {
+            ImFontConfigPtr configuration = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
+
+            configuration.GlyphOffset = new System.Numerics.Vector2(0, 6);
+            configuration.GlyphMinAdvanceX = size;
+            configuration.MergeMode = true;
+            configuration.PixelSnapH = true;
+
+            GCHandle rangeHandle = GCHandle.Alloc(new ushort[]
+            {
+                range.Item1,
+                range.Item2,
+        0
+            }, GCHandleType.Pinned);
+
+            try
+            {
+                return ImGui.GetIO().Fonts.AddFontFromFileTTF(path, (float)size, configuration, rangeHandle.AddrOfPinnedObject()); ;
+            }
+            finally
+            {
+                configuration.Destroy();
+
+                if (rangeHandle.IsAllocated)
+                {
+                    rangeHandle.Free();
+                }
+            }
+
+        }
+
 
         public void Initialize()
         {
@@ -115,34 +186,31 @@ namespace DevoidEngine.Engine.Imgui
 
         }
 
-        void ConfigureFontAtlas()
+        public void ConfigureFontAtlas()
         {
+            Console.WriteLine("CONFIGURING FONT ATLAS");
+
             ImGuiIOPtr io = ImGui.GetIO();
+
+            if (io.Fonts.Fonts.Size == 0)
+            {
+                AddDefaultFont();
+            }
+
+            io.Fonts.Build();
+            
+            // Bake the font atlas
             io.Fonts.GetTexDataAsRGBA32(out nint pixels, out int width, out int height, out int bpp);
 
             int size = width * height * bpp;
             byte[] managedPixels = new byte[size];
-
             Marshal.Copy(pixels, managedPixels, 0, size);
 
-            _fontTexture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(width, height, TextureFormat.RGBA8_UNorm, false);
+            _fontTexture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(
+                width, height, TextureFormat.RGBA8_UNorm, false);
             _fontTexture.SetData(managedPixels);
 
             io.Fonts.SetTexID(_fontTexture.GetHandle());
-
-            _defaultSampler = Renderer.graphicsDevice.CreateSampler(new SamplerDescription()
-            {
-                MinFilter = TextureFilter.Linear,
-                MagFilter = TextureFilter.Linear,
-                MipFilter = MipFilter.None,
-                WrapU = TextureWrapMode.ClampToEdge,
-                WrapV = TextureWrapMode.ClampToEdge,
-                WrapW = TextureWrapMode.ClampToEdge,
-                MaxAnisotropy = 1,
-                MipLODBias = 0.0f,
-                MinLOD = 0.0f,
-                MaxLOD = 0.0f
-            });
 
         }
 
@@ -190,7 +258,9 @@ namespace DevoidEngine.Engine.Imgui
             io.MouseDown[1] = InternalInputState.GetMouseButton((int)MouseButton.Right);
             io.MouseDown[2] = InternalInputState.GetMouseButton((int)MouseButton.Middle);
             io.MouseWheel = InternalInputState.MouseScroll.Y;
+
             io.MouseWheelH = InternalInputState.MouseScroll.X;
+
 
         }
 
@@ -199,25 +269,31 @@ namespace DevoidEngine.Engine.Imgui
             ImGuiIOPtr io = ImGui.GetIO();
 
             io.DeltaTime = delta;
+
+            if (io.Fonts.Fonts.Size != _fontsCount)
+            {
+                ConfigureFontAtlas();
+                _fontsCount = io.Fonts.Fonts.Size;
+            }
         }
 
 
-        bool _frameBegun;
         public void PerFrame(float delta = 1 / 60f)
         {
-            UpdateInput();
-            UpdateDisplay();
             UpdatePerFrameParameters(delta);
-            if (_frameBegun)
-            {
-                _frameBegun = false;
-                ImGui.Render();
+            UpdateDisplay();
 
-                RenderImDrawData(ImGui.GetDrawData());
-            }
-            _frameBegun = true;
             ImGui.NewFrame();
+            ImGui.PushFont(DefaultFont);
+
             CreateDockspace();
+
+            OnGUI?.Invoke();
+
+
+            ImGui.PopFont();
+            ImGui.Render();
+            RenderImDrawData(ImGui.GetDrawData());
         }
 
         public void RenderImDrawData(ImDrawDataPtr drawData)

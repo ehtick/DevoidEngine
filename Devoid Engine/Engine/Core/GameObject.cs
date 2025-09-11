@@ -46,6 +46,8 @@ namespace DevoidEngine.Engine.Core
             transform = new Transform();
             transform.gameObject = this;
             Components.Add(transform);
+            
+
         }
 
         public T AddComponent<T>() where T : Component, new()
@@ -62,7 +64,7 @@ namespace DevoidEngine.Engine.Core
             Component _component = component;
             _component.gameObject = this;
             Components.Add(_component);
-            scene?.ComponentAdded(_component);
+            //scene?.ComponentAdded(_component);
             return _component;
         }
 
@@ -159,6 +161,7 @@ namespace DevoidEngine.Engine.Core
 
         public void OnStart()
         {
+
             for (int i = 0; i < Components.Count; i++)
             {
                 Components[i].OnStart();
@@ -179,6 +182,7 @@ namespace DevoidEngine.Engine.Core
             {
                 Components[i].OnUpdate(dt);
             }
+
 
 
             if (children.Count > 0)

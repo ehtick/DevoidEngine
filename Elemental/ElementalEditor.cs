@@ -11,8 +11,8 @@ namespace Elemental
         {
             ApplicationSpecification applicationSpecification = new ApplicationSpecification()
             {
-                Height = 500,
-                Width = 500,
+                Width = (int)(1920/1.5f),
+                Height = (int)(1080/1.5f),
                 forceVsync = true,
                 Name = "Devoid D3D11",
 
@@ -22,7 +22,11 @@ namespace Elemental
 
             Application application = new Application();
             application.Create(applicationSpecification);
-            application.AddLayer(new EditorLayer());
+
+            EditorLayer editor = new EditorLayer();
+            editor.application = application;
+
+            application.AddLayer(editor);
             application.Run();
         }
 

@@ -3,6 +3,7 @@ using System.Numerics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -42,6 +43,12 @@ namespace DevoidEngine.Engine.Core
         Adaptive
     }
 
+    public struct MonitorResolution
+    {
+        public int width, height;
+        public int refreshRate;
+    }
+
     public class Window : NativeWindow
     {
         public event Action? OnLoad;
@@ -49,7 +56,7 @@ namespace DevoidEngine.Engine.Core
 
         public event Action<double>? OnFixedUpdate;
         public event Action<double>? OnUpdateFrame;
-        public event Action? OnRenderFrame;
+        public event Action<double>? OnRenderFrame;
 
         public WindowSpecification WindowSpecification;
 
@@ -71,6 +78,7 @@ namespace DevoidEngine.Engine.Core
             Title = windowSpec.WindowTitle
         })
         {
+            this.CenterWindow();
             WindowSpecification = windowSpec;
         }
 
@@ -90,9 +98,9 @@ namespace DevoidEngine.Engine.Core
             OnFixedUpdate?.Invoke(deltaTime);
         }
 
-        public void Render()
+        public void Render(double deltaTime)
         {
-            OnRenderFrame?.Invoke();
+            OnRenderFrame?.Invoke(deltaTime);
         }
 
         public void Close()
@@ -117,7 +125,27 @@ namespace DevoidEngine.Engine.Core
                 return hwnd;
 
             }
+        }
 
+        public List<MonitorResolution> GetSupportedResolutions(int monitorIdx = 0)
+        {
+            var videoModes = Monitors.GetMonitors()[monitorIdx].SupportedVideoModes;
+            List<MonitorResolution> resolutions = new List<MonitorResolution>();
+
+            foreach (VideoMode mode in videoModes)
+            {
+                if (mode.RefreshRate != 60) continue;
+                resolutions.Add(
+                    new MonitorResolution()
+                    {
+                        width = mode.Width,
+                        height = mode.Height,
+                        refreshRate = mode.RefreshRate
+                    }
+                );
+            }
+
+            return resolutions;
         }
 
 
