@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using System;
@@ -12,8 +13,6 @@ namespace DevoidGPU.DX11
 {
     internal class DX11Texture2D : ITexture2D, IDisposable
     {
-        private static readonly Dictionary<IntPtr, ShaderResourceView> Registry = new();
-        private static int nextId = 1;
         private IntPtr handle;
 
         public TextureType Type => TextureType.Texture2D;
@@ -28,7 +27,10 @@ namespace DevoidGPU.DX11
         public Texture2D Texture { get; set; }
         public RenderTargetView RenderTargetView { get; set; }
         public DepthStencilView DepthStencilView { get; set; }
-        public ShaderResourceView ShaderResourceView { get; set; }
+        public ShaderResourceView ShaderResourceView { get; private set; }
+        public UnorderedAccessView UnorderedAccessView { get; private set; }
+
+        public bool AllowUnorderedView { get; set; }
 
         private readonly Device device;
         private readonly DeviceContext deviceContext;
@@ -48,19 +50,24 @@ namespace DevoidGPU.DX11
             this.format = format;
             this.Width = width;
             this.Height = height;
+
+            var textureFormat = format;
+            if (IsDepthStencil && format == Format.D24_UNorm_S8_UInt)
+                textureFormat = Format.R24G8_Typeless;
+
             var desc = new Texture2DDescription
             {
                 
                 Width = width,
                 Height = height,
-                MipLevels = 1,
+                MipLevels = 0,
                 ArraySize = 1,
-                Format = format,
+                Format = textureFormat,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
-                BindFlags = BindFlags.ShaderResource
-                          | (IsRenderTarget ? BindFlags.RenderTarget : 0)
-                          | (IsDepthStencil ? BindFlags.DepthStencil : 0),
+                BindFlags = (IsDepthStencil ? BindFlags.DepthStencil | BindFlags.ShaderResource : BindFlags.ShaderResource)
+                   | (IsRenderTarget ? BindFlags.RenderTarget : 0)
+                   | (AllowUnorderedView ? BindFlags.UnorderedAccess : 0),
                 CpuAccessFlags = CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.None
             };
@@ -68,8 +75,38 @@ namespace DevoidGPU.DX11
             this.Texture = new Texture2D(device, desc);
 
             RenderTargetView = IsRenderTarget ? new RenderTargetView(device, Texture) : null;
-            DepthStencilView = IsDepthStencil ? new DepthStencilView(device, Texture) : null;
-            ShaderResourceView = new ShaderResourceView(device, this.Texture);
+            if (IsDepthStencil)
+            {
+                var dsvDesc = new DepthStencilViewDescription
+                {
+                    Format = Format.D24_UNorm_S8_UInt,
+                    Dimension = DepthStencilViewDimension.Texture2D,
+                    Flags = DepthStencilViewFlags.None,
+                    Texture2D = new DepthStencilViewDescription.Texture2DResource { MipSlice = 0 }
+                };
+                DepthStencilView = new DepthStencilView(device, Texture, dsvDesc);
+
+                var srvDesc = new ShaderResourceViewDescription
+                {
+                    Format = Format.R24_UNorm_X8_Typeless,
+                    Dimension = ShaderResourceViewDimension.Texture2D,
+                    Texture2D = new ShaderResourceViewDescription.Texture2DResource
+                    {
+                        MostDetailedMip = 0,
+                        MipLevels = 1
+                    }
+                };
+                ShaderResourceView = new ShaderResourceView(device, Texture, srvDesc);
+            }
+            else
+            {
+                ShaderResourceView = new ShaderResourceView(device, Texture);
+            }
+
+            if (AllowUnorderedView)
+            {
+                UnorderedAccessView = new UnorderedAccessView(device, this.Texture);
+            }
 
             handle = TextureManager.Register(this);
         }
@@ -80,6 +117,11 @@ namespace DevoidGPU.DX11
             var handle = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0);
             var box = new DataBox(handle, rowPitch, 0);
             deviceContext.UpdateSubresource(box, Texture, 0);
+        }
+
+        public void GenerateMipmaps()
+        {
+            deviceContext.GenerateMips(ShaderResourceView);
         }
 
         public IntPtr GetHandle() => handle;
@@ -103,5 +145,12 @@ namespace DevoidGPU.DX11
         {
             deviceContext.PixelShader.SetShaderResource(slot, ShaderResourceView);
         }
+
+        public void BindMutable(int slot)
+        {
+            deviceContext.ComputeShader.SetUnorderedAccessView(slot, UnorderedAccessView);
+        }
+
+        
     }
 }

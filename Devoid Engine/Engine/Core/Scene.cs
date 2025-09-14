@@ -128,6 +128,18 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
+        public CameraComponent3D GetMainCamera()
+        {
+            for (int i = 0; i < this.Cameras.Count; i++)
+            {
+                if (this.Cameras[i].IsDefault)
+                {
+                    return this.Cameras[i];
+                }
+            }
+            return null;
+        }
+
         public void AddCamera(CameraComponent3D camera)
         {
             this.Cameras.Add(camera);
@@ -162,6 +174,14 @@ namespace DevoidEngine.Engine.Core
         public void Pause()
         {
             IsPlaying = false;
+
+            for (int i = 0; i < GameObjects.Count; i++)
+            {
+                for (int j = 0; j < GameObjects[i].Components.Count; j++)
+                {
+                    GameObjects[i].Components[j].IsInitialized = false;
+                }
+            }
         }
 
         public void OnUpdate(float dt)
@@ -174,15 +194,18 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-        public void OnRender()
+        public void OnRender(float dt)
         {
+            if (!IsPlaying) { return; }
+
+            for (int i = 0; i < GameObjects.Count; i++)
+            {
+                GameObjects[i].OnRender(dt);
+            }
+
             foreach (CameraComponent3D camera in Cameras)
             {
-                //Renderer3D.BeginRender(camera.Camera);
 
-                //Renderer3D.Render();
-
-                //Renderer3D.EndRender();
             }
         }
 
@@ -190,23 +213,34 @@ namespace DevoidEngine.Engine.Core
         {
             OnComponentAdded?.Invoke(component);
 
+            if (component is CameraComponent3D)
+            {
+                AddCamera((CameraComponent3D)component);
+            }
+
             if (IsPlaying)
             {
                 component.OnStart();
+                component.IsInitialized = true;
             }
         }
 
         public void ComponentRemoved(Component component)
         {
+            if (component is CameraComponent3D)
+            {
+                RemoveCamera((CameraComponent3D)component);
+            }
+
             OnComponentRemoved?.Invoke(component);
         }
 
         public void OnResize(float width, float height)
         {
-            //for (int i = 0; i < Cameras.Count; i++)
-            //{
-            //    Cameras[i].
-            //}
+            for (int i = 0; i < Cameras.Count; i++)
+            {
+                Cameras[i].SetViewportSize((int)width, (int)height);
+            }
         }
         protected virtual void Dispose(bool disposing)
         {

@@ -75,11 +75,6 @@ namespace DevoidGPU.DX11
             deviceContext.Dispatch(x, y, z);
         }
 
-        public void Use()
-        {
-            deviceContext.ComputeShader.Set(ComputeShader);
-        }
-
         public void Wait()
         {
             // DX11 Handles pipeline sync
@@ -88,6 +83,11 @@ namespace DevoidGPU.DX11
         public void Dispose()
         {
             ComputeShader.Dispose();
+        }
+
+        public void Use()
+        {
+            deviceContext.ComputeShader.Set(ComputeShader);
         }
     }
 }

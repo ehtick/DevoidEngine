@@ -48,8 +48,8 @@ namespace Elemental.Editor.Utils
             //RegisterCategory<AnchorComponent>("Transform");
             //RegisterCategory<CanvasComponent>("Transform");
 
-            //RegisterCategory<MeshRenderer>("Rendering");
-            //RegisterCategory<LightComponent>("Rendering");
+            RegisterCategory<MeshRenderer>("Rendering");
+            RegisterCategory<LightComponent>("Rendering");
 
             //RegisterCategory<ColliderComponent3D>("Physics");
             //RegisterCategory<RigidBody3D>("Physics");

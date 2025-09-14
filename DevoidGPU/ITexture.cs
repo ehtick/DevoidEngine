@@ -23,10 +23,12 @@ namespace DevoidGPU
         public bool IsDepthStencil { get; }
         public IntPtr GetHandle();
         public void Bind(int slot = 0);
+        public void BindMutable(int slot = 0);
     }
 
     public interface ITexture2D : ITexture
     {
+        bool AllowUnorderedView { get; }
         void SetData(byte[] data);
     }
     public interface ITexture3D : ITexture { }

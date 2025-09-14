@@ -209,10 +209,11 @@ namespace DevoidGPU.DX11
             {
                 var desc = new DepthStencilStateDescription
                 {
-                    IsDepthEnabled = true,
+                    IsDepthEnabled = func != DepthTest.Disabled, // only enable if not Disabled
                     DepthComparison = DX11StateMapper.ToDXDepthFunc(func),
                     DepthWriteMask = writeEnable ? DepthWriteMask.All : DepthWriteMask.Zero
                 };
+
 
                 state = new DepthStencilState(device, desc);
                 depthCache[key] = state;

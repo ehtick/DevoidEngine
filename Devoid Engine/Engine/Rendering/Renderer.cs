@@ -9,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
-    struct PerFrameData
-    {
-
-    }
 
     public static class Renderer
     {
@@ -25,8 +21,6 @@ namespace DevoidEngine.Engine.Rendering
         {
             graphicsDevice = gd;
 
-            Renderer3D.ActiveRenderingPipeline = new ClusteredRenderer();
-
             Renderer3D.Initialize(width, height);
         }
 
@@ -34,7 +28,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             Width = width;
             Height = height;
-
+            Renderer3D.Resize(width, height);
 
         }
 

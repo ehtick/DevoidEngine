@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DevoidEngine.Engine.Components;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,5 +33,9 @@ namespace DevoidEngine.Engine.Core
             MainScene.OnUpdate(delta);
         }
 
+        public static void Render(float delta)
+        {
+            MainScene.OnRender(delta);
+        }
     }
 }

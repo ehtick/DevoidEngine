@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Core;
 using Elemental.Editor.Panels;
 using Elemental.Editor.Utils;
 using ImGuiNET;
@@ -22,10 +23,6 @@ namespace Elemental.Editor
 
         public override void OnAttach()
         {
-            AddPanel<ViewportPanel>();
-            AddPanel<InspectorPanel>();
-            AddPanel<ProjectPanel>();
-            AddPanel<GameObjectListPanel>();
 
 
             EditorUI.SetEditorStyling();
@@ -40,16 +37,30 @@ namespace Elemental.Editor
             application.ImGuiRenderer.ConfigureFontAtlas();
             application.ImGuiRenderer.SetDefaultFont(EditorUI.DefaultFontSmall);
 
-            foreach (var panel in Panels)
-            {
-                panel.OnAttach();
-            }
-
 
             SceneManager.LoadScene(new Scene());
 
             SceneManager.MainScene.Play();
 
+            AddPanel<ViewportPanel>();
+            AddPanel<InspectorPanel>();
+            AddPanel<ProjectPanel>();
+            AddPanel<GameObjectListPanel>();
+
+            foreach (var panel in Panels)
+            {
+                panel.OnAttach();
+            }
+
+            SetupSandbox();
+
+        }
+
+        void SetupSandbox()
+        {
+            GameObject gameObject = SceneManager.MainScene.addGameObject("SandboxObj#1");
+            CameraComponent3D camera = gameObject.AddComponent<CameraComponent3D>();
+            camera.IsDefault = true;
         }
 
         public override void OnDetach()
@@ -59,11 +70,15 @@ namespace Elemental.Editor
 
         public override void OnUpdate(float deltaTime)
         {
-            SceneManager.Update(deltaTime);
             foreach (var panel in Panels)
             {
                 panel.OnUpdate(deltaTime);
             }
+        }
+
+        public override void OnRender(float deltaTime)
+        {
+
         }
 
         public override void OnGUIRender()

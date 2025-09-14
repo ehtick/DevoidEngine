@@ -69,6 +69,7 @@ namespace DevoidEngine.Engine.Core
             })
             {
                 IsBackground = true,
+                Name = "Update_Thread"
             };
 
             updateThread.Start();

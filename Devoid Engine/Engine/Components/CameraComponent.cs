@@ -1,5 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Utilities;
+using DevoidEngine.Engine.Rendering;
 using System;
 using System.Numerics;
 
@@ -9,21 +10,35 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(CameraComponent3D);
 
-        public bool IsDefault { get; set; }
+        public bool IsDefault { get => isDefault; set
+            {
+                isDefault = value;
+                if (value == true)
+                {
+                    gameObject.Scene.SetMainCamera(this);
+                }
+            }
+        }
 
-        internal Camera Camera { get; private set; }
+        public Camera Camera { get; private set; }
 
+        private bool isDefault;
         private int width = 800;
         private int height = 600;
 
         public CameraComponent3D()
         {
             Camera = new Camera();
+            Camera.RenderTarget = new Framebuffer();
+            Camera.RenderTarget.AttachRenderTexture(new Texture2D((int)Screen.Size.X, (int)Screen.Size.Y, DevoidGPU.TextureFormat.RGBA16_Float));
+            Camera.RenderTarget.AttachDepthTexture(new Texture2D((int)Screen.Size.X, (int)Screen.Size.Y, DevoidGPU.TextureFormat.Depth24_Stencil8, false, false, true));
+
             UpdateProjection();
         }
 
         public override void OnStart()
         {
+
             //gameObject.Scene.AddCamera(this);
             //if (IsDefault) gameObject.Scene.SetMainCamera(this);
         }

@@ -2,7 +2,7 @@ struct VSInput
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
-    float2 UV1 : TEXCOORD0;
+    float2 UV0 : TEXCOORD0;
     float3 Tangent : TANGENT;
     float3 BiTangent : BINORMAL;
 };
@@ -13,7 +13,7 @@ struct PSInput
     float3 Normal : NORMAL;
     float4 Tangent : TANGENT; // xyz = tangent, w = handedness
     float3 BiTangent : BINORMAL;
-    float2 UV1 : TEXCOORD0;
+    float2 UV0 : TEXCOORD0;
     float3 FragPos : TEXCOORD1;
     float3 WorldPos : TEXCOORD2;
 };
@@ -60,7 +60,7 @@ PSInput VSMain(VSInput input)
     output.FragPos = worldPos.xyz;
 
     // UVs
-    output.UV1 = input.UV1;
+    output.UV0 = input.UV0;
 
     // Transform to clip space
     float4 viewPos = mul(View, worldPos);

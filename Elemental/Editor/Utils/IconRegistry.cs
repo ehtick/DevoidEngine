@@ -42,8 +42,8 @@ namespace Elemental.Editor.Utils
             //Register<CanvasComponent>(Category("Transform", BootstrapIconFont.AspectRatio));
 
             // --- Rendering ---
-            //Register<MeshRenderer>(Category("Rendering", BootstrapIconFont.BoxFill));
-            //Register<LightComponent>(Category("Rendering", BootstrapIconFont.Lightbulb));
+            Register<MeshRenderer>(Category("Rendering", BootstrapIconFont.BoxFill));
+            Register<LightComponent>(Category("Rendering", BootstrapIconFont.Lightbulb));
             //Register<WorldEnvironment>(Category("Rendering", BootstrapIconFont.Sliders));
 
             // --- Physics ---

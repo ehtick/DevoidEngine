@@ -1,4 +1,5 @@
-﻿using SharpDX.Direct3D11;
+﻿using SharpDX;
+using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,13 @@ namespace DevoidGPU.DX11
 {
     public class DX11UniformBuffer : IUniformBuffer
     {
+        public BufferUsage Usage { get; private set; }
+
         private readonly Device device;
         private readonly DeviceContext deviceContext;
         private readonly SharpDX.Direct3D11.Buffer buffer;
 
-        public DX11UniformBuffer(Device device, DeviceContext deviceContext, int sizeInBytes)
+        public DX11UniformBuffer(Device device, DeviceContext deviceContext, int sizeInBytes, BufferUsage bufferUsage)
         {
             this.device = device ?? throw new ArgumentNullException(nameof(device));
             this.deviceContext = deviceContext ?? throw new ArgumentNullException(nameof(deviceContext));
@@ -22,10 +25,10 @@ namespace DevoidGPU.DX11
 
             var desc = new BufferDescription
             {
-                Usage = ResourceUsage.Default,
+                Usage = DX11StateMapper.ToDXResourceUsage(bufferUsage),
                 SizeInBytes = alignedSize,
                 BindFlags = BindFlags.ConstantBuffer,
-                CpuAccessFlags = CpuAccessFlags.None,
+                CpuAccessFlags = bufferUsage == BufferUsage.Dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0
             };
@@ -33,11 +36,29 @@ namespace DevoidGPU.DX11
             buffer = new SharpDX.Direct3D11.Buffer(device, desc);
 
 
+            this.Usage = bufferUsage;
         }
 
         public void SetData<T>(ref T data) where T : struct
         {
-            deviceContext.UpdateSubresource(ref data, buffer);
+            if (this.Usage == BufferUsage.Dynamic)
+            {
+                DataBox dataBox = deviceContext.MapSubresource(
+                    buffer,
+                    0,
+                    MapMode.WriteDiscard, // Use WriteDiscard or WriteNoOverwrite
+                    MapFlags.None
+                );
+
+                // Copy the data
+                Utilities.Write(dataBox.DataPointer, ref data);
+
+                deviceContext.UnmapSubresource(buffer, 0);
+            }
+            else
+            {
+                deviceContext.UpdateSubresource(ref data, buffer);
+            }
         }
         public void Bind(int slot, ShaderStage stages)
         {

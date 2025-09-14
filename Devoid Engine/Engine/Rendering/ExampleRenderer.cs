@@ -13,10 +13,6 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
-    public struct ObjectData
-    {
-        public Matrix4x4 Model;
-    }
 
     public static class ExampleRenderer
     {
@@ -64,10 +60,10 @@ namespace DevoidEngine.Engine.Rendering
                 Model = Matrix4x4.CreateTranslation(new Vector3(0, 0, 11)) * Matrix4x4.CreateScale(1)
             };
 
-            uniformBuffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<CameraData>();
+            uniformBuffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<CameraData>(BufferUsage.Dynamic);
             uniformBuffer.SetData(ref camData);
 
-            uniformBuffer2 = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<ObjectData>();
+            uniformBuffer2 = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<ObjectData>(BufferUsage.Dynamic);
             uniformBuffer2.SetData(ref objData);
 
         }
@@ -79,7 +75,8 @@ namespace DevoidEngine.Engine.Rendering
             framebuffer.ClearColor(new System.Numerics.Vector4(0, 0, 0, 1));
             framebuffer.Bind();
             Renderer.graphicsDevice.SetViewport(0, 0, 500, 500);
-
+            Renderer.graphicsDevice.SetDepthState(DepthTest.Disabled, false);
+            Renderer.graphicsDevice.SetBlendState(BlendMode.Additive);
 
             InputLayout.Bind();
             simpleShader.Use();

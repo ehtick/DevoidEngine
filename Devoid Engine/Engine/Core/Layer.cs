@@ -9,7 +9,7 @@
         // This method is called every frame to update the logic of the application
         public virtual void OnUpdate(float deltaTime) { }
         // This method is called before the renderer commences rendering, this is for submitting the meshes to be rendered to the renderer
-        public virtual void OnRender() { }
+        public virtual void OnRender(float deltaTime) { }
         // This method is called once all the rendering is done
         public virtual void OnLateRender() { }
         // This method is called whenever there is a key down event, this includes all keys including control keys

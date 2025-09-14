@@ -38,6 +38,7 @@ namespace DevoidEngine.Engine.Core
             public int UseRoughnessMap;
             public int UseEmissionMap;
             public int UseParallaxMap;
+            
         }
 
         public PBRData MaterialData;
@@ -49,6 +50,17 @@ namespace DevoidEngine.Engine.Core
         private float _metallic = 0f;
         private float _roughness = 0f;
 
+        private Texture2D diffuseTexture;
+        private Texture2D normalTexture;
+        private Texture2D roughnessTexture;
+        private Texture2D emissionTexture;
+
+        public bool isDiffuseSet;
+        public bool isNormalSet;
+        public bool isSpecularSet;
+        public bool isRoughnessSet;
+        public bool isEmissionSet;
+
         // --- Properties only update CPU-side fields
         public Vector4 Albedo { get => _albedo; set { _albedo = value; Update(); } }
         public Vector4 Emission { get => _emission; set { _emission = value; Update(); } }
@@ -56,9 +68,54 @@ namespace DevoidEngine.Engine.Core
         public float Metallic { get => _metallic; set { _metallic = value; Update(); } }
         public float Roughness { get => _roughness; set { _roughness = value; Update(); } }
 
+        public Texture2D DiffuseTexture
+        {
+            get => diffuseTexture;
+            set
+            {
+                diffuseTexture = value;
+                isDiffuseSet = true;
+                Update();
+            }
+        }
+
+        public Texture2D NormalTexture
+        {
+            get => normalTexture;
+            set
+            {
+                normalTexture = value;
+                isNormalSet = true;
+                Update();
+            }
+        }
+
+        public Texture2D RoughnessTexture
+        {
+            get => roughnessTexture;
+            set
+            {
+                roughnessTexture = value;
+                isRoughnessSet = true;
+                Update();
+            }
+        }
+
+        public Texture2D EmissionTexture
+        {
+            get => emissionTexture;
+            set
+            {
+                emissionTexture = value;
+                isEmissionSet = true;
+                Update();
+            }
+        }
+
         public PBRMaterial()
         {
-            this.Buffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<PBRData>();
+            this.Shader = new Shader("Engine/Content/Shaders/PBR/clustered_pbr");
+            this.Buffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<PBRData>(BufferUsage.Dynamic);
             Update(); // keep data in sync at start
         }
 
@@ -75,6 +132,11 @@ namespace DevoidEngine.Engine.Core
                 EmissionStr = _emissionStr,
                 Metallic = _metallic,
                 Roughness = _roughness,
+                UseDiffuseMap = isDiffuseSet ? 1 : 0,
+                UseNormalMap = isNormalSet ? 1 : 0,
+                UseRoughnessMap = isRoughnessSet ? 1 : 0,
+                UseEmissionMap = isEmissionSet ? 1 : 0,
+                UseParallaxMap = 0
                 // leave texture flags alone, set elsewhere
             };
 
@@ -84,8 +146,51 @@ namespace DevoidEngine.Engine.Core
         public override void Apply()
         {
             base.Apply();
-            this.Buffer.Bind(1, ShaderStage.Fragment);
+
+            this.Buffer.Bind(2, ShaderStage.Fragment);
             Shader.Use();
+
+            if (isDiffuseSet)
+            {
+                diffuseTexture.BindSampler(0);
+                diffuseTexture.Bind(10);
+            }
+            else
+            {
+                //Texture.White2DTex.Bind();
+            }
+
+            if (isNormalSet)
+            {
+                normalTexture.BindSampler(1);
+                normalTexture.Bind(11);
+            }
+            else
+            {
+                //Texture.White2DTex.Bind();
+            }
+
+            if (isRoughnessSet)
+            {
+                roughnessTexture.BindSampler(2);
+                roughnessTexture.Bind(12);
+            }
+            else
+            {
+                //Texture.White2DTex.Bind();
+            }
+
+            if (isEmissionSet)
+            {
+                emissionTexture.BindSampler(3);
+                emissionTexture.Bind(13);
+            }
+            else
+            {
+                //Texture.White2DTex.Bind();
+            }
+
+
         }
     }
 }

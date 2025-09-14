@@ -1,14 +1,93 @@
 ﻿using DevoidEngine.Engine.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DevoidEngine.Engine.Utilities;
+using DevoidGPU;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Rendering
 {
+    public struct ObjectData
+    {
+        public Matrix4x4 Model;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 16)]
+    unsafe struct Cluster
+    {
+        public Vector4 minPoint;
+        public Vector4 maxPoint;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    unsafe struct LightGrid
+    {
+        public uint offset;
+        public uint count;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    struct GlobalIndexCount
+    {
+        public uint globalLightIndexCount;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct ScreenViewData
+    {
+        public Matrix4x4 inverseProjectionMatrix; // 64 bytes
+        public Vector4 tileSizes;                 // 16 bytes
+        public uint screenWidth;
+        public uint screenHeight;
+        public float sliceScaling;
+        public float sliceBias;
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 16)]
+    struct ClusteredRendererData
+    {
+        public Vector4 groupSize;
+    }
+
     public class ClusteredRenderer : IRenderPipeline
     {
+        ClusteredRendererData clusteredRendererData = new ClusteredRendererData()
+        {
+            groupSize = new Vector4(16, 9, 24, 1)
+        };
+
+        int numClusters;
+        uint numLightsPerTile = 100;
+
+        Cluster[] clusters;
+        LightGrid[] lightGrids;
+
+        uint[] globalLightIndexList;
+
+        BufferObject<Cluster> clusterBuffer;
+        BufferObject<LightGrid> lightGridBuffer;
+        BufferObject<uint> globalIndexCount;
+        BufferObject<uint> globalLightIndexListSSBO;
+        BufferObject<LightData> lightDataUBO;
+        BufferObject<ScreenViewData> screenViewDataBuffer;
+
+        UniformBuffer<CameraData> cameraBuffer;
+        UniformBuffer<ClusteredRendererData> clusteredRendererDataBuffer;
+
+        ComputeShader clusterCompute;
+        ComputeShader clusterLightCull;
+
+        RenderContext currentRenderContext;
+
+        // TEMP //
+        UniformBuffer<ObjectData> objectData;
+        ObjectData objData;
+        IVertexBuffer vertexBuffer;
+        IInputLayout layout;
+        Shader clusteredPBR;
+        PBRMaterial material;
+        // END OF TEMP //
+
 
         public Material GetDefaultMaterial()
         {
@@ -23,15 +102,177 @@ namespace DevoidEngine.Engine.Rendering
         public void Initialize(int width, int height)
         {
             Console.WriteLine("Initializing Clustered Renderer");
+
+            clusterCompute = new ComputeShader("Engine/Content/Shaders/Clustering/cluster.comp.hlsl");
+            clusterLightCull = new ComputeShader("Engine/Content/Shaders/Clustering/cluster_light_cull.comp.hlsl");
+
+
+            numClusters = (int)(clusteredRendererData.groupSize.X * clusteredRendererData.groupSize.Y * clusteredRendererData.groupSize.Z);
+
+            clusters = new Cluster[numClusters];
+            lightGrids = new LightGrid[numClusters * 100];
+            globalLightIndexList = new uint[numLightsPerTile * numClusters];
+
+
+            clusterBuffer = new BufferObject<Cluster>(clusters.Length, BufferUsage.Default, true);
+            lightGridBuffer = new BufferObject<LightGrid>(lightGrids.Length, BufferUsage.Default, true);
+            globalIndexCount = new BufferObject<uint>(1, BufferUsage.Default, true);
+            globalLightIndexListSSBO = new BufferObject<uint>(globalLightIndexList.Length, BufferUsage.Default, true);
+
+            screenViewDataBuffer = new BufferObject<ScreenViewData>(1, BufferUsage.Dynamic, false);
+
+
+            clusteredRendererDataBuffer = new UniformBuffer<ClusteredRendererData>();
+            clusteredRendererDataBuffer.SetData(ref clusteredRendererData);
+
+            cameraBuffer = new UniformBuffer<CameraData>();
+
+            LightManager.Initialize();
+
+            // TEMP //
+
+            objData = new ObjectData()
+            {
+                Model = Matrix4x4.CreateTranslation(11, 0, 0) * Matrix4x4.CreateScale(1)
+            };
+
+            objectData = new UniformBuffer<ObjectData>();
+            objectData.SetData(ref objData);
+
+            Vertex[] box = Primitives.GetCubeVertex();
+            vertexBuffer = Renderer.graphicsDevice.BufferFactory.CreateVertexBuffer(BufferUsage.Default, Vertex.VertexInfo, box.Length);
+            vertexBuffer.SetData(box);
+
+            clusteredPBR = new Shader("Engine/Content/Shaders/PBR/clustered_pbr");
+
+            layout = Renderer.graphicsDevice.CreateInputLayout(Vertex.VertexInfo, clusteredPBR.vShader);
+
+            material = new PBRMaterial()
+            {
+                Albedo = new Vector4(0, 1, 0, 1),
+                Emission = new Vector4(0, 0, 0, 0),
+                Roughness = 0.2f
+            };
+
+        }
+
+        void ComputeClusters()
+        {
+            clusterCompute.Use();
+
+            clusterBuffer.BindMutable((int)RenderGraph.SSBOBindIndex.ClusterBuffer);
+            screenViewDataBuffer.Bind((int)RenderGraph.SSBOBindIndex.ScreenInfoBuffer, ShaderStage.Compute);
+
+            cameraBuffer.Bind(0, ShaderStage.Compute);
+            clusteredRendererDataBuffer.Bind(1, ShaderStage.Compute);
+
+            clusterCompute.Dispatch((int)clusteredRendererData.groupSize.X, (int)clusteredRendererData.groupSize.Y, (int)clusteredRendererData.groupSize.Z);
+        }
+
+        public void CreateScreenViewBuffer(Camera camera)
+        {
+            uint sizeX = (uint)Math.Ceiling(Renderer.Width / (float)clusteredRendererData.groupSize.X);
+
+            // This is generated here since the camera does not get assigned at the initialize stage.
+            ScreenViewData screenViewData = new ScreenViewData();
+            screenViewData.screenWidth = (uint)Screen.Size.X;
+            screenViewData.screenHeight = (uint)Screen.Size.Y;
+            screenViewData.sliceScaling = (float)clusteredRendererData.groupSize.Z / (float)Math.Log(camera.FarClip / camera.NearClip, 2);
+            screenViewData.sliceBias = -(clusteredRendererData.groupSize.Z * (float)Math.Log(camera.NearClip, 2) / (float)Math.Log(camera.FarClip / camera.NearClip, 2));
+            screenViewData.tileSizes.X = clusteredRendererData.groupSize.X;
+            screenViewData.tileSizes.Y = clusteredRendererData.groupSize.Y;
+            screenViewData.tileSizes.Z = clusteredRendererData.groupSize.Z;
+            screenViewData.tileSizes.W = (int)sizeX;
+            Matrix4x4.Invert(camera.GetProjectionMatrix(), out screenViewData.inverseProjectionMatrix);
+            screenViewData.inverseProjectionMatrix = Matrix4x4.Transpose(screenViewData.inverseProjectionMatrix);
+            screenViewDataBuffer.SetData(new ScreenViewData[] { screenViewData }, 1);
+            screenViewDataBuffer.Bind((int)RenderGraph.SSBOBindIndex.ScreenInfoBuffer);
+        }
+        public void CullLights()
+        {
+            lightGridBuffer.UnBind((int)RenderGraph.SSBOBindIndex.LightGridBuffer);
+            globalLightIndexListSSBO.UnBind((int)RenderGraph.SSBOBindIndex.GlobalLightIndexList);
+
+            clusterLightCull.Use();
+
+            LightManager.pointLightBuffer.Bind(0, ShaderStage.Compute);
+            LightManager.spotLightBuffer.Bind(1, ShaderStage.Compute);
+
+            cameraBuffer.Bind(0, ShaderStage.Compute);
+            LightManager.countsBuffer.Bind(1, ShaderStage.Compute);
+            clusteredRendererDataBuffer.Bind(2, ShaderStage.Compute);
+
+
+            lightGridBuffer.BindMutable((int)RenderGraph.SSBOBindIndex.LightGridBuffer);
+            
+            // Already bound while ComputeCluster();
+            //clusterBuffer.BindMutable((int)RenderGraph.SSBOBindIndex.ClusterBuffer);
+            globalIndexCount.BindMutable((int)RenderGraph.SSBOBindIndex.GlobalLightIndexCount);
+            globalLightIndexListSSBO.BindMutable((int)RenderGraph.SSBOBindIndex.GlobalLightIndexList);
+
+            
+            clusterLightCull.Dispatch(1, 1, 6);
+            clusterLightCull.Wait();
+
+            lightGridBuffer.UnBindMutable((int)RenderGraph.SSBOBindIndex.LightGridBuffer);
+            globalLightIndexListSSBO.UnBindMutable((int)RenderGraph.SSBOBindIndex.GlobalLightIndexList);
         }
 
         public void BeginRender(Camera camera)
         {
-            Console.WriteLine("Rendering");
+            LightManager.Update();
+
+            currentRenderContext = new RenderContext();
+            currentRenderContext.Camera = camera;
+            
+
+            CameraData cameraInfo = camera.GetCameraData();
+            cameraBuffer.SetData(ref cameraInfo);
+
+            CreateScreenViewBuffer(camera);
+
+            ComputeClusters();
+            CullLights();
         }
 
         public void Render()
         {
+            
+            currentRenderContext.Camera.RenderTarget.Clear();
+            currentRenderContext.Camera.RenderTarget.Bind();
+            Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
+            Renderer.graphicsDevice.SetDepthState(DepthTest.GreaterEqual, true);
+
+            for (int i = 0; i < Renderer3D.DrawCommandList.Count; i++)
+            {
+                DrawCommand drawCommand = Renderer3D.DrawCommandList[i];
+                IInputLayout inputLayout = Renderer3D.GetInputLayout(drawCommand.Mesh, clusteredPBR);
+
+                objData = new ObjectData()
+                {
+                    Model = drawCommand.WorldMatrix,
+                };
+                objectData.SetData(ref objData);
+
+                inputLayout.Bind();
+                drawCommand.Mesh.VertexBuffer.Bind();
+
+                material.Apply();
+
+                LightManager.pointLightBuffer.Bind(0, ShaderStage.Fragment);
+                LightManager.spotLightBuffer.Bind(1, ShaderStage.Fragment);
+                LightManager.countsBuffer.Bind(1, ShaderStage.Fragment);
+
+                cameraBuffer.Bind(0, ShaderStage.Vertex | ShaderStage.Fragment);
+                objectData.Bind(1, ShaderStage.Vertex);
+
+                lightGridBuffer.Bind((int)RenderGraph.SSBOBindIndex.LightGridBuffer, ShaderStage.Fragment);
+                globalLightIndexListSSBO.Bind((int)RenderGraph.SSBOBindIndex.GlobalLightIndexList, ShaderStage.Fragment);
+
+                Renderer.graphicsDevice.Draw(vertexBuffer.VertexCount, 0);
+            }
+
+            Renderer.graphicsDevice.MainSurface.Bind();
 
         }
 
@@ -42,7 +283,7 @@ namespace DevoidEngine.Engine.Rendering
 
         public void Resize(int width, int height)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

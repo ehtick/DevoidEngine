@@ -312,6 +312,9 @@ namespace Elemental.Editor.Utils
                 {
 
                     hasChanged |= DrawVec3Property(property, component);
+                } else if (property.PropertyType == typeof(Vector4))
+                {
+
                 }
                 else if (property.PropertyType == typeof(bool))
                 {
@@ -600,6 +603,9 @@ namespace Elemental.Editor.Utils
                 {
 
                     hasChanged |= DrawVec3Field(field, component);
+                } else if (field.FieldType == typeof(Vector4))
+                {
+
                 }
                 else if (field.FieldType == typeof(bool))
                 {

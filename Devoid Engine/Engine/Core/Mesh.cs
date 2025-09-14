@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Numerics;
 using DevoidEngine.Engine.Rendering;
+using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
 
 namespace DevoidEngine.Engine.Core
@@ -21,6 +23,7 @@ namespace DevoidEngine.Engine.Core
         public bool IsRenderable { get; set; } = true;
         public bool IsHighlighted { get; set; } = false;
         public bool IsStatic { get; private set; } = true;
+        public BoundingBox LocalBounds { get; private set; } = BoundingBox.Empty;
 
         private bool isDisposed = false;
 
@@ -44,21 +47,21 @@ namespace DevoidEngine.Engine.Core
         }
 
         // Rendering handled by Renderer, not Mesh itself.
-        public void Render(IGraphicsDevice graphicsDevice)
-        {
-            if (!IsRenderable || VertexBuffer == null)
-                return;
+        //public void Render(IGraphicsDevice graphicsDevice)
+        //{
+        //    if (!IsRenderable || VertexBuffer == null)
+        //        return;
 
-            VertexBuffer.Bind();
-            if (IndexBuffer != null)
-            {
+        //    VertexBuffer.Bind();
+        //    if (IndexBuffer != null)
+        //    {
+        //        graphicsDevice.DrawIndexed(IndexBuffer.IndexCount, 0, 0);
+        //    } else
+        //    {
+        //        graphicsDevice.Draw(VertexBuffer.VertexCount, 0);
+        //    }
 
-            } else
-            {
-                graphicsDevice.Draw(VertexBuffer.VertexCount, 0);
-            }
-
-        }
+        //}
 
 
         public void SetStatic(bool isStatic) => IsStatic = isStatic;
@@ -74,18 +77,39 @@ namespace DevoidEngine.Engine.Core
             );
 
             VertexBuffer.SetData(vertexArray);
+            ComputeLocalBounds(vertexArray);
         }
 
         public void SetIndices(int[] indexArray)
         {
-            //indices = indexArray;
+            indices = indexArray;
 
-            //IndexBuffer = Renderer.graphicsDevice.BufferManager.CreateIndexBuffer(
-            //    indexArray.Length,
-            //    BufferUsage.Default
-            //);
+            IndexBuffer = Renderer.graphicsDevice.BufferFactory.CreateIndexBuffer(
+                indexArray.Length,
+                BufferUsage.Default
+            );
 
-            //IndexBuffer.SetData(indexArray);
+            IndexBuffer.SetData(indexArray);
+        }
+
+        private void ComputeLocalBounds(Vertex[] verts)
+        {
+            if (verts == null || verts.Length == 0)
+            {
+                LocalBounds = BoundingBox.Empty;
+                return;
+            }
+
+            Vector3 min = verts[0].Position;
+            Vector3 max = verts[0].Position;
+
+            foreach (var v in verts)
+            {
+                min = Vector3.Min(min, v.Position);
+                max = Vector3.Max(max, v.Position);
+            }
+
+            LocalBounds = new BoundingBox(min, max);
         }
 
         // Getters

@@ -48,7 +48,7 @@ namespace DevoidEngine.Engine.Core
 
         public void Dispose()
         {
-            Dispose(true);
+
             GC.SuppressFinalize(this);
         }
 

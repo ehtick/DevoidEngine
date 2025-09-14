@@ -64,7 +64,7 @@ namespace DevoidEngine.Engine.Core
             Component _component = component;
             _component.gameObject = this;
             Components.Add(_component);
-            //scene?.ComponentAdded(_component);
+            scene?.ComponentAdded(_component);
             return _component;
         }
 
@@ -165,6 +165,7 @@ namespace DevoidEngine.Engine.Core
             for (int i = 0; i < Components.Count; i++)
             {
                 Components[i].OnStart();
+                Components[i].IsInitialized = true;
             }
 
             if (children.Count > 0)
@@ -190,6 +191,25 @@ namespace DevoidEngine.Engine.Core
                 for (int i = 0; i < children.Count; i++)
                 {
                     children[i].OnUpdate(dt);
+                }
+            }
+        }
+
+        public void OnRender(float dt)
+        {
+            for (int i = 0; i < Components.Count; i++)
+            {
+                if (!Components[i].IsInitialized) { continue; }
+                Components[i].OnRender(dt);
+            }
+
+
+
+            if (children.Count > 0)
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    children[i].OnRender(dt);
                 }
             }
         }

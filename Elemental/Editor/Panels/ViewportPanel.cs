@@ -25,6 +25,18 @@ namespace Elemental.Editor.Panels
         {
             supportedResolutions = editor.application.MainWindow.GetSupportedResolutions();
 
+            foreach(var resolution in supportedResolutions)
+            {
+                if (resolution.height == 1080 &&  resolution.width == 1920)
+                {
+                    selectedResolution = resolution;
+                    Renderer.Resize(resolution.width, resolution.height);
+                    Screen.Size.X = resolution.width;
+                    Screen.Size.Y = resolution.height;
+                    SceneManager.MainScene.OnResize(resolution.width, resolution.height);
+                }
+            }
+
             controls = new List<ViewportControl>
             {
                 new ViewportControl(ViewportAlignment.Left, () =>
@@ -85,6 +97,8 @@ namespace Elemental.Editor.Panels
                     new Vector2(200, 40)
                 )
             };
+
+
         }
 
         public override void OnGUI()
@@ -93,9 +107,12 @@ namespace Elemental.Editor.Panels
 
             if (ImGui.Begin("Viewport"))
             {
-                //ImGui.Image(ExampleRenderer.framebuffer.ColorAttachments[0].GetHandle(), new System.Numerics.Vector2(500, 500));
-
                 ViewportUtil.DrawViewportTools(60, controls);
+
+                if (SceneManager.MainScene.GetMainCamera() != null)
+                {
+                    ImGui.Image(SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0).GetDeviceTexture().GetHandle(), new System.Numerics.Vector2(600, 400));
+                }
             }
 
             ImGui.End();

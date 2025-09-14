@@ -70,7 +70,7 @@ namespace DevoidEngine.Engine.Imgui
         {
             this.graphicsDevice = graphicsDevice;
             this.guiShader = new Shader("Engine/Content/Shaders/Imgui/gui");
-            this.ShaderConstantBuffer = graphicsDevice.BufferFactory.CreateUniformBuffer<ImShaderData>();
+            this.ShaderConstantBuffer = graphicsDevice.BufferFactory.CreateUniformBuffer<ImShaderData>(BufferUsage.Dynamic);
 
             this.VertexBuffer = graphicsDevice.BufferFactory.CreateVertexBuffer(BufferUsage.Dynamic, ImGuiVertex.VertexInfo, vertexBufferSize);
             this.IndexBuffer = graphicsDevice.BufferFactory.CreateIndexBuffer(indexBufferSize, BufferUsage.Dynamic, true);
@@ -348,6 +348,7 @@ namespace DevoidEngine.Engine.Imgui
                     VertexBuffer.Dispose();
                     vertexBufferSize = (int)Math.Max(vertexBufferSize * 1.5f, vtxSize);
                     VertexBuffer = graphicsDevice.BufferFactory.CreateVertexBuffer(BufferUsage.Dynamic, ImGuiVertex.VertexInfo, vertexBufferSize);
+                    VertexBuffer.Bind();
                 }
 
                 int idxSize = cmdList.IdxBuffer.Size * sizeof(ushort);
@@ -356,10 +357,14 @@ namespace DevoidEngine.Engine.Imgui
                     IndexBuffer.Dispose();
                     indexBufferSize = (int)Math.Max(indexBufferSize * 1.5f, idxSize);
                     IndexBuffer = graphicsDevice.BufferFactory.CreateIndexBuffer(indexBufferSize, BufferUsage.Dynamic, true);
+
+                    IndexBuffer.Bind();
+
                 }
 
                 VertexBuffer.UpdatePartial(cmdList.VtxBuffer.Data, 0, cmdList.VtxBuffer.Size);
                 IndexBuffer.UpdatePartial(cmdList.IdxBuffer.Data, 0, cmdList.IdxBuffer.Size);
+
 
                 for (int cmd_i = 0; cmd_i < cmdList.CmdBuffer.Size; cmd_i++)
                 {
@@ -393,7 +398,6 @@ namespace DevoidEngine.Engine.Imgui
             graphicsDevice.SetDepthState(DepthTest.LessEqual, true);
             graphicsDevice.SetRasterizerState(CullMode.Back);
         }
-
 
 
 

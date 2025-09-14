@@ -43,6 +43,8 @@ namespace DevoidEngine.Engine.Core
 
         public ImGuiRenderer ImGuiRenderer;
 
+        private bool isInitialized = false;
+
         public void Create(ApplicationSpecification appSpec)
         {
             this.AppSpec = appSpec;
@@ -169,8 +171,10 @@ namespace DevoidEngine.Engine.Core
         {
             ImGuiRenderer.PerFrame((float)deltaTime);
 
-
-            LayerHandler.RenderLayers();
+            LayerHandler.RenderLayers((float)deltaTime);
+            
+            SynchronizationManager.ExecuteRenderThread((float)deltaTime);
+            
             graphicsDevice.MainSurface.Present();
 
             RenderThreadDispatcher.ExecutePending();
@@ -181,10 +185,13 @@ namespace DevoidEngine.Engine.Core
             ImGuiRenderer.UpdateInput();
 
             LayerHandler.UpdateLayers((float)deltaTime);
+            
+            SynchronizationManager.ExecuteUpdateThread((float)deltaTime);
+
             UpdateThreadDispatcher.ExecutePending();
 
             //Input.Update();
-            RenderThreadDispatcher.Queue(() =>
+            RenderThreadDispatcher.QueueLatest("Input_Update", () =>
             {
                 InternalInputState.UpdateFrame();
             });

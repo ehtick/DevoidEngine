@@ -257,7 +257,10 @@ namespace Elemental.Editor.Panels
                 {
                     if (ImGui.MenuItem("Basic GameObject"))
                     {
-                        SelectedObject = SceneManager.MainScene.addGameObject("Basic Object");
+                        UpdateThreadDispatcher.QueueLatest("GameObjectList_AddGameObject", () =>
+                        {
+                            SelectedObject = SceneManager.MainScene.addGameObject("DevoidObject");
+                        });
                     }
 
                     ImGui.EndMenu();

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DevoidEngine.Engine.Rendering;
+using DevoidEngine.Engine.Utilities;
+using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -18,6 +20,9 @@ namespace DevoidEngine.Engine.Core
 
     public class Camera
     {
+        public Framebuffer RenderTarget { get; set; }
+        public Frustum Frustum { get; set; }
+
         public Vector3 Position { get; private set; } = new Vector3(0, 0, -5);
         public Vector3 Front { get; private set; } = Vector3.UnitZ;
         public Vector3 Up { get; private set; } = Vector3.UnitY;
@@ -30,6 +35,8 @@ namespace DevoidEngine.Engine.Core
 
         private Matrix4x4 _viewMatrix = Matrix4x4.Identity;
         private Matrix4x4 _projectionMatrix = Matrix4x4.Identity;
+
+
 
         // --- Data for GPU ---
         public CameraData GetCameraData()
@@ -56,6 +63,8 @@ namespace DevoidEngine.Engine.Core
         public void UpdateProjectionMatrix(float aspectRatio)
         {
             _projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(FovY, aspectRatio, NearClip, FarClip);
+
+            Frustum = Frustum.FromMatrix(_viewMatrix * _projectionMatrix);
         }
 
         public void UpdateView(Vector3 position, Vector3 front, Vector3 up)
@@ -66,6 +75,8 @@ namespace DevoidEngine.Engine.Core
             Up = Vector3.Normalize(up);
 
             _viewMatrix = Matrix4x4.CreateLookAt(Position, Position + Front, Up);
+
+            Frustum = Frustum.FromMatrix(_viewMatrix * _projectionMatrix);
         }
     }
 }
