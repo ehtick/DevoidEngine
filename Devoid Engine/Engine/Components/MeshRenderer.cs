@@ -25,6 +25,13 @@ namespace DevoidEngine.Engine.Components
             mesh.SetVertices(Primitives.GetCubeVertex());
 
             instance = SceneRenderSystem.SubmitMesh(mesh, 0, Matrix4x4.Identity);
+
+            RenderPipeline.OnBeginCameraRender += RenderPipeline_OnBeginCameraRender;
+        }
+
+        private void RenderPipeline_OnBeginCameraRender()
+        {
+            instance.WorldMatrix = Matrix4x4.CreateTranslation(gameObject.transform.Position);
         }
 
         public override void OnUpdate(float dt)

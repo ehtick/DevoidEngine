@@ -114,7 +114,7 @@ namespace DevoidEngine.Engine.Core
 
         public PBRMaterial()
         {
-            this.Shader = new Shader("Engine/Content/Shaders/PBR/clustered_pbr");
+            this.Shader = ShaderLibrary.GetShader("PBR/ClusteredPBR");
             this.Buffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<PBRData>(BufferUsage.Dynamic);
             Update(); // keep data in sync at start
         }

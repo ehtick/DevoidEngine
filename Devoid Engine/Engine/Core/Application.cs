@@ -173,7 +173,7 @@ namespace DevoidEngine.Engine.Core
 
             LayerHandler.RenderLayers((float)deltaTime);
             
-            SynchronizationManager.ExecuteRenderThread((float)deltaTime);
+            EnginePipeline.ExecuteRenderThread((float)deltaTime);
             
             graphicsDevice.MainSurface.Present();
 
@@ -186,7 +186,7 @@ namespace DevoidEngine.Engine.Core
 
             LayerHandler.UpdateLayers((float)deltaTime);
             
-            SynchronizationManager.ExecuteUpdateThread((float)deltaTime);
+            EnginePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();
 

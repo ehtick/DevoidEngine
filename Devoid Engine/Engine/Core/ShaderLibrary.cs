@@ -15,11 +15,18 @@ namespace DevoidEngine.Engine.Core
         static ShaderLibrary()
         {
             shaders["BASIC_SHADER"] = new Shader("Engine/Content/Shaders/Testing/basic");
+            shaders["PBR/ClusteredPBR"] = new Shader("Engine/Content/Shaders/PBR/clustered_pbr");
         }
 
         public static void RegisterShader(string name, Shader shader)
         {
-            shaders.Add(name, shader);
+            if (shaders.ContainsKey(name))
+            {
+                return;
+            } else
+            {
+                shaders.Add(name, shader);
+            }
         }
 
         public static Shader GetShader(string name)
