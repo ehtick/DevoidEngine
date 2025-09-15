@@ -1,6 +1,6 @@
 # Devoid Engine
 
-Devoid Engine is a custom-built game engine designed as a personal learning project to better understand modern game engine architecture and rendering systems. It primarily uses OpenGL for rendering and is written in C# using OpenTK. While it is not intended for production use, it includes many modern engine features and supports editor integration.
+Devoid Engine is a custom-built game engine developed as a personal learning project to explore modern game engine architecture, rendering systems, and editor integration. It is written in C# and powered by DevoidGPU, a Render Hardware Interface (RHI) that supports multiple graphics backends. While not intended for production use, the engine implements many modern features and provides a foundation for experimenting with engine design and rendering techniques.
 
 ## Features
 
