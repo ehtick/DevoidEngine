@@ -14,6 +14,8 @@ namespace DevoidEngine.Engine.Rendering
         IFramebuffer frameBuffer;
 
         List<Texture2D> RenderTextures;
+        Texture2D DepthTexture;
+
         public Framebuffer()
         {
             frameBuffer = Renderer.graphicsDevice.BufferFactory.CreateFramebuffer();
@@ -37,6 +39,24 @@ namespace DevoidEngine.Engine.Rendering
             return RenderTextures[index];
         }
 
+        public Texture2D GetDepthTexture()
+        {
+            return DepthTexture;
+        }
+
+        public void Resize(int width, int height)
+        {
+            frameBuffer = Renderer.graphicsDevice.BufferFactory.CreateFramebuffer();
+
+            for (int i = 0; i <  RenderTextures.Count; i++)
+            {
+                RenderTextures[i].Resize(width, height);
+                frameBuffer.AddColorAttachment(RenderTextures[i].GetDeviceTexture());
+            }
+            DepthTexture.Resize(width, height);
+            frameBuffer.AddDepthAttachment(DepthTexture.GetDeviceTexture());
+        }
+
         public void AttachRenderTexture(Texture2D texture)
         {
             frameBuffer.AddColorAttachment(texture.GetDeviceTexture());
@@ -46,6 +66,7 @@ namespace DevoidEngine.Engine.Rendering
         public void AttachDepthTexture(Texture2D texture)
         {
             frameBuffer.AddDepthAttachment(texture.GetDeviceTexture());
+            DepthTexture = texture;
         }
 
 

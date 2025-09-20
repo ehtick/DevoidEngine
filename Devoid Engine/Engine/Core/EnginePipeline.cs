@@ -12,6 +12,7 @@ namespace DevoidEngine.Engine.Core
     {
         public static Pool<DrawMeshIndexed> DrawMeshIndexedPool;
         public static Pool<SetViewInfoCommand3D> SetViewInfoPool;
+        public static Pool<Render3DStateCommand> Renderer3DStateCommand;
 
         public static Dictionary<Camera, List<RenderInstance>> VisibleInstances;
 
@@ -23,6 +24,7 @@ namespace DevoidEngine.Engine.Core
         {
             DrawMeshIndexedPool = new Pool<DrawMeshIndexed>();
             SetViewInfoPool = new Pool<SetViewInfoCommand3D>();
+            Renderer3DStateCommand = new Pool<Render3DStateCommand>();
 
             InstanceBuffers = new DoubleBuffer<List<IRenderCommand>>(new List<IRenderCommand>(), new List<IRenderCommand>());
 
@@ -43,7 +45,7 @@ namespace DevoidEngine.Engine.Core
 
             // Frustum culling per camera
             PerformFrustumCull(renderInstances);
-            
+
             foreach (var cameraRenderInstances in VisibleInstances)
             {
                 Camera camera = cameraRenderInstances.Key;
@@ -52,12 +54,16 @@ namespace DevoidEngine.Engine.Core
 
                 Graphics.SetCamera(camera);
 
+
+
                 RenderPipeline.BeginCameraRender();
 
+                Graphics.SetRendererState(RendererStateCommnandType.Begin);
                 foreach (var renderInstance in visibleInstances)
                 {
                     Graphics.DrawMeshIndexed(renderInstance.Mesh, renderInstance.MaterialHandle, renderInstance.WorldMatrix);
                 }
+                Graphics.SetRendererState(RendererStateCommnandType.End);
 
                 RenderPipeline.EndCameraRender();
             }

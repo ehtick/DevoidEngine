@@ -14,6 +14,8 @@ namespace DevoidEngine.Engine.Core
         public CullMode CullMode { get; set; } = CullMode.Back;
         public IUniformBuffer Buffer { get; set; }
 
+        public Guid Id;
+
         public Shader Shader { get; set; } = ShaderLibrary.GetShader("BASIC_SHADER");
     
         public virtual void Apply()
@@ -140,8 +142,13 @@ namespace DevoidEngine.Engine.Core
                 // leave texture flags alone, set elsewhere
             };
 
-            this.Buffer.SetData(ref  MaterialData);
+            RenderThreadDispatcher.QueueLatest("UPDATE_MATERIAL_DATA_" + GetHashCode(), () =>
+            {
+                this.Buffer.SetData(ref MaterialData);
+            });
         }
+
+        bool x = false;
 
         public override void Apply()
         {
@@ -153,11 +160,13 @@ namespace DevoidEngine.Engine.Core
             if (isDiffuseSet)
             {
                 diffuseTexture.BindSampler(0);
-                diffuseTexture.Bind(10);
+                diffuseTexture.Bind(10, ShaderStage.Fragment);
+
             }
             else
             {
-                //Texture.White2DTex.Bind();
+                Texture2D.DefaultSampler.Bind(0);
+                Texture2D.WhiteTexture.Bind(10);
             }
 
             if (isNormalSet)
@@ -167,7 +176,8 @@ namespace DevoidEngine.Engine.Core
             }
             else
             {
-                //Texture.White2DTex.Bind();
+                Texture2D.DefaultSampler.Bind(1);
+                Texture2D.WhiteTexture.Bind(11);
             }
 
             if (isRoughnessSet)

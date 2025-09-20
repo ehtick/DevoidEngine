@@ -141,10 +141,13 @@ namespace Elemental.Editor.Panels
                     }
 
                     // Apply deletions
-                    foreach (var comp in componentsToRemove)
+                    UpdateThreadDispatcher.Queue(() =>
                     {
-                        //GameObjectListPanel.SelectedObject.RemoveComponent(comp);
-                    }
+                        foreach (var comp in componentsToRemove)
+                        {
+                            GameObjectListPanel.SelectedObject.RemoveComponent(comp);
+                        }
+                    });
 
 
 

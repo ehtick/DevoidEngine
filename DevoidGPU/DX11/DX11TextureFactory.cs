@@ -16,11 +16,10 @@ namespace DevoidGPU.DX11
             this.device = device;
             this.deviceContext = deviceContext;
         }
-        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool allowUAV, bool isDepth, bool isRenderTarget)
+        public ITexture2D CreateTexture2D(Tex2DDescription description)
         {
-            DX11Texture2D texture = new DX11Texture2D(device, deviceContext, isRenderTarget, isDepth);
-            texture.AllowUnorderedView = allowUAV;
-            texture.Create(width, height, DX11TextureFormat.ToDXGIFormat(format));
+            DX11Texture2D texture = new DX11Texture2D(device, deviceContext, description);
+            texture.Create();
             return texture;
         }
 

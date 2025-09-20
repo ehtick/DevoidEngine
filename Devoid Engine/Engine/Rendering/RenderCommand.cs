@@ -8,11 +8,21 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
+    public enum RendererStateCommnandType
+    {
+        Begin,
+        End
+    }
+
     public interface IRenderCommand
     {
 
     }
 
+    public class Render3DStateCommand : IRenderCommand
+    {
+        public RendererStateCommnandType state;
+    }
 
     public class SetViewInfoCommand3D : IRenderCommand
     {

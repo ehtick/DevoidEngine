@@ -5,13 +5,15 @@ using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Device = SharpDX.Direct3D11.Device;
 
 namespace DevoidGPU.DX11
 {
-    internal class DX11Texture2D : ITexture2D, IDisposable
+    internal class DX11Texture2D : ITexture2D
     {
         private IntPtr handle;
 
@@ -34,22 +36,29 @@ namespace DevoidGPU.DX11
 
         private readonly Device device;
         private readonly DeviceContext deviceContext;
+        private Tex2DDescription Description;
         private Format format;
+        
 
-        public DX11Texture2D(Device device, DeviceContext deviceContext, bool isRT = true, bool isDS = false)
+        public DX11Texture2D(Device device, DeviceContext deviceContext, Tex2DDescription texture2DDescription)
         {
             this.device = device;
             this.deviceContext = deviceContext;
 
-            IsRenderTarget = isRT;
-            IsDepthStencil = isDS;
+            this.Description = texture2DDescription;
+
+            this.format = DX11TextureFormat.ToDXGIFormat(Description.Format);
+            Console.WriteLine(format);
+            this.Width = Description.Width;
+            this.Height = Description.Height;
+
+            this.AllowUnorderedView = Description.IsMutable;
+            this.IsRenderTarget = Description.IsRenderTarget;
+            this.IsDepthStencil = Description.IsDepthStencil;
         }
 
-        public void Create(int width, int height, Format format)
+        public void Create()
         {
-            this.format = format;
-            this.Width = width;
-            this.Height = height;
 
             var textureFormat = format;
             if (IsDepthStencil && format == Format.D24_UNorm_S8_UInt)
@@ -57,10 +66,10 @@ namespace DevoidGPU.DX11
 
             var desc = new Texture2DDescription
             {
-                
-                Width = width,
-                Height = height,
-                MipLevels = 0,
+
+                Width = Width,
+                Height = Height,
+                MipLevels = Description.MipLevels,
                 ArraySize = 1,
                 Format = textureFormat,
                 SampleDescription = new SampleDescription(1, 0),
@@ -69,7 +78,7 @@ namespace DevoidGPU.DX11
                    | (IsRenderTarget ? BindFlags.RenderTarget : 0)
                    | (AllowUnorderedView ? BindFlags.UnorderedAccess : 0),
                 CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
+                OptionFlags = Description.GenerateMipmaps ? ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.None
             };
 
             this.Texture = new Texture2D(device, desc);
@@ -119,6 +128,35 @@ namespace DevoidGPU.DX11
             deviceContext.UpdateSubresource(box, Texture, 0);
         }
 
+        public void SetData<T>(T[] data) where T : unmanaged
+        {
+            int elementSize = Unsafe.SizeOf<T>();
+
+            // number of components per pixel (RGBA = 4)
+            int components = DX11TextureFormat.FormatToComponentCount(
+                DX11TextureFormat.DXGIFormatToTextureFormat(format));
+
+            // actual bytes per pixel based on T
+            int bytesPerPixel = components * elementSize;
+
+            // row pitch = bytes per pixel * width
+            int rowPitch = bytesPerPixel * Width;
+
+            // pin array
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = handle.AddrOfPinnedObject();
+                var box = new DataBox(ptr, rowPitch, 0);
+                deviceContext.UpdateSubresource(box, Texture, 0);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
+
         public void GenerateMipmaps()
         {
             deviceContext.GenerateMips(ShaderResourceView);
@@ -149,6 +187,11 @@ namespace DevoidGPU.DX11
         public void BindMutable(int slot)
         {
             deviceContext.ComputeShader.SetUnorderedAccessView(slot, UnorderedAccessView);
+        }
+
+        public void UnBind(int slot)
+        {
+            deviceContext.PixelShader.SetShaderResource(slot, null);
         }
 
         

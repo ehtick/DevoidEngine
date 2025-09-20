@@ -206,8 +206,17 @@ namespace DevoidEngine.Engine.Imgui
             byte[] managedPixels = new byte[size];
             Marshal.Copy(pixels, managedPixels, 0, size);
 
-            _fontTexture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(
-                width, height, TextureFormat.RGBA8_UNorm, false);
+            _fontTexture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(new Tex2DDescription()
+            {
+                Width = width,
+                Height = height,
+                Format = TextureFormat.RGBA8_UNorm,
+                GenerateMipmaps = false,
+                IsDepthStencil = false,
+                IsRenderTarget = false,
+                IsMutable = false,
+                MipLevels = 0, 
+            });
             _fontTexture.SetData(managedPixels);
 
             io.Fonts.SetTexID(_fontTexture.GetHandle());

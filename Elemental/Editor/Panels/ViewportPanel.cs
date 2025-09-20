@@ -50,12 +50,14 @@ namespace Elemental.Editor.Panels
                             if (ImGui.Selectable($"{res.width}x{res.height}", isSelected))
                             {
                                 selectedResolution = res;
-
-                                Renderer.Resize(res.width, res.height);
-                                Screen.Size.X = res.width;
-                                Screen.Size.Y = res.height;
-                                SceneManager.MainScene.OnResize(res.width, res.height);
-
+                                RenderThreadDispatcher.QueueLatest("Renderer_Resize", () =>
+                                {
+                                    Renderer.Resize(res.width, res.height);
+                                    Screen.Size.X = res.width;
+                                    Screen.Size.Y = res.height;
+                                    SceneManager.MainScene.OnResize(res.width, res.height);
+                                    SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.Resize(res.width, res.height);
+                                });
                                 //DebugLogPanel.Log("RESIZED RENDERER", DebugLogPanel.DebugMessageSeverity.Information, "Viewport Change");
                             }
                         }
@@ -111,7 +113,7 @@ namespace Elemental.Editor.Panels
 
                 if (SceneManager.MainScene.GetMainCamera() != null)
                 {
-                    ImGui.Image(SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0).GetDeviceTexture().GetHandle(), new System.Numerics.Vector2(600, 400));
+                    ImGui.Image(SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0).GetDeviceTexture().GetHandle(), new System.Numerics.Vector2(500, 281));
                 }
             }
 

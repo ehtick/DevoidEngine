@@ -104,7 +104,7 @@ float sqDistPointAABB(float3 pos, uint tile)
 bool testSphereAABB(uint light, uint tile)
 {
     float radius = sharedPointLights[light].range.x;
-    float3 center = mul(View, float4(sharedPointLights[light].position.xyz, 1.0)).xyz;
+    float3 center = mul(float4(sharedPointLights[light].position.xyz, 1.0), View).xyz;
     float squaredDistance = sqDistPointAABB(center, tile);
     return squaredDistance <= (radius * radius);
 }
@@ -112,7 +112,7 @@ bool testSphereAABB(uint light, uint tile)
 bool testSphereAABB_Spot(uint light, uint tile)
 {
     float radius = sharedSpotLights[light].direction.w;
-    float3 center = mul(View, float4(sharedSpotLights[light].position.xyz, 1.0)).xyz;
+    float3 center = mul(float4(sharedSpotLights[light].position.xyz, 1.0), View).xyz;
     float squaredDistance = sqDistPointAABB(center, tile);
     return squaredDistance <= (radius * radius);
 }

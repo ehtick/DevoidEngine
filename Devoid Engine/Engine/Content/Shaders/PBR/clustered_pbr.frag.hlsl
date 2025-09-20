@@ -5,8 +5,9 @@
     float4 Tangent : TANGENT; // xyz = tangent, w = handedness
     float3 BiTangent : BINORMAL;
     float2 UV0 : TEXCOORD0;
-    float3 FragPos : TEXCOORD1;
-    float3 WorldPos : TEXCOORD2;
+    float2 UV1 : TEXCOORD1;
+    float3 FragPos : TEXCOORD2;
+    float3 WorldPos : TEXCOORD3;
 };
 
 cbuffer Material : register(b2)
@@ -120,7 +121,7 @@ float3 CalcIBL(float3 N, float3 V, float3 F0, float3 albedo, float3 R, float rou
 
 float linearDepth(float depthSample);
 float3 GammaCorrect(float3 value);
-float4 GetDiffuse(float3 texCoords);
+float4 GetDiffuse(float2 texCoords);
 float GetRoughness(float3 texCoords);
 float GetMetallic(float3 texCoords);
 float3 GetNormal(float3 N, float4 Tangent, float2 texCoords);
@@ -140,7 +141,6 @@ float ComputeAttenuation(PointLight light, float dist)
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    
      // normalize normal
     float3 N = GetNormal(input.Normal, input.Tangent, input.UV0);
 
@@ -152,18 +152,20 @@ float4 PSMain(PSInput input) : SV_TARGET
     // ambient
     float3 radianceOut = float3(0.1, 0.1, 0.1);
     
+    float3 albedo = GetDiffuse(input.UV0).rgb;
+
+
+    float ndcDepth = input.Position.z / input.Position.w;
     
+    float linDepth = linearDepth(ndcDepth);
 
-
-    // === Tile index computation like your GLSL ===
-    // z slice index:
-    float ndcDepth = input.Position.z; // already 0–1
-    float linDepth = zFar * zNear / (zFar - ndcDepth * (zFar - zNear)); // or your preferred formula
 
     uint zTile = (uint) max(log2(linDepth) * screenViewData[0].sliceScaling + screenViewData[0].sliceBias, 0.0f);
 
+
+    
     // x,y tile indices:
-    uint2 tileXY = uint2(input.Position.xy) / screenViewData[0].tileSizes.w; // tile width in w
+    uint2 tileXY = uint2(floor(input.Position.xy / screenViewData[0].tileSizes.w));
     uint tileIndex = tileXY.x +
                  screenViewData[0].tileSizes.x * tileXY.y +
                  screenViewData[0].tileSizes.x * screenViewData[0].tileSizes.y * zTile;
@@ -176,7 +178,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     
     
     float3 F0 = float3(0.04, 0.04, 0.04);
-    F0 = lerp(F0, Albedo.xyz, Metallic);
+    F0 = lerp(F0, albedo, Metallic);
     
 
     // loop only over point lights
@@ -191,11 +193,10 @@ float4 PSMain(PSInput input) : SV_TARGET
         {
             PointLight light = pointLights[lightIndex];
             
-            radianceOut += CalcPointLight(lightIndex, N, input.FragPos, V, Albedo.xyz, Roughness, Metallic, F0, VDist);
+            radianceOut += CalcPointLight(lightIndex, N, input.FragPos, V, albedo, Roughness, Metallic, F0, VDist);
             
         }
     }
-
     return float4(radianceOut, 1.0f);
 }
 

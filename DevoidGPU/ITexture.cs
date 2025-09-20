@@ -13,7 +13,7 @@ namespace DevoidGPU
         TextureCube,
     }
 
-    public interface ITexture
+    public interface ITexture : IDisposable
     {
         TextureType Type { get; }
         int Width { get; }
@@ -23,6 +23,7 @@ namespace DevoidGPU
         public bool IsDepthStencil { get; }
         public IntPtr GetHandle();
         public void Bind(int slot = 0);
+        public void UnBind(int slot = 0);
         public void BindMutable(int slot = 0);
     }
 
@@ -30,6 +31,8 @@ namespace DevoidGPU
     {
         bool AllowUnorderedView { get; }
         void SetData(byte[] data);
+        void SetData<T>(T[] data) where T : unmanaged;
+        void GenerateMipmaps();
     }
     public interface ITexture3D : ITexture { }
     public interface ITextureCube : ITexture { }

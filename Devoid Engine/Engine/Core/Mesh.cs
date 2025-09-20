@@ -69,27 +69,33 @@ namespace DevoidEngine.Engine.Core
         public void SetVertices(Vertex[] vertexArray)
         {
             vertices = vertexArray;
-
-            VertexBuffer = Renderer.graphicsDevice.BufferFactory.CreateVertexBuffer(
-                BufferUsage.Default,
-                Vertex.VertexInfo,
-                vertexArray.Length
-            );
-
-            VertexBuffer.SetData(vertexArray);
             ComputeLocalBounds(vertexArray);
+
+            RenderThreadDispatcher.QueueLatest("MESH_SET_VERTICES", () =>
+            {
+                VertexBuffer = Renderer.graphicsDevice.BufferFactory.CreateVertexBuffer(
+                    IsStatic ? BufferUsage.Default : BufferUsage.Dynamic,
+                    Vertex.VertexInfo,
+                    vertexArray.Length
+                );
+
+                VertexBuffer.SetData(vertexArray);
+            });
         }
 
         public void SetIndices(int[] indexArray)
         {
             indices = indexArray;
 
-            IndexBuffer = Renderer.graphicsDevice.BufferFactory.CreateIndexBuffer(
-                indexArray.Length,
-                BufferUsage.Default
-            );
+            RenderThreadDispatcher.QueueLatest("MESH_SET_INDICES", () =>
+            {
+                IndexBuffer = Renderer.graphicsDevice.BufferFactory.CreateIndexBuffer(
+                    indexArray.Length,
+                    BufferUsage.Default
+                );
 
-            IndexBuffer.SetData(indexArray);
+                IndexBuffer.SetData(indexArray);
+            });
         }
 
         private void ComputeLocalBounds(Vertex[] verts)

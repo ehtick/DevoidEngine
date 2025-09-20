@@ -38,9 +38,12 @@ namespace DevoidEngine.Engine.Rendering
         public Vector4 tileSizes;                 // 16 bytes
         public uint screenWidth;
         public uint screenHeight;
+        public uint tilePixelHeight;
         public float sliceScaling;
         public float sliceBias;
+        public Vector3 _padding;
     }
+
 
 
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
@@ -183,6 +186,7 @@ namespace DevoidEngine.Engine.Rendering
             screenViewData.tileSizes.Y = clusteredRendererData.groupSize.Y;
             screenViewData.tileSizes.Z = clusteredRendererData.groupSize.Z;
             screenViewData.tileSizes.W = (int)sizeX;
+            screenViewData.tilePixelHeight = (uint)Math.Ceiling(Renderer.Height / (float)clusteredRendererData.groupSize.Y);
             Matrix4x4.Invert(camera.GetProjectionMatrix(), out screenViewData.inverseProjectionMatrix);
             screenViewData.inverseProjectionMatrix = Matrix4x4.Transpose(screenViewData.inverseProjectionMatrix);
             screenViewDataBuffer.SetData(new ScreenViewData[] { screenViewData }, 1);
@@ -229,56 +233,50 @@ namespace DevoidEngine.Engine.Rendering
             CameraData cameraInfo = camera.GetCameraData();
             cameraBuffer.SetData(ref cameraInfo);
 
-            CreateScreenViewBuffer(camera);
+            camera.RenderTarget.Clear();
+            camera.RenderTarget.Bind();
+            Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
+            Renderer.graphicsDevice.SetDepthState(DepthTest.GreaterEqual, false);
 
+
+            CreateScreenViewBuffer(camera);
             ComputeClusters();
             CullLights();
         }
 
-        public void Render()
+        public void Render(Mesh mesh, Matrix4x4 WorldMatrix)
         {
             
-            currentRenderContext.Camera.RenderTarget.Clear();
-            currentRenderContext.Camera.RenderTarget.Bind();
-            Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
-            Renderer.graphicsDevice.SetDepthState(DepthTest.GreaterEqual, true);
+            IInputLayout inputLayout = Renderer3D.GetInputLayout(mesh, clusteredPBR);
 
-            for (int i = 0; i < Renderer3D.DrawCommandList.Count; i++)
+            objData = new ObjectData()
             {
-                DrawCommand drawCommand = Renderer3D.DrawCommandList[i];
-                IInputLayout inputLayout = Renderer3D.GetInputLayout(drawCommand.Mesh, clusteredPBR);
+                Model = WorldMatrix,
+            };
+            objectData.SetData(ref objData);
 
-                objData = new ObjectData()
-                {
-                    Model = drawCommand.WorldMatrix,
-                };
-                objectData.SetData(ref objData);
+            inputLayout.Bind();
+            mesh.VertexBuffer.Bind();
 
-                inputLayout.Bind();
-                drawCommand.Mesh.VertexBuffer.Bind();
+            MaterialManager.MaterialA.Apply();
 
-                material.Apply();
+            LightManager.pointLightBuffer.Bind(0, ShaderStage.Fragment);
+            LightManager.spotLightBuffer.Bind(1, ShaderStage.Fragment);
+            LightManager.countsBuffer.Bind(1, ShaderStage.Fragment);
 
-                LightManager.pointLightBuffer.Bind(0, ShaderStage.Fragment);
-                LightManager.spotLightBuffer.Bind(1, ShaderStage.Fragment);
-                LightManager.countsBuffer.Bind(1, ShaderStage.Fragment);
+            cameraBuffer.Bind(0, ShaderStage.Vertex | ShaderStage.Fragment);
+            objectData.Bind(1, ShaderStage.Vertex);
 
-                cameraBuffer.Bind(0, ShaderStage.Vertex | ShaderStage.Fragment);
-                objectData.Bind(1, ShaderStage.Vertex);
+            lightGridBuffer.Bind((int)RenderGraph.SSBOBindIndex.LightGridBuffer, ShaderStage.Fragment);
+            globalLightIndexListSSBO.Bind((int)RenderGraph.SSBOBindIndex.GlobalLightIndexList, ShaderStage.Fragment);
 
-                lightGridBuffer.Bind((int)RenderGraph.SSBOBindIndex.LightGridBuffer, ShaderStage.Fragment);
-                globalLightIndexListSSBO.Bind((int)RenderGraph.SSBOBindIndex.GlobalLightIndexList, ShaderStage.Fragment);
-
-                Renderer.graphicsDevice.Draw(vertexBuffer.VertexCount, 0);
-            }
-
-            Renderer.graphicsDevice.MainSurface.Bind();
+            Renderer.graphicsDevice.Draw(vertexBuffer.VertexCount, 0);
 
         }
 
         public void EndRender()
         {
-
+            Renderer.graphicsDevice.MainSurface.Bind();
         }
 
         public void Resize(int width, int height)

@@ -57,6 +57,7 @@ namespace DevoidEngine.Engine.Utilities
         /// </summary>
         public bool Intersects(BoundingBox box)
         {
+            return true;
             foreach (var plane in Planes)
             {
                 // compute positive vertex

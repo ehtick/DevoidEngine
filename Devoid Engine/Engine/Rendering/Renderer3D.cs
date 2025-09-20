@@ -51,9 +51,9 @@ namespace DevoidEngine.Engine.Rendering
             ActiveRenderingPipeline.BeginRender(camera);
         }
 
-        public static void Render()
+        public static void Render(Mesh mesh, Matrix4x4 worldTransform)
         {
-            ActiveRenderingPipeline.Render();
+            ActiveRenderingPipeline.Render(mesh, worldTransform);
         }
 
         public static void EndRender()

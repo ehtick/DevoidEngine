@@ -1,5 +1,6 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidGPU;
+using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,20 +13,49 @@ namespace DevoidEngine.Engine.Core
     {
         ISampler sampler;
         ITexture2D texture;
+
+        public TextureFormat TextureFormat { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public Tex2DDescription Description { get; private set; }
+
+        private bool isMutable = false;
+        private bool isRenderTarget = false;
+        private bool isDepthTarget = false;
         
         SamplerDescription samplerDescription = SamplerDescription.Default;
 
-        public Texture2D()
-        {
-            sampler = Renderer.graphicsDevice.CreateSampler(samplerDescription);
-            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(1, 1, TextureFormat.RGBA16_Float);
+        public static Texture2D WhiteTexture { get; private set; }
+        public static ISampler DefaultSampler { get; private set; }
 
+        static Texture2D()
+        {
+            WhiteTexture = new Texture2D(new Tex2DDescription()
+            {
+                Width = 1,
+                Height = 1,
+                Format = TextureFormat.RGBA16_Float,
+                GenerateMipmaps = false,
+                MipLevels = 1,
+                IsDepthStencil = false,
+                IsRenderTarget = true,
+                IsMutable = false
+            });
+            DefaultSampler = Renderer.graphicsDevice.CreateSampler(SamplerDescription.Default);
         }
-
-        public Texture2D(int width, int height, TextureFormat format, bool isMutable = false, bool isRenderTarget = true, bool isDepthTarget = false)
+        public Texture2D(Tex2DDescription description)
         {
+            this.Description = description;
+            this.Width = description.Width;
+            this.Height = description.Height;
+            this.TextureFormat = description.Format;
+
+            this.isMutable = description.IsMutable;
+            this.isRenderTarget = description.IsRenderTarget;
+            this.isDepthTarget = description.IsDepthStencil;
+
             sampler = Renderer.graphicsDevice.CreateSampler(samplerDescription);
-            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(width, height, format, isMutable, isDepthTarget, isRenderTarget);
+            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(description);
 
         }
 
@@ -34,6 +64,21 @@ namespace DevoidEngine.Engine.Core
             texture.SetData(data);
         }
 
+        public void SetData<T>(T[] data) where T : unmanaged
+        {
+            texture.SetData<T>(data);
+        }
+
+        public void GenerateMipmaps()
+        {
+            texture.GenerateMipmaps();
+        }
+
+        public void Resize(int width, int height)
+        {
+            texture?.Dispose();
+            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(Description);
+        }
 
         public void SetFilter(TextureFilter min, TextureFilter mag)
         {
@@ -58,7 +103,7 @@ namespace DevoidEngine.Engine.Core
             RecreateSampler();
         }
 
-        public void Bind(int slot = 0, BindMode mode = BindMode.ReadOnly)
+        public void Bind(int slot = 0, ShaderStage stages = ShaderStage.Fragment, BindMode mode = BindMode.ReadOnly)
         {
             if (mode == BindMode.ReadOnly)
             {
@@ -72,6 +117,11 @@ namespace DevoidEngine.Engine.Core
         public void BindSampler(int slot)
         {
             sampler.Bind(slot);
+        }
+
+        public void UnBind(int slot)
+        {
+            texture.UnBind(slot);
         }
 
         public ITexture2D GetDeviceTexture()

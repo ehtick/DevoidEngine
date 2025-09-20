@@ -3,6 +3,7 @@ using DevoidGPU;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace DevoidEngine.Engine.Rendering
     {
         void Initialize(int width, int height);
         void BeginRender(Camera camera);
-        void Render();
+        void Render(Mesh mesh, Matrix4x4 WorldMatrix);
         void EndRender();
 
         void Resize(int width, int height);

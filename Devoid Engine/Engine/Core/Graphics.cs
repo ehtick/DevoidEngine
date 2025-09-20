@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DevoidEngine.Engine.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -22,6 +23,13 @@ namespace DevoidEngine.Engine.Core
         {
             var cmd = EnginePipeline.SetViewInfoPool.Get();
             cmd.camera = camera;
+            EnginePipeline.RenderCommands.Add(cmd);
+        }
+
+        internal static void SetRendererState(RendererStateCommnandType commandType)
+        {
+            var cmd = EnginePipeline.Renderer3DStateCommand.Get();
+            cmd.state = commandType;
             EnginePipeline.RenderCommands.Add(cmd);
         }
     }

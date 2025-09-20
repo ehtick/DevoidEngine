@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DevoidGPU
 {
-    public interface IFramebuffer
+    public interface IFramebuffer : IDisposable
     {
         List<ITexture2D> ColorAttachments { get; }
         ITexture2D DepthAttachment { get; }

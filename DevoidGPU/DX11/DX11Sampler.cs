@@ -9,7 +9,7 @@ namespace DevoidGPU.DX11
 {
     public class DX11Sampler : ISampler
     {
-        public SamplerDescription Description => throw new NotImplementedException();
+        public SamplerDescription Description { get; private set; }
 
         private SamplerState native;
         private DeviceContext deviceContext;
@@ -18,6 +18,7 @@ namespace DevoidGPU.DX11
         {
             deviceContext = context;
 
+            this.Description = description;
 
             var dxDesc = new SamplerStateDescription
             {

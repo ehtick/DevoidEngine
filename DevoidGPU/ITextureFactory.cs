@@ -8,7 +8,7 @@ namespace DevoidGPU
 {
     public interface ITextureFactory
     {
-        ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool allowUAV = false, bool isDepth = false, bool isRenderTarget = false);
+        ITexture2D CreateTexture2D(Tex2DDescription description);
         ITexture3D CreateTexture3D();
         ITextureCube CreateTextureCube();
 

@@ -30,8 +30,26 @@ namespace DevoidEngine.Engine.Components
         {
             Camera = new Camera();
             Camera.RenderTarget = new Framebuffer();
-            Camera.RenderTarget.AttachRenderTexture(new Texture2D((int)Screen.Size.X, (int)Screen.Size.Y, DevoidGPU.TextureFormat.RGBA16_Float));
-            Camera.RenderTarget.AttachDepthTexture(new Texture2D((int)Screen.Size.X, (int)Screen.Size.Y, DevoidGPU.TextureFormat.Depth24_Stencil8, false, false, true));
+            Camera.RenderTarget.AttachRenderTexture(new Texture2D(new DevoidGPU.Tex2DDescription()
+            {
+                Width = (int)Screen.Size.X,
+                Height = (int)Screen.Size.Y,
+                Format = DevoidGPU.TextureFormat.RGBA16_Float,
+                GenerateMipmaps = false,
+                IsDepthStencil = false,
+                IsRenderTarget = true,
+                IsMutable = false,
+            }));
+            Camera.RenderTarget.AttachDepthTexture(new Texture2D(new DevoidGPU.Tex2DDescription()
+            {
+                Width = (int)Screen.Size.X,
+                Height = (int)Screen.Size.Y,
+                Format = DevoidGPU.TextureFormat.Depth24_Stencil8,
+                GenerateMipmaps = false,
+                IsDepthStencil = true,
+                IsRenderTarget = false,
+                IsMutable = false
+            }));
 
             UpdateProjection();
         }

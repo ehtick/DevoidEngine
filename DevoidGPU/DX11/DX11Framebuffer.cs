@@ -92,5 +92,10 @@ namespace DevoidGPU.DX11
             if (DepthAttachment != null)
                 deviceContext.ClearDepthStencilView((DepthAttachment as DX11Texture2D).DepthStencilView, DepthStencilClearFlags.Depth, depth, 0);
         }
+
+        public void Dispose()
+        {
+
+        }
     }
 }

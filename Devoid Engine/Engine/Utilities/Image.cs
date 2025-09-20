@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmberaEngine.Engine.Utilities
+namespace DevoidEngine.Engine.Utilities
 {
     public class Image
     {
@@ -100,6 +100,42 @@ namespace EmberaEngine.Engine.Utilities
 
             Pixels = pixels.ToArray();
         }
+
+        public void LoadPNGAsFloat(string path, bool directPath = false)
+        {
+            using SixLabors.ImageSharp.Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>(path);
+
+            this.Width = image.Width;
+            this.Height = image.Height;
+
+            // 4 floats per pixel
+            float[] floatPixels = new float[4 * image.Width * image.Height];
+
+            image.ProcessPixelRows(accessor =>
+            {
+                int index = 0;
+                for (int y = 0; y < image.Height; y++)
+                {
+                    var row = accessor.GetRowSpan(y);
+
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        var px = row[x];
+
+                        // normalize each channel
+                        floatPixels[index++] = px.R / 255f;
+                        floatPixels[index++] = px.G / 255f;
+                        floatPixels[index++] = px.B / 255f;
+                        floatPixels[index++] = px.A / 255f;
+                    }
+                }
+            });
+
+            this.PixelHP = floatPixels;   // store float array here
+            this.IsHDR = true;            // mark as HDR/float
+            this.Pixels = null;           // not using byte[] now
+        }
+
 
 
     }
