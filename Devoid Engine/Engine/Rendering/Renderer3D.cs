@@ -28,8 +28,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             DrawCommandList = new List<DrawCommand>();
 
-            ActiveRenderingPipeline = new ClusteredRenderer();
-
+            ActiveRenderingPipeline = new ForwardRenderer();
             ActiveRenderingPipeline.Initialize(width, height);
         }
 
@@ -51,9 +50,9 @@ namespace DevoidEngine.Engine.Rendering
             ActiveRenderingPipeline.BeginRender(camera);
         }
 
-        public static void Render(Mesh mesh, Matrix4x4 worldTransform)
+        public static void Render(List<RenderInstance> renderInstances)
         {
-            ActiveRenderingPipeline.Render(mesh, worldTransform);
+            ActiveRenderingPipeline.Render(renderInstances);
         }
 
         public static void EndRender()

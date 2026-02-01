@@ -13,11 +13,9 @@ namespace DevoidGPU.DX11
         public static InputElement[] CreateInputElements(VertexInfo vertexInfo)
         {
             InputElement[] InputLayoutElements = new InputElement[vertexInfo.VertexAttributes.Length];
-            Console.WriteLine("#############");
             for (int i = 0; i < InputLayoutElements.Length; i++)
             {
                 VertexAttribute attribute = vertexInfo.VertexAttributes[i];
-                Console.WriteLine(MapDXGIComponentCountToFormat(attribute));
                 InputLayoutElements[i] = new InputElement()
                 {
                     SemanticName = attribute.Name,

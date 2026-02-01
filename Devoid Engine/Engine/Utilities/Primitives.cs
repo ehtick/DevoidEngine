@@ -11,17 +11,18 @@ namespace DevoidEngine.Engine.Utilities
         {
             return new Vertex[]
             {
-                // First triangle
-                new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 0)),
-                new Vertex(new Vector3( 0.5f, -0.5f, 0.0f), new Vector3(0, 0, 1), new Vector2(1, 0)),
-                new Vertex(new Vector3( 0.5f,  0.5f, 0.0f), new Vector3(0, 0, 1), new Vector2(1, 1)),
+        // First triangle
+        new Vertex(new Vector3(-1.0f, -1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 0)),
+        new Vertex(new Vector3( 1.0f, -1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(1, 0)),
+        new Vertex(new Vector3( 1.0f,  1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(1, 1)),
 
-                // Second triangle
-                new Vertex(new Vector3( 0.5f,  0.5f, 0.0f), new Vector3(0, 0, 1), new Vector2(1, 1)),
-                new Vertex(new Vector3(-0.5f,  0.5f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 1)),
-                new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 0)),
+        // Second triangle
+        new Vertex(new Vector3( 1.0f,  1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(1, 1)),
+        new Vertex(new Vector3(-1.0f,  1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 1)),
+        new Vertex(new Vector3(-1.0f, -1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 0)),
             };
         }
+
 
         public static Vertex[] GetCubeVertex()
         {

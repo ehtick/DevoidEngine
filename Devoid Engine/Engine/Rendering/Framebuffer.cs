@@ -31,7 +31,7 @@ namespace DevoidEngine.Engine.Rendering
         public void Clear()
         {
             frameBuffer.ClearColor(new Vector4(0,0,0,1));
-            frameBuffer.ClearDepth(0);
+            frameBuffer.ClearDepth(1);
         }
 
         public Texture2D GetRenderTexture(int index)

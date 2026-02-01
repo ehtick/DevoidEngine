@@ -1,21 +1,16 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Core
 {
     public class Graphics
     {
-        public static void DrawMeshIndexed(Mesh mesh, int material, Matrix4x4 worldMatrix)
+
+
+        public static void DrawMeshIndexed(RenderInstance renderInstance)
         {
             var cmd = EnginePipeline.DrawMeshIndexedPool.Get();
-            cmd.Mesh = mesh;
-            cmd.MaterialHandle = material;
-            cmd.WorldMatrix = worldMatrix;
+            cmd.instance = renderInstance;
             EnginePipeline.RenderCommands.Add(cmd);
         }
 

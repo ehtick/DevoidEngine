@@ -115,6 +115,7 @@ namespace DevoidEngine.Engine.Components
 
             width = newWidth;
             height = newHeight;
+            Camera.RenderTarget.Resize(width, height);
             UpdateProjection();
         }
 

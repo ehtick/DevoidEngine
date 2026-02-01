@@ -1,10 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D11;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DevoidGPU.DX11
 {
@@ -15,6 +12,7 @@ namespace DevoidGPU.DX11
         private readonly Device device;
         private readonly DeviceContext deviceContext;
         private readonly SharpDX.Direct3D11.Buffer buffer;
+        private readonly int bufferSize;
 
         public DX11UniformBuffer(Device device, DeviceContext deviceContext, int sizeInBytes, BufferUsage bufferUsage)
         {
@@ -37,6 +35,8 @@ namespace DevoidGPU.DX11
 
 
             this.Usage = bufferUsage;
+
+            this.bufferSize = alignedSize;
         }
 
         public void SetData<T>(ref T data) where T : struct
@@ -60,6 +60,45 @@ namespace DevoidGPU.DX11
                 deviceContext.UpdateSubresource(ref data, buffer);
             }
         }
+
+        public unsafe void SetData(ReadOnlySpan<byte> data)
+        {
+            if (data.Length > bufferSize)
+                throw new ArgumentException("Data size exceeds constant buffer size.");
+
+            if (Usage != BufferUsage.Dynamic)
+            {
+                // Fallback for non-dynamic buffers (rare for CBs)
+                fixed (byte* srcPtr = data)
+                {
+                    deviceContext.UpdateSubresource(
+                        new DataBox((IntPtr)srcPtr, 0, 0),
+                        buffer,
+                        0
+                    );
+                }
+                return;
+            }
+
+            DataBox mapped = deviceContext.MapSubresource(
+                buffer,
+                0,
+                MapMode.WriteDiscard,
+                MapFlags.None
+            );
+
+            System.Buffer.MemoryCopy(
+                source: Unsafe.AsPointer(ref MemoryMarshal.GetReference(data)),
+                destination: (void*)mapped.DataPointer,
+                destinationSizeInBytes: bufferSize,
+                sourceBytesToCopy: data.Length
+            );
+
+            deviceContext.UnmapSubresource(buffer, 0);
+        }
+
+
+
         public void Bind(int slot, ShaderStage stages)
         {
             if ((stages & ShaderStage.Vertex) != 0)

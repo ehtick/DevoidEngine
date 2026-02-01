@@ -41,8 +41,6 @@ namespace DevoidEngine.Engine.Rendering
 
     public class DrawMeshIndexed : IRenderCommand
     {
-        public Mesh Mesh;
-        public int MaterialHandle;
-        public Matrix4x4 WorldMatrix;
+        public RenderInstance instance;
     }
 }

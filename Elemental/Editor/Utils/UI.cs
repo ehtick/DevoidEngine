@@ -381,7 +381,6 @@ namespace Elemental.Editor.Utils
                         // if (!Equals(original, editable)) // too shallow usually
                         if (shouldUpdate)
                         {
-                            Console.WriteLine("Updating");
                             property.SetValue(component, editable); // ← still required if fields were modified
                         }
                     }

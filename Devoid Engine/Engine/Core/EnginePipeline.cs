@@ -34,6 +34,9 @@ namespace DevoidEngine.Engine.Core
 
         public static void ExecuteUpdateThread(float deltaTime)
         {
+            if (!SceneManager.IsSceneLoaded()) { return; }
+
+
             RenderCommands.Clear();
 
             SceneManager.Update(deltaTime);
@@ -48,6 +51,7 @@ namespace DevoidEngine.Engine.Core
 
             foreach (var cameraRenderInstances in VisibleInstances)
             {
+
                 Camera camera = cameraRenderInstances.Key;
                 List<RenderInstance> visibleInstances = cameraRenderInstances.Value;
 
@@ -61,7 +65,7 @@ namespace DevoidEngine.Engine.Core
                 Graphics.SetRendererState(RendererStateCommnandType.Begin);
                 foreach (var renderInstance in visibleInstances)
                 {
-                    Graphics.DrawMeshIndexed(renderInstance.Mesh, renderInstance.MaterialHandle, renderInstance.WorldMatrix);
+                    Graphics.DrawMeshIndexed(renderInstance);
                 }
                 Graphics.SetRendererState(RendererStateCommnandType.End);
 
@@ -84,6 +88,8 @@ namespace DevoidEngine.Engine.Core
 
         static void PerformFrustumCull(List<RenderInstance> renderInstances)
         {
+            
+
             VisibleInstances.Clear();
             foreach (var camera in SceneManager.MainScene.Cameras)
             {
@@ -92,6 +98,10 @@ namespace DevoidEngine.Engine.Core
                 for (int i = 0; i < renderInstances.Count; i++)
                 {
                     var instance = renderInstances[i];
+                    
+                    list.Add(instance);
+                    continue;
+
                     if (cam.Frustum.Intersects(instance.Mesh.LocalBounds.Transform(instance.WorldMatrix)))
                         list.Add(instance);
                 }

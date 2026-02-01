@@ -188,7 +188,6 @@ namespace DevoidEngine.Engine.Imgui
 
         public void ConfigureFontAtlas()
         {
-            Console.WriteLine("CONFIGURING FONT ATLAS");
 
             ImGuiIOPtr io = ImGui.GetIO();
 

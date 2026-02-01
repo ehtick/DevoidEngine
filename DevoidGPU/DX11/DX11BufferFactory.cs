@@ -24,6 +24,11 @@ namespace DevoidGPU.DX11
             return new DX11UniformBuffer(device, deviceContext, Marshal.SizeOf<T>(), bufferUsage);
         }
 
+        public IUniformBuffer CreateUniformBuffer(int size, BufferUsage bufferUsage)
+        {
+            return new DX11UniformBuffer(device, deviceContext, size, bufferUsage);
+        }
+
         public IShaderStorageBuffer<T> CreateShaderStorageBuffer<T>(int elementCount, BufferUsage usage, bool allowUAV = false) where T : struct
         {
             return new DX11ShaderStorageBuffer<T>(device, deviceContext, elementCount, usage, allowUAV);

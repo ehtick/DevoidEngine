@@ -113,6 +113,16 @@ namespace DevoidGPU.DX11
         private RasterizerState currentRasterizer;
         private SharpDX.Mathematics.Interop.RawRectangle? currentScissor;
 
+        public void UnbindAllShaderResources()
+        {
+            ShaderResourceView[] nullSRVs = new ShaderResourceView[16];
+            UnorderedAccessView[] nullUAVs = new UnorderedAccessView[7];
+
+            deviceContext.PixelShader.SetShaderResources(0, 16, nullSRVs);
+            deviceContext.VertexShader.SetShaderResources(0, 16, nullSRVs);
+
+            deviceContext.ComputeShader.SetUnorderedAccessViews(0, nullUAVs);
+        }
 
 
         public void SetRasterizerState(CullMode cullMode, FillMode fillMode = FillMode.Solid)

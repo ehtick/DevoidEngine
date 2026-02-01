@@ -71,28 +71,52 @@ void CSMain(uint3 groupID : SV_GroupID,
           uint3 groupThreadID : SV_GroupThreadID,
           uint groupIndex : SV_GroupIndex)
 {
+    
+    
     float3 eyePos = float3(0.0, 0.0, 0.0);
 
-    uint tileSizePx = screenViewData[0].tileSizes.w;
+    uint tileSizePx = screenViewData[0].tilePixelWidth;
 
-    // Compute tile index exactly as GLSL did
-    uint tileIndex =
-        groupID.x +
-        groupID.y * groupSize.x + // you’ll need to pass total counts
-        groupID.z * (groupSize.x * groupSize.y);
+    uint tileIndex = groupID.x +
+                 groupID.y * screenViewData[0].tileCountX +
+                 groupID.z * (screenViewData[0].tileCountX * screenViewData[0].tileCountY);
 
-    // Screen space coordinates for min/max corners
-    float4 maxPoint_sS = float4(
-        (float2(groupID.x + 1, groupID.y + 1) * tileSizePx),
-        -1.0, 1.0); // Top Right
+    float2 minPixel = float2(groupID.x * screenViewData[0].tilePixelWidth,
+                         groupID.y * screenViewData[0].tilePixelHeight);
+    float2 maxPixel = float2((groupID.x + 1) * screenViewData[0].tilePixelWidth,
+                         (groupID.y + 1) * screenViewData[0].tilePixelHeight);
 
-    float4 minPoint_sS = float4(
-        (float2(groupID.xy) * tileSizePx),
-        -1.0, 1.0); // Bottom Left
+    maxPixel = min(maxPixel, float2(screenViewData[0].screenWidth, screenViewData[0].screenHeight));
 
-    //Pass min and max to view space
-    float3 maxPoint_vS = screen2View(maxPoint_sS).xyz;
-    float3 minPoint_vS = screen2View(minPoint_sS).xyz;
+    // after computing minPixel and maxPixel and clamping:
+    float2 minPixelClamped = minPixel;
+    float2 maxPixelClamped = maxPixel;
+
+    // convert to clip (NDC) coordinates -1..1
+        float2 minNDC = (minPixelClamped / float2(screenViewData[0].screenWidth, screenViewData[0].screenHeight)) * 2.0 - 1.0;
+        float2 maxNDC = (maxPixelClamped / float2(screenViewData[0].screenWidth, screenViewData[0].screenHeight)) * 2.0 - 1.0;
+
+    // near-plane clip coords (z = -1, w = 1)
+        float4 minPoint_sS = float4(minNDC, -1.0, 1.0);
+        float4 maxPoint_sS = float4(maxNDC, -1.0, 1.0);
+
+    // then unproject via screen2View/ inverse projection
+        float3 maxPoint_vS = screen2View(maxPoint_sS).xyz;
+        float3 minPoint_vS = screen2View(minPoint_sS).xyz;
+    
+
+    //// Screen space coordinates for min/max corners
+    //float4 maxPoint_sS = float4(
+    //    (float2(groupID.x + 1, groupID.y + 1) * tileSizePx),
+    //    -1.0, 1.0); // Top Right
+
+    //float4 minPoint_sS = float4(
+    //    (float2(groupID.xy) * tileSizePx),
+    //    -1.0, 1.0); // Bottom Left
+
+    ////Pass min and max to view space
+    //float3 maxPoint_vS = screen2View(maxPoint_sS).xyz;
+    //float3 minPoint_vS = screen2View(minPoint_sS).xyz;
 
     //Near and far values of the cluster in view space
     float tileNear = -zNear * pow(zFar / zNear,

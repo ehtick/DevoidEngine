@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevoidStarter", "DevoidStar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevoidEngine.SourceGen", "DevoidEngine.SourceGen\DevoidEngine.SourceGen.csproj", "{07621B75-9772-4D51-9CC3-48831A26950A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevoidStandaloneLauncher", "DevoidStandaloneLauncher\DevoidStandaloneLauncher.csproj", "{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,14 @@ Global
 		{07621B75-9772-4D51-9CC3-48831A26950A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{07621B75-9772-4D51-9CC3-48831A26950A}.Release|x64.ActiveCfg = Release|Any CPU
 		{07621B75-9772-4D51-9CC3-48831A26950A}.Release|x64.Build.0 = Release|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Debug|x64.Build.0 = Debug|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Release|x64.ActiveCfg = Release|Any CPU
+		{0C370142-B58E-45E5-89C2-A1FBA8BC96FA}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

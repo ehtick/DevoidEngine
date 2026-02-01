@@ -18,6 +18,7 @@ namespace DevoidGPU
     public interface IUniformBuffer
     {
         void SetData<T>(ref T data) where T : struct;
+        void SetData(ReadOnlySpan<byte> data);
         void Bind(int slot, ShaderStage stage);
     }
 }

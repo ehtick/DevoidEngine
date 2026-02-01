@@ -30,8 +30,6 @@ namespace DevoidGPU.DX11
             this.Usage = usage;
             this.Stride = layout.SizeInBytes;
 
-            Console.WriteLine("VERTEX BUFFER STRIDE: " + this.Stride);
-
             BufferDescription bufferDescription = new BufferDescription()
             {
                 SizeInBytes = Stride * VertexCount,

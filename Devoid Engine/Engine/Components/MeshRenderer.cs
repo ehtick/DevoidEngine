@@ -20,33 +20,19 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnStart()
         {
-            mesh = new Mesh();
-
-            mesh.SetVertices(Primitives.GetCubeVertex());
-
-            GameObject go = SceneManager.MainScene.addGameObject("A");
-            go.AddComponent<CameraComponent3D>();
-
-            MaterialManager.MaterialA = new PBRMaterial()
-            {
-                Albedo = new Vector4(1, 0, 0, 1),
-                Roughness = 0.5f,
-                Metallic = 0f
-            };
-
-            RenderThreadDispatcher.QueueLatest("TEXTURE_SET", () =>
-            {
-                ((PBRMaterial)(MaterialManager.MaterialA)).DiffuseTexture = Helper.loadImageAsTex("Engine/Content/Textures/brick.png", DevoidGPU.TextureFilter.Linear);
-            });
-
-            instance = SceneRenderSystem.SubmitMesh(mesh, 0, Matrix4x4.Identity);
-
             RenderPipeline.OnBeginCameraRender += RenderPipeline_OnBeginCameraRender;
+        }
+
+        public void AddMesh(Mesh mesh)
+        {
+            this.mesh = mesh;
+            instance = SceneRenderSystem.SubmitMesh(mesh, 0, Matrix4x4.Identity);   
         }
 
         private void RenderPipeline_OnBeginCameraRender()
         {
-            instance.WorldMatrix = Matrix4x4.CreateTranslation(gameObject.transform.Position) * Matrix4x4.CreateScale(gameObject.transform.Scale) * Matrix4x4.CreateRotationX(gameObject.transform.Rotation.X) * Matrix4x4.CreateRotationY(gameObject.transform.Rotation.Y) * Matrix4x4.CreateRotationZ(gameObject.transform.Rotation.Z);
+            if (instance == null) return;
+            instance.WorldMatrix = Matrix4x4.CreateScale(gameObject.transform.Scale) * Matrix4x4.CreateRotationX(gameObject.transform.Rotation.X) * Matrix4x4.CreateRotationY(gameObject.transform.Rotation.Y) * Matrix4x4.CreateRotationZ(gameObject.transform.Rotation.Z) * Matrix4x4.CreateTranslation(gameObject.transform.Position);
         }
     }
 }

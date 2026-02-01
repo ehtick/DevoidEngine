@@ -11,11 +11,12 @@ namespace DevoidEngine.Engine.Core
     {
         public Matrix4x4 View;
         public Matrix4x4 Projection;
+        public Matrix4x4 InverseProjection;
         public Vector3 Position;
-        private float _padding0;
         public float NearClip;
         public float FarClip;
-        private Vector2 _padding1;
+        public Vector2 ScreenSize;
+        private float _padding0;
     }
 
     public class Camera
@@ -41,13 +42,17 @@ namespace DevoidEngine.Engine.Core
         // --- Data for GPU ---
         public CameraData GetCameraData()
         {
+            Matrix4x4.Invert(_projectionMatrix, out Matrix4x4 invProjection);
+
             return new CameraData
             {
                 View = _viewMatrix,
                 Projection = _projectionMatrix,
+                InverseProjection = invProjection,
                 Position = Position,
                 NearClip = NearClip,
                 FarClip = FarClip,
+                ScreenSize = new Vector2(Renderer.Width, Renderer.Height)
             };
         }
 

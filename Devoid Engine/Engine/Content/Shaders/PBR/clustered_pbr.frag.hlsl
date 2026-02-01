@@ -68,12 +68,21 @@ struct SpotLight
 
 struct ScreenViewData
 {
-    float4x4 inverseProjectionMatrix; // matches mat4
-    float4 tileSizes;
+    float4x4 inverseProjectionMatrix;
+
+    // tile info
+    uint tileCountX;
+    uint tileCountY;
+    uint sliceCountZ;
+    uint tilePixelWidth;
+
     uint screenWidth;
     uint screenHeight;
+    uint tilePixelHeight;
+
     float sliceScaling;
     float sliceBias;
+    float3 _padding;
 };
 
 struct LightGrid
@@ -139,6 +148,17 @@ float ComputeAttenuation(PointLight light, float dist)
 }
 
 
+//float GetClusterZNear(uint zSlice)
+//{
+//    // EQ: Z = NearZ (FarZ / NearZ) ^ (slice / numSlices)
+//    // From: http://www.aortiz.me/2018/12/21/CG.html#part-2 and DOOM 2016 SIGGRAPH
+    
+//    // _ProjectionParams: Y = near, Z = far
+//    // _ZBufferParams: Y = far / near
+//    return zNear * pow(_ZBufferParams.y, (float) zSlice * INV_DEPTH_SLICES);
+//}
+
+
 float4 PSMain(PSInput input) : SV_TARGET
 {
      // normalize normal
@@ -155,7 +175,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     float3 albedo = GetDiffuse(input.UV0).rgb;
 
 
-    float ndcDepth = input.Position.z / input.Position.w;
+    float ndcDepth = input.Position.z;
     
     float linDepth = linearDepth(ndcDepth);
 
@@ -165,10 +185,13 @@ float4 PSMain(PSInput input) : SV_TARGET
 
     
     // x,y tile indices:
-    uint2 tileXY = uint2(floor(input.Position.xy / screenViewData[0].tileSizes.w));
-    uint tileIndex = tileXY.x +
-                 screenViewData[0].tileSizes.x * tileXY.y +
-                 screenViewData[0].tileSizes.x * screenViewData[0].tileSizes.y * zTile;
+    uint2 tileXY = uint2(floor(input.Position.xy / float2(screenViewData[0].tilePixelWidth, screenViewData[0].tilePixelHeight)));
+
+    tileXY.x = min(tileXY.x, screenViewData[0].tileCountX - 1u);
+    tileXY.y = min(tileXY.y, screenViewData[0].tileCountY - 1u);
+
+    uint tileIndex = tileXY.x + screenViewData[0].tileCountX * tileXY.y + screenViewData[0].tileCountX * screenViewData[0].tileCountY * zTile;
+
 
 
     // get the light range for this tile

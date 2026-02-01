@@ -5,202 +5,109 @@ using System.Numerics;
 
 namespace DevoidEngine.Engine.Core
 {
-    public class Material
-    {
 
+    public class MaterialGPUData
+    {
+        public IUniformBuffer UniformBuffer;
+        public bool Dirty;
+    }
+
+    public class RenderState
+    {
         public BlendMode BlendMode { get; set; } = BlendMode.Opaque;
         public DepthTest DepthTest { get; set; } = DepthTest.LessEqual;
         public bool DepthWrite { get; set; } = true;
         public CullMode CullMode { get; set; } = CullMode.Back;
-        public IUniformBuffer Buffer { get; set; }
+    }
 
+    public class Material
+    {
+        public RenderState RenderState;
         public Guid Id;
 
         public Shader Shader { get; set; } = ShaderLibrary.GetShader("BASIC_SHADER");
-    
-        public virtual void Apply()
-        {
+        public MaterialLayout MaterialLayout { get; set; }
 
-        }
+        // PROPERTIES
+        public Dictionary<string, int> PropertiesInt = new();
+        public Dictionary<string, float> PropertiesFloat = new();
+        public Dictionary<string, Vector2> PropertiesVec2 = new();
+        public Dictionary<string, Vector3> PropertiesVec3 = new();
+        public Dictionary<string, Vector4> PropertiesVec4 = new();
+        public Dictionary<string, Matrix4x4> PropertiesMat4 = new();
+
+
+        public Dictionary<string, Texture2D> Textures2D = new();
 
     }
 
-    public class PBRMaterial : Material
+    public class MaterialInstance
     {
-        public struct PBRData
-        {
-            public Vector4 Albedo;
-            public Vector4 Emission;
-            public float EmissionStr;
-            public float Metallic;
-            public float Roughness;
+        public Material BaseMaterial;
+        public MaterialGPUData GPUData { get; set; }
 
-            public int UseDiffuseMap;
-            public int UseNormalMap;
-            public int UseRoughnessMap;
-            public int UseEmissionMap;
-            public int UseParallaxMap;
-            
+        public Dictionary<string, int> PropertiesIntOverride = new();
+        public Dictionary<string, float> PropertiesFloatOverride = new();
+        public Dictionary<string, Vector2> PropertiesVec2Override = new();
+        public Dictionary<string, Vector3> PropertiesVec3Override = new();
+        public Dictionary<string, Vector4> PropertiesVec4Override = new();
+        public Dictionary<string, Matrix4x4> PropertiesMat4Override = new();
+
+        public Dictionary<string, Texture2D> Textures2DOverride = new();
+
+        public MaterialInstance(Material material)
+        {
+            this.BaseMaterial = material;
+
+            this.GPUData = new MaterialGPUData();
+            this.GPUData.UniformBuffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer(material.MaterialLayout.bufferSize, BufferUsage.Dynamic);
+            this.GPUData.Dirty = true;
+
+            MaterialHelper.Update(this);
+
         }
 
-        public PBRData MaterialData;
-
-        // --- Backing fields
-        private Vector4 _albedo = Vector4.Zero;
-        private Vector4 _emission = Vector4.Zero;
-        private float _emissionStr = 0f;
-        private float _metallic = 0f;
-        private float _roughness = 0f;
-
-        private Texture2D diffuseTexture;
-        private Texture2D normalTexture;
-        private Texture2D roughnessTexture;
-        private Texture2D emissionTexture;
-
-        public bool isDiffuseSet;
-        public bool isNormalSet;
-        public bool isSpecularSet;
-        public bool isRoughnessSet;
-        public bool isEmissionSet;
-
-        // --- Properties only update CPU-side fields
-        public Vector4 Albedo { get => _albedo; set { _albedo = value; Update(); } }
-        public Vector4 Emission { get => _emission; set { _emission = value; Update(); } }
-        public float EmissionStr { get => _emissionStr; set { _emissionStr = value; Update(); } }
-        public float Metallic { get => _metallic; set { _metallic = value; Update(); } }
-        public float Roughness { get => _roughness; set { _roughness = value; Update(); } }
-
-        public Texture2D DiffuseTexture
+        public void Set(string name, int value)
         {
-            get => diffuseTexture;
-            set
-            {
-                diffuseTexture = value;
-                isDiffuseSet = true;
-                Update();
-            }
+            PropertiesIntOverride[name] = value;
+            GPUData.Dirty = true;
+        }
+        public void Set(string name, float value)
+        {
+            PropertiesFloatOverride[name] = value;
+            GPUData.Dirty = true;
+        }
+        public void Set(string name, Vector2 value)
+        {
+            PropertiesVec2Override[name] = value;
+            GPUData.Dirty = true;
+        }
+        public void Set(string name, Vector3 value)
+        {
+            PropertiesVec3Override[name] = value;
+            GPUData.Dirty = true;
+        }
+        public void Set(string name, Vector4 value)
+        {
+            PropertiesVec4Override[name] = value;
+            GPUData.Dirty = true;
         }
 
-        public Texture2D NormalTexture
+        public void Set(string name, Matrix4x4 value)
         {
-            get => normalTexture;
-            set
-            {
-                normalTexture = value;
-                isNormalSet = true;
-                Update();
-            }
+            PropertiesMat4Override[name] = value;
+            GPUData.Dirty = true;
         }
 
-        public Texture2D RoughnessTexture
+        public void Apply()
         {
-            get => roughnessTexture;
-            set
-            {
-                roughnessTexture = value;
-                isRoughnessSet = true;
-                Update();
-            }
-        }
-
-        public Texture2D EmissionTexture
-        {
-            get => emissionTexture;
-            set
-            {
-                emissionTexture = value;
-                isEmissionSet = true;
-                Update();
-            }
-        }
-
-        public PBRMaterial()
-        {
-            this.Shader = ShaderLibrary.GetShader("PBR/ClusteredPBR");
-            this.Buffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer<PBRData>(BufferUsage.Dynamic);
-            Update(); // keep data in sync at start
-        }
-
-        /// <summary>
-        /// Updates the MaterialData struct from properties,
-        /// and pushes it to the GPU buffer if one exists.
-        /// </summary>
-        private void Update()
-        {
-            MaterialData = new PBRData
-            {
-                Albedo = _albedo,
-                Emission = _emission,
-                EmissionStr = _emissionStr,
-                Metallic = _metallic,
-                Roughness = _roughness,
-                UseDiffuseMap = isDiffuseSet ? 1 : 0,
-                UseNormalMap = isNormalSet ? 1 : 0,
-                UseRoughnessMap = isRoughnessSet ? 1 : 0,
-                UseEmissionMap = isEmissionSet ? 1 : 0,
-                UseParallaxMap = 0
-                // leave texture flags alone, set elsewhere
-            };
-
-            RenderThreadDispatcher.QueueLatest("UPDATE_MATERIAL_DATA_" + GetHashCode(), () =>
-            {
-                this.Buffer.SetData(ref MaterialData);
-            });
-        }
-
-        bool x = false;
-
-        public override void Apply()
-        {
-            base.Apply();
-
-            this.Buffer.Bind(2, ShaderStage.Fragment);
-            Shader.Use();
-
-            if (isDiffuseSet)
-            {
-                diffuseTexture.BindSampler(0);
-                diffuseTexture.Bind(10, ShaderStage.Fragment);
-
-            }
-            else
-            {
-                Texture2D.DefaultSampler.Bind(0);
-                Texture2D.WhiteTexture.Bind(10);
-            }
-
-            if (isNormalSet)
-            {
-                normalTexture.BindSampler(1);
-                normalTexture.Bind(11);
-            }
-            else
-            {
-                Texture2D.DefaultSampler.Bind(1);
-                Texture2D.WhiteTexture.Bind(11);
-            }
-
-            if (isRoughnessSet)
-            {
-                roughnessTexture.BindSampler(2);
-                roughnessTexture.Bind(12);
-            }
-            else
-            {
-                //Texture.White2DTex.Bind();
-            }
-
-            if (isEmissionSet)
-            {
-                emissionTexture.BindSampler(3);
-                emissionTexture.Bind(13);
-            }
-            else
-            {
-                //Texture.White2DTex.Bind();
-            }
 
 
+            MaterialHelper.Update(this);
+
+            BaseMaterial.Shader.Use();
+
+            GPUData.UniformBuffer.Bind(2, ShaderStage.Fragment | ShaderStage.Vertex);
         }
     }
 }

@@ -30,12 +30,17 @@ namespace DevoidEngine.Engine.Core
 
         public static void Update(float delta)
         {
-            MainScene.OnUpdate(delta);
+            MainScene?.OnUpdate(delta);
         }
 
         public static void Render(float delta)
         {
-            MainScene.OnRender(delta);
+            MainScene?.OnRender(delta);
+        }
+
+        public static bool IsSceneLoaded()
+        {
+            return MainScene != null;
         }
     }
 }

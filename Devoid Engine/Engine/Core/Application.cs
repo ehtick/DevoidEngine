@@ -43,8 +43,6 @@ namespace DevoidEngine.Engine.Core
 
         public ImGuiRenderer ImGuiRenderer;
 
-        private bool isInitialized = false;
-
         public void Create(ApplicationSpecification appSpec)
         {
             this.AppSpec = appSpec;
@@ -74,6 +72,8 @@ namespace DevoidEngine.Engine.Core
 
             windowManager = new WindowManager();
             MainWindow = new Window(windowSpecification);
+
+            Screen.Size = new System.Numerics.Vector2(appSpec.Width, appSpec.Height);
 
             graphicsDevice = appSpec.graphicsDevice;
             graphicsDevice.Initialize(MainWindow.GetWindowPtr(), presentationParameters);
@@ -174,7 +174,10 @@ namespace DevoidEngine.Engine.Core
             LayerHandler.RenderLayers((float)deltaTime);
             
             EnginePipeline.ExecuteRenderThread((float)deltaTime);
-            
+
+            LayerHandler.LateRenderLayers();
+
+            graphicsDevice.MainSurface.Bind();
             graphicsDevice.MainSurface.Present();
 
             RenderThreadDispatcher.ExecutePending();

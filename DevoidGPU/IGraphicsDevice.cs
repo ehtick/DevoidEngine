@@ -20,6 +20,8 @@ namespace DevoidGPU
 
         void SetViewport(int x, int y, int width, int height);
 
+        void UnbindAllShaderResources();
+
         void SetBlendState(BlendMode mode, bool alphaToCoverage = false);
         void SetDepthState(DepthTest func, bool writeEnable);
         void SetRasterizerState(CullMode cullMode, FillMode fillMode = FillMode.Solid, bool scissorEnabled = false);

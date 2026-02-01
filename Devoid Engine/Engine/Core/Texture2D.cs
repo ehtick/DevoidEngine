@@ -77,7 +77,16 @@ namespace DevoidEngine.Engine.Core
         public void Resize(int width, int height)
         {
             texture?.Dispose();
-            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(Description);
+
+            Tex2DDescription desc = Description;
+            desc.Width = width;
+            desc.Height = height;
+
+            Width = desc.Width;
+            Height = desc.Height;
+
+            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(desc);
+            this.Description = desc;
         }
 
         public void SetFilter(TextureFilter min, TextureFilter mag)

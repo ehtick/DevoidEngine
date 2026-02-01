@@ -48,7 +48,6 @@ namespace DevoidGPU.DX11
             this.Description = texture2DDescription;
 
             this.format = DX11TextureFormat.ToDXGIFormat(Description.Format);
-            Console.WriteLine(format);
             this.Width = Description.Width;
             this.Height = Description.Height;
 

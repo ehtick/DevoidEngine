@@ -19,7 +19,12 @@ namespace DevoidEngine.Engine.Rendering
 
         public static void Initialize(IGraphicsDevice gd, int width, int height)
         {
+            Width = width;
+            Height = height;
+
             graphicsDevice = gd;
+            graphicsDevice.SetViewport(0, 0, width, height);
+
 
             Renderer3D.Initialize(width, height);
         }

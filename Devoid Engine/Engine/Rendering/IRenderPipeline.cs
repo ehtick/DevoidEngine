@@ -13,13 +13,13 @@ namespace DevoidEngine.Engine.Rendering
     {
         void Initialize(int width, int height);
         void BeginRender(Camera camera);
-        void Render(Mesh mesh, Matrix4x4 WorldMatrix);
+        void Render(List<RenderInstance> renderInstances);
         void EndRender();
 
         void Resize(int width, int height);
 
         Framebuffer GetOutputFrameBuffer();
 
-        Material GetDefaultMaterial();
+        MaterialInstance GetDefaultMaterial();
     }
 }
