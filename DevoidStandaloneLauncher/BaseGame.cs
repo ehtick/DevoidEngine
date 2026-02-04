@@ -8,7 +8,7 @@ namespace DevoidStandaloneLauncher
     internal class BaseGame : Layer
     {
         Scene MainScene = new Scene();
-        Prototype gamePrototype = new CubeSpinForwardRenderer();
+        Prototype gamePrototype = new UITester();
 
         public override void OnAttach()
         {
@@ -31,8 +31,8 @@ namespace DevoidStandaloneLauncher
 
         public override void OnLateRender()
         {
-            if (SceneManager.MainScene.GetMainCamera() == null) return;
-            Texture2D renderOutput = SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0);
+            //if (SceneManager.MainScene.GetMainCamera() == null) return;
+            Texture2D renderOutput = UIRenderer.RenderOutput.GetRenderTexture(0);//SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0);
             
             RenderAPI.RenderToScreen(renderOutput);
         }
@@ -41,6 +41,8 @@ namespace DevoidStandaloneLauncher
         {
             Console.WriteLine(width);
             Renderer.Resize(width, height);
+
+            Screen.Size = new System.Numerics.Vector2(width, height);
             Renderer.graphicsDevice.SetViewport(0, 0, width, height);
             MainScene.OnResize(width, height);
         }

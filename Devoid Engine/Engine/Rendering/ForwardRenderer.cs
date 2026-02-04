@@ -80,11 +80,8 @@ namespace DevoidEngine.Engine.Rendering
             Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
         }
 
-        float i = 0;
         public void EndRender()
         {
-            BasicForward.Set("Albedo", new Vector4(i, 1, 0, 0.5f));
-            i += 0.1f;
         }
 
         public void Render(List<RenderInstance> renderInstances)

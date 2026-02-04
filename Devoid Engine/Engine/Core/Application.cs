@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DevoidEngine.Engine.Imgui;
 using DevoidEngine.Engine.Rendering;
+using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
 using ImGuiNET;
@@ -175,10 +176,12 @@ namespace DevoidEngine.Engine.Core
             
             EnginePipeline.ExecuteRenderThread((float)deltaTime);
 
+            UISystem.PerformUI();
             LayerHandler.LateRenderLayers();
 
             graphicsDevice.MainSurface.Bind();
             graphicsDevice.MainSurface.Present();
+
 
             RenderThreadDispatcher.ExecutePending();
         }
@@ -188,7 +191,7 @@ namespace DevoidEngine.Engine.Core
             ImGuiRenderer.UpdateInput();
 
             LayerHandler.UpdateLayers((float)deltaTime);
-            
+
             EnginePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();

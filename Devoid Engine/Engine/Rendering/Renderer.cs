@@ -27,6 +27,7 @@ namespace DevoidEngine.Engine.Rendering
 
 
             Renderer3D.Initialize(width, height);
+            UIRenderer.Initialize(width, height);
         }
 
         public static void Resize(int width, int height)
@@ -34,7 +35,7 @@ namespace DevoidEngine.Engine.Rendering
             Width = width;
             Height = height;
             Renderer3D.Resize(width, height);
-
+            UIRenderer.Resize(width, height);
         }
 
     }

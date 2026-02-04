@@ -7,7 +7,7 @@ namespace DevoidEngine.Engine.Utilities
 {
     public static class Primitives
     {
-        public static Vertex[] GetQuadVertex()
+        public static Vertex[] GetScreenQuadVertex()
         {
             return new Vertex[]
             {
@@ -20,6 +20,22 @@ namespace DevoidEngine.Engine.Utilities
         new Vertex(new Vector3( 1.0f,  1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(1, 1)),
         new Vertex(new Vector3(-1.0f,  1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 1)),
         new Vertex(new Vector3(-1.0f, -1.0f, 0.0f), new Vector3(0, 0, 1), new Vector2(0, 0)),
+            };
+        }
+
+        public static Vertex[] GetQuadVertex()
+        {
+            return new Vertex[]
+            {
+        // First triangle
+        new Vertex(new Vector3(0.0f, 0.0f, 0.0f), Vector3.UnitZ, new Vector2(0, 0)),
+        new Vertex(new Vector3(1.0f, 0.0f, 0.0f), Vector3.UnitZ, new Vector2(1, 0)),
+        new Vertex(new Vector3(1.0f, 1.0f, 0.0f), Vector3.UnitZ, new Vector2(1, 1)),
+
+        // Second triangle
+        new Vertex(new Vector3(1.0f, 1.0f, 0.0f), Vector3.UnitZ, new Vector2(1, 1)),
+        new Vertex(new Vector3(0.0f, 1.0f, 0.0f), Vector3.UnitZ, new Vector2(0, 1)),
+        new Vertex(new Vector3(0.0f, 0.0f, 0.0f), Vector3.UnitZ, new Vector2(0, 0)),
             };
         }
 

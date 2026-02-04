@@ -91,7 +91,7 @@ namespace DevoidEngine.Engine.Rendering
         static RenderAPI()
         {
             mesh = new Mesh();
-            mesh.SetVertices(Primitives.GetQuadVertex());
+            mesh.SetVertices(Primitives.GetScreenQuadVertex());
         }
 
         static Mesh mesh;

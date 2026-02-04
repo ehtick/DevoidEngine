@@ -2,47 +2,44 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace DevoidEngine.Engine.Core
 {
-    public struct WindowRunState
+    public class WindowRunState
     {
         public Window window;
-        public double accumulated;
-
+        public double fixedAccumulator;
     }
+
     public class WindowManager
     {
-        private readonly List<WindowRunState> windows = new List<WindowRunState>();
-        private bool _running = true;
+        private readonly List<WindowRunState> windows = new();
+        private volatile bool _running = true;
 
         public static WindowManager Instance { get; } = new WindowManager();
 
-
         public void RegisterWindow(Window window)
         {
-            windows.Add(new WindowRunState() {
-                window = window
-            });
+            windows.Add(new WindowRunState { window = window });
         }
 
         public void RunAll()
         {
+            const double updateHz = 60.0;
+            const double renderHz = 165.0;
 
-            float updateFixed = 1 / 60f;
-            float renderFixed = 1 / 60f;
+            double updateStep = 1.0 / updateHz;
+            double renderStep = 1.0 / renderHz;
 
             foreach (var wrs in windows)
                 wrs.window.Load();
 
+            // ---------------- UPDATE THREAD ----------------
             Thread updateThread = new Thread(() =>
             {
                 Stopwatch timer = Stopwatch.StartNew();
                 double lastTime = timer.Elapsed.TotalSeconds;
-                const double fixedUpdate = 1.0 / 60.0;
 
                 while (_running)
                 {
@@ -53,19 +50,26 @@ namespace DevoidEngine.Engine.Core
                     for (int i = 0; i < windows.Count; i++)
                     {
                         var wrs = windows[i];
-                        wrs.accumulated += delta;
+                        wrs.fixedAccumulator += delta;
+
                         wrs.window.Update(delta);
 
-                        while (wrs.accumulated >= fixedUpdate)
+                        while (wrs.fixedAccumulator >= updateStep)
                         {
-                            wrs.window.FixedUpdate(fixedUpdate);
-                            wrs.accumulated -= fixedUpdate;
+                            wrs.window.FixedUpdate(updateStep);
+                            wrs.fixedAccumulator -= updateStep;
                         }
                     }
+
+                    // Sleep until next update tick
+                    double frameTime = timer.Elapsed.TotalSeconds - now;
+                    double sleep = updateStep - frameTime;
+
+                    if (sleep > 0)
+                        Thread.Sleep((int)(sleep * 1000));
+                    else
+                        Thread.Yield();
                 }
-
-
-
             })
             {
                 IsBackground = true,
@@ -74,18 +78,15 @@ namespace DevoidEngine.Engine.Core
 
             updateThread.Start();
 
-            Stopwatch timer = Stopwatch.StartNew();
-            double lastRender = timer.Elapsed.TotalSeconds;
-            double accumulated = 0f;
+            // ---------------- RENDER / EVENT THREAD ----------------
+            Stopwatch renderTimer = Stopwatch.StartNew();
+            double lastRender = renderTimer.Elapsed.TotalSeconds;
 
             while (_running && windows.Count > 0)
             {
-                double currentTime = timer.Elapsed.TotalSeconds;
-
-                double deltaTime = currentTime - lastRender;
-                lastRender = currentTime;
-
-                accumulated += deltaTime;
+                double now = renderTimer.Elapsed.TotalSeconds;
+                double delta = now - lastRender;
+                lastRender = now;
 
                 for (int i = windows.Count - 1; i >= 0; i--)
                 {
@@ -99,23 +100,22 @@ namespace DevoidEngine.Engine.Core
                         continue;
                     }
 
-                    // Render
-                    if (accumulated >= renderFixed)
-                    {
-                        wrs.window.Render(deltaTime);
-                        accumulated = 0;
-                    }
+                    wrs.window.Render(delta);
                 }
+
+                // Sleep until next render tick
+                double frameTime = renderTimer.Elapsed.TotalSeconds - now;
+                double sleep = renderStep - frameTime;
+
+                if (sleep > 0)
+                    Thread.Sleep((int)(sleep * 1000));
+                else
+                    Thread.Yield();
+
                 _running = windows.Count > 0;
             }
 
             updateThread.Join();
         }
-
-        public void Shutdown()
-        {
-
-        }
     }
-
 }
