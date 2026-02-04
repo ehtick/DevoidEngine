@@ -15,39 +15,56 @@ namespace DevoidEngine.Engine.UI.Nodes
         public bool Visible = true;
         public bool Interactable = true;
 
-        protected readonly List<UINode> _children = new List<UINode>();
+        protected readonly List<UINode> _children = new();
 
-        public Vector2? Size;                 // Explicit width/height
+
+
+        // Size intent
+        public Vector2? Size;
         public Vector2 MinSize = Vector2.Zero;
         public Vector2 MaxSize = new(float.PositiveInfinity);
+
+        public bool ParticipatesInLayout = true;
 
         public void Add(UINode child)
         {
             _children.Add(child);
         }
 
-        public virtual Vector2 Measure(Vector2 availableSize)
+        // ENTRY POINT
+        public Vector2 Measure(Vector2 availableSize)
         {
-            // Default: take the max of children
-            Vector2 size = Vector2.Zero;
+            if (!Visible)
+                return Vector2.Zero;
 
-            foreach (var c in _children)
-            {
-                Vector2 childSize = c.Measure(availableSize);
-                size.X = MathF.Max(size.X, childSize.X);
-                size.Y = MathF.Max(size.Y, childSize.Y);
-            }
-            return size;
+            Vector2 desired = MeasureCore(availableSize);
+
+            if (Size.HasValue)
+                desired = Size.Value;
+
+            desired.X = MathF.Clamp(desired.X, MinSize.X, MaxSize.X);
+            desired.Y = MathF.Clamp(desired.Y, MinSize.Y, MaxSize.Y);
+
+            desired.X = MathF.Min(desired.X, availableSize.X);
+            desired.Y = MathF.Min(desired.Y, availableSize.Y);
+
+            DesiredSize = desired;
+            return desired;
         }
 
-        public virtual void Arrange(UITransform finalRect)
+        public void Arrange(UITransform finalRect)
         {
             Rect = finalRect;
 
-            foreach (var c in _children)
-            {
-                c.Arrange(finalRect);
-            }
+            if (!Visible)
+                return;
+
+            ArrangeCore(finalRect);
         }
+
+        // OVERRIDES
+        protected abstract Vector2 MeasureCore(Vector2 availableSize);
+        protected abstract void ArrangeCore(UITransform finalRect);
     }
+
 }

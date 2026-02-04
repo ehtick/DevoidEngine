@@ -19,10 +19,25 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         public override void Arrange(UITransform finalRect)
         {
-            Rect = finalRect;
-
             foreach (var child in _children)
-                child.Arrange(finalRect);
+            {
+                if (child.ParticipatesInLayout)
+                {
+                    // Normal layout flow
+                    child.Arrange(new UITransform(
+                        finalRect.position,
+                        child.DesiredSize
+                    ));
+                }
+                else
+                {
+                    // SMART DEFAULT: absolute positioning
+                    child.Arrange(new UITransform(
+                        finalRect.position + child.Position,
+                        child.Size ?? child.DesiredSize
+                    ));
+                }
+            }
         }
 
     }

@@ -26,18 +26,16 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         public override void Arrange(UITransform finalRect)
         {
-            Rect = finalRect;
-
-            // Simple policy: children fill panel
             foreach (var child in _children)
             {
-                child.Arrange(new UITransform(
-                    finalRect.position,
-                    finalRect.size
-                ));
+                child.Arrange(finalRect);
             }
 
-            UIRenderer.DrawRect(Rect);
+            UIRenderer.DrawRect(new UITransform()
+            {
+                position = new Vector2(0, 0),
+                size = Size ?? Vector2.Zero,
+            });
         }
 
     }
