@@ -35,7 +35,11 @@ namespace DevoidEngine.Engine.UI
                 Direction = FlexDirection.Row,
                 Gap = 10f,
                 Align = AlignItems.Stretch,
-                Justify = JustifyContent.Start
+                Justify = JustifyContent.Start,
+                Layout = new LayoutOptions
+                {
+                    FlexGrowMain = 1
+                }
             };
 
             mainContainer.Add(node);

@@ -11,19 +11,18 @@ namespace DevoidEngine.Engine.UI.Nodes
     {
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {
-            // Canvas always fills screen
+            base.MeasureCore(availableSize);
             return availableSize;
         }
 
         protected override void ArrangeCore(UITransform finalRect)
         {
-            // Let FlexNode do ALL layout logic
             base.ArrangeCore(finalRect);
         }
 
         protected override void RenderCore()
         {
-            // no-op
+
         }
     }
 }
