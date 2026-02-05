@@ -8,13 +8,13 @@ namespace DevoidEngine.Engine.UI.Nodes
 {
     public class LayoutOptions
     {
-        public bool ExpandV = false;
-        public bool ExpandH = false;
+        public float FlexGrowMain;
+        public float FlexGrowCross;
 
         public static readonly LayoutOptions Default = new LayoutOptions
         {
-            ExpandV = true,
-            ExpandH = true
+            FlexGrowMain = 1,
+            FlexGrowCross = 1,
         };
     }
 }

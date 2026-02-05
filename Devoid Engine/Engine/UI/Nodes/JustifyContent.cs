@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    public static class UIHelper
+    public enum JustifyContent
     {
-
-
+        Start,
+        Center,
+        End,
+        SpaceBetween,
+        SpaceAround,
+        SpaceEvenly
     }
 }
