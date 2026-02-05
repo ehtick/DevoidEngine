@@ -15,6 +15,7 @@ namespace DevoidEngine.Engine.Rendering
     struct UIRenderData
     {
         public Matrix4x4 model;
+        public Vector4 id;
     }
 
     public static class UIRenderer
@@ -58,7 +59,7 @@ namespace DevoidEngine.Engine.Rendering
 
             Matrix4x4 ortho = Matrix4x4.CreateOrthographicOffCenter(
                 0f, Screen.Size.X,
-                Screen.Size.Y, 0f,
+                0f, Screen.Size.Y,
                 -1f,
                 1f
             );
@@ -100,12 +101,11 @@ namespace DevoidEngine.Engine.Rendering
             Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
             Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
 
-            UIRenderBuffer.Bind(1, ShaderStage.Vertex);
+            UIRenderBuffer.Bind(1, ShaderStage.Vertex | ShaderStage.Fragment);
             ScreendataBuffer.Bind(0, ShaderStage.Vertex);
 
         }
-
-        public static void DrawRect(UITransform transform)
+        public static void DrawRect(UITransform transform, int count)
         {
 
             UIRenderData = new UIRenderData()
@@ -113,9 +113,8 @@ namespace DevoidEngine.Engine.Rendering
                 model =
                     Matrix4x4.CreateScale(transform.size.X, transform.size.Y, 1.0f) *
                     Matrix4x4.CreateTranslation(transform.position.X, transform.position.Y, 0.0f),
-
             };
-
+            UIRenderData.id.X = count;
             UIRenderBuffer.SetData(ref UIRenderData);
 
             IInputLayout layout = Renderer3D.GetInputLayout(Quad, basicShader);
@@ -125,7 +124,6 @@ namespace DevoidEngine.Engine.Rendering
 
             basicShader.Use();
             Renderer.graphicsDevice.Draw(Quad.VertexBuffer.VertexCount, 0);
-
         }
 
         public static void EndRender()
@@ -136,7 +134,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             Matrix4x4 ortho = Matrix4x4.CreateOrthographicOffCenter(
                 0f, width,
-                height, 0f,
+                0f, height,
                 -1f,
                 1f
             );

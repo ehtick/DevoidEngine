@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    class PanelNode : UINode
+    class BoxNode : UINode
     {
         protected override Vector2 MeasureCore(Vector2 available)
         {
@@ -36,9 +36,12 @@ namespace DevoidEngine.Engine.UI.Nodes
                 ));
             }
 
-            UIRenderer.DrawRect( finalRect );
+            UIRenderer.DrawRect( finalRect , DEBUG_NUM_LOCAL);
         }
 
-
+        protected override void RenderCore()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

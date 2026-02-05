@@ -66,8 +66,8 @@ namespace DevoidGPU.DX11
             var desc = new Texture2DDescription
             {
 
-                Width = Width,
-                Height = Height,
+                Width = Width > 0 ? Width : 1,
+                Height = Height > 0 ? Height : 1,
                 MipLevels = Description.MipLevels,
                 ArraySize = 1,
                 Format = textureFormat,

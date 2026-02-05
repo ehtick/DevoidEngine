@@ -9,8 +9,20 @@ namespace DevoidEngine.Engine.UI.Nodes
 {
     public abstract class UINode
     {
+        // REMOVE
+        public int DEBUG_NUM_LOCAL = 0;
+        static int DEBUG_NUM_STATIC = 0;
+
+        public UINode()
+        {
+            DEBUG_NUM_LOCAL = DEBUG_NUM_STATIC++;
+        }
+
+
         public UITransform Rect { get; protected set; }
         public Vector2 DesiredSize { get; private set; }
+        public LayoutOptions Layout { get; set; } = new LayoutOptions();
+
 
         public bool Visible = true;
         public bool Interactable = true;
@@ -62,10 +74,15 @@ namespace DevoidEngine.Engine.UI.Nodes
 
             ArrangeCore(finalRect);
         }
+        public void Render()
+        {
+            RenderCore();
+        }
 
         // OVERRIDES
         protected abstract Vector2 MeasureCore(Vector2 availableSize);
         protected abstract void ArrangeCore(UITransform finalRect);
+        protected abstract void RenderCore();
     }
 
 }

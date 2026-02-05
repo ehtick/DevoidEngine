@@ -11,13 +11,8 @@
 struct PSInput
 {
     float4 Position : SV_POSITION;
-    float3 Normal : NORMAL;
-    float4 Tangent : TANGENT; // xyz = tangent, w = handedness
-    float3 BiTangent : BINORMAL;
+    float2 NDC : TEXCOORD4;
     float2 UV0 : TEXCOORD0;
-    float2 UV1 : TEXCOORD1;
-    float3 FragmentPosition : TEXCOORD2;
-    float3 WorldspacePosition : TEXCOORD3;
 };
 
 
@@ -36,6 +31,7 @@ cbuffer CameraData : register(b0)
 cbuffer TransformData : register(b1)
 {
     float4x4 Model;
+    float4 id;
 }
 
 
@@ -43,14 +39,14 @@ PSInput VSMain(VSInput input)
 {
     PSInput output;
 
-    // Local → Screen (via model)
-    float4 worldPos = mul(Model, float4(input.Position.xy, 0.0f, 1.0f));
+    float4 local = float4(input.Position.xy, 0.0, 1.0);
+    float4 world = mul(Model, local);
+    float4 clip = mul(Projection, world);
 
-    // Screen → Clip
-    output.Position = mul(Projection, worldPos);
+    output.Position = clip;
+    output.NDC = clip.xy / clip.w; // ✅ VALID HERE
     output.UV0 = input.UV0;
 
     return output;
 }
 
- 

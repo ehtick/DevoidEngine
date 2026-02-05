@@ -33,5 +33,10 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
 
         }
+
+        protected override void RenderCore()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
