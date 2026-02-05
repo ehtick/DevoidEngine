@@ -9,36 +9,29 @@ namespace DevoidEngine.Engine.UI.Nodes
 {
     public class CanvasNode : UINode
     {
-        public override Vector2 Measure(Vector2 availableSize)
-        {
-            foreach (var child in _children)
-                child.Measure(availableSize);
-
-            return availableSize;
-        }
-
-        public override void Arrange(UITransform finalRect)
+        protected override Vector2 MeasureCore(Vector2 availableSize)
         {
             foreach (var child in _children)
             {
-                if (child.ParticipatesInLayout)
-                {
-                    // Normal layout flow
-                    child.Arrange(new UITransform(
-                        finalRect.position,
-                        child.DesiredSize
-                    ));
-                }
-                else
-                {
-                    // SMART DEFAULT: absolute positioning
-                    child.Arrange(new UITransform(
-                        finalRect.position + child.Position,
-                        child.Size ?? child.DesiredSize
-                    ));
-                }
+                child.Measure(availableSize);
             }
-        }
 
+            // Canvas desires exactly the available screen size
+            return availableSize;
+        }
+        protected override void ArrangeCore(UITransform finalRect)
+        {
+            Rect = finalRect;
+
+            foreach (var child in _children)
+            {
+
+                child.Arrange(new UITransform(
+                    finalRect.position + child.Offset,
+                    child.Size ?? child.DesiredSize
+                ));
+            }
+
+        }
     }
 }

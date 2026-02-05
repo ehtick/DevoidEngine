@@ -20,6 +20,7 @@ namespace DevoidEngine.Engine.UI.Nodes
 
 
         // Size intent
+        public Vector2 Offset = Vector2.Zero;
         public Vector2? Size;
         public Vector2 MinSize = Vector2.Zero;
         public Vector2 MaxSize = new(float.PositiveInfinity);
@@ -42,11 +43,11 @@ namespace DevoidEngine.Engine.UI.Nodes
             if (Size.HasValue)
                 desired = Size.Value;
 
-            desired.X = MathF.Clamp(desired.X, MinSize.X, MaxSize.X);
-            desired.Y = MathF.Clamp(desired.Y, MinSize.Y, MaxSize.Y);
+            desired.X = Math.Clamp(desired.X, MinSize.X, MaxSize.X);
+            desired.Y = Math.Clamp(desired.Y, MinSize.Y, MaxSize.Y);
 
-            desired.X = MathF.Min(desired.X, availableSize.X);
-            desired.Y = MathF.Min(desired.Y, availableSize.Y);
+            desired.X = Math.Min(desired.X, availableSize.X);
+            desired.Y = Math.Min(desired.Y, availableSize.Y);
 
             DesiredSize = desired;
             return desired;

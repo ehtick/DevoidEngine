@@ -10,33 +10,35 @@ namespace DevoidEngine.Engine.UI.Nodes
 {
     class PanelNode : UINode
     {
-        public override Vector2 Measure(Vector2 availableSize)
+        protected override Vector2 MeasureCore(Vector2 available)
         {
             Vector2 desired = Size ?? Vector2.Zero;
 
             foreach (var child in _children)
             {
-                Vector2 childSize = child.Measure(availableSize);
-                desired.X = MathF.Max(desired.X, childSize.X);
-                desired.Y = MathF.Max(desired.Y, childSize.Y);
+                var childDesired = child.Measure(available);
+                desired = Vector2.Max(desired, childDesired);
             }
 
             return desired;
         }
 
-        public override void Arrange(UITransform finalRect)
+        protected override void ArrangeCore(UITransform finalRect)
         {
-            foreach (var child in _children)
+            Rect = finalRect;
+
+            for (int i = 0; i < _children.Count; i++)
             {
-                child.Arrange(finalRect);
+                var child = _children[i];
+                child.Arrange(new UITransform(
+                    finalRect.position,
+                    child.DesiredSize
+                ));
             }
 
-            UIRenderer.DrawRect(new UITransform()
-            {
-                position = new Vector2(0, 0),
-                size = Size ?? Vector2.Zero,
-            });
+            UIRenderer.DrawRect( finalRect );
         }
+
 
     }
 }

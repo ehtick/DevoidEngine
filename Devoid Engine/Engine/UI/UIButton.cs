@@ -15,23 +15,25 @@ namespace DevoidEngine.Engine.UI
         {
             PanelNode node = new PanelNode()
             {
-                Size = new Vector2(100, 100)
+                Size = new Vector2(100, 100),
             };
-            Root = node;
 
-            PanelNode childNode = new PanelNode()
+            PanelNode node1 = new PanelNode()
             {
-                
-                Size = new Vector2(70, 70)
+                Size = new Vector2(100, 100),
             };
-            node.Add(childNode);
 
-            PanelNode childNode1 = new PanelNode()
+            ContainerNode mainContainer = new ContainerNode()
             {
-
-                Size = new Vector2(50, 50)
+                MaxSize = new Vector2(300, 300),
+                MinSize = new Vector2(200, 200),
+                Offset = new Vector2(20, 20),
+                Padding = 10
             };
-            childNode.Add(childNode1);
+            mainContainer.Add(node);
+            mainContainer.Add(node1);
+
+            Root = mainContainer;
 
             UISystem.Canvas.Add(Root);
         }

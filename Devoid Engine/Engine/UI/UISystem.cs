@@ -23,7 +23,7 @@ namespace DevoidEngine.Engine.UI
         {
             UIRenderer.BeginRender();
             Canvas.Measure(Screen.Size);
-            Canvas.Arrange(new UITransform(Vector2.One * 10, Screen.Size));
+            Canvas.Arrange(new UITransform(Vector2.Zero, Screen.Size));
             UIRenderer.EndRender();
         }
     }
