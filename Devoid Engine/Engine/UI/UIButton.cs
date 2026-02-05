@@ -18,23 +18,22 @@ namespace DevoidEngine.Engine.UI
             BoxNode node = new BoxNode()
             {
                 Size = new Vector2(100, 100),
-                Layout = new LayoutOptions { FlexGrowMain = 0 }
+                Layout = new LayoutOptions { FlexGrowMain = 1 }
             };
 
             BoxNode node1 = new BoxNode()
             {
-                MinSize = new Vector2(40, 200),
-                Layout = new LayoutOptions { FlexGrowMain = 0 }
+                Size = new Vector2(100, 100),
+                Layout = new LayoutOptions { FlexGrowMain = 1 }
             };
+
 
 
 
             FlexNode mainContainer = new FlexNode()
             {
-                Direction = FlexDirection.Column,
-                Gap = 0f,
-                Offset = new Vector2(20, 20),
-                Size = new Vector2(150, 300),
+                Direction = FlexDirection.Row,
+                Gap = 10f,
                 Align = AlignItems.Stretch,
                 Justify = JustifyContent.Start
             };

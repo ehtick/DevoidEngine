@@ -7,36 +7,23 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    public class CanvasNode : UINode
+    public class CanvasNode : FlexNode
     {
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {
-            foreach (var child in _children)
-            {
-                child.Measure(availableSize);
-            }
-
-            // Canvas desires exactly the available screen size
+            // Canvas always fills screen
             return availableSize;
         }
+
         protected override void ArrangeCore(UITransform finalRect)
         {
-            Rect = finalRect;
-
-            foreach (var child in _children)
-            {
-
-                child.Arrange(new UITransform(
-                    finalRect.position + child.Offset,
-                    child.Size ?? child.DesiredSize
-                ));
-            }
-
+            // Let FlexNode do ALL layout logic
+            base.ArrangeCore(finalRect);
         }
 
         protected override void RenderCore()
         {
-            throw new NotImplementedException();
+            // no-op
         }
     }
 }

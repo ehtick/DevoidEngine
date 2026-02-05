@@ -16,7 +16,13 @@ namespace DevoidEngine.Engine.UI
 
         static UISystem()
         {
-            Canvas = new CanvasNode();
+            Canvas = new CanvasNode()
+            {
+                Direction = FlexDirection.Row,
+                Gap = 10f,
+                Align = AlignItems.Stretch,
+                Justify = JustifyContent.Start
+            };
         }
 
         public static void PerformUI()
