@@ -1,0 +1,188 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DevoidEngine.Engine.UI.Nodes
+{
+    class FlexboxNode : UINode
+    {
+        public FlexDirection Direction = FlexDirection.Row;
+        public JustifyContent Justify = JustifyContent.Start;
+        public AlignItems Align = AlignItems.Stretch;
+        public float Gap = 0f;
+
+        protected override Vector2 MeasureCore(Vector2 availableSize)
+        {
+            float availableMainAxisSize = FlexboxTools.Main(availableSize, Direction);
+
+            float maximumCrossAxisSize = 0f;
+            float totalMainAxisSize = 0f;
+
+            int count = 0;
+
+            foreach (var child in _children)
+            {
+                if (!child.Visible || !child.Interactable)
+                    continue;
+
+                Vector2 childAvailableSize = Direction == FlexDirection.Row
+                    ? new Vector2(float.PositiveInfinity, availableSize.Y)
+                    : new Vector2(availableSize.X, float.PositiveInfinity);
+
+                Vector2 childSize = child.Measure(childAvailableSize);
+
+                float childMainAxisSize = FlexboxTools.Main(childSize, Direction);
+                float childCrossAxisSize = FlexboxTools.Cross(childSize, Direction);
+
+                totalMainAxisSize += childMainAxisSize;
+                maximumCrossAxisSize = Math.Max(maximumCrossAxisSize, childCrossAxisSize);
+                count++;
+            }
+
+            if (count > 1)
+            {
+                totalMainAxisSize += (Gap) * (count - 1);
+            }
+
+            return FlexboxTools.FromMainCross(totalMainAxisSize, maximumCrossAxisSize, Direction);
+        }
+
+        protected override void ArrangeCore(UITransform finalRect)
+        {
+            float containerMain = FlexboxTools.Main(finalRect.size, Direction);
+            float containerCross = FlexboxTools.Cross(finalRect.size, Direction);
+
+            List<UINode> children = _children.Where(x => x.Visible && x.ParticipatesInLayout).ToList();
+
+            float totalGap = Math.Max(0, Gap * (children.Count - 1));
+
+            // we compute the remaining space
+            float remainingSpace = containerMain - totalGap;
+
+            // from my limited newly acquired knowledge of stackalloc, lets give it a go!
+            Span<float> resolvedMainSizes = children.Count <= 64 ? stackalloc float[children.Count] : new float[children.Count];
+            Span<bool> frozenItems = children.Count <= 64 ? stackalloc bool[children.Count] : new bool[children.Count];
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+
+                float intrinsic = Math.Clamp(
+                    FlexboxTools.Main(child.DesiredSize, Direction),
+                    FlexboxTools.Main(child.MinSize, Direction),
+                    FlexboxTools.Main(child.MaxSize, Direction)
+                );
+
+                resolvedMainSizes[i] = intrinsic;
+                remainingSpace -= intrinsic;
+
+                if (child.Layout.FlexGrowMain <= 0f)
+                {
+                    frozenItems[i] = true;
+                }
+
+            }
+
+            // here we compute the sizes for each child based on its flexGrow and redistribute
+            while (true)
+            {
+                float totalGrow = 0f;
+               
+                for (int i = 0; i < children.Count; i++)
+                {
+                    if (!frozenItems[i])
+                    {
+                        totalGrow += children[i].Layout.FlexGrowMain;
+                    }
+                }
+
+                if (totalGrow <= 0f)
+                    break;
+
+                bool anyFrozenThisPass = false;
+
+                for (int i = 0; i < children.Count; i++)
+                {
+                    if (frozenItems[i]) { continue; }
+
+                    var child = children[i];
+
+                    float mainSize = remainingSpace * (child.Layout.FlexGrowMain / totalGrow);
+
+
+                    // mainSize is the proposed size.
+
+                    float minSize = FlexboxTools.Main(child.MinSize, Direction);
+                    float maxSize = FlexboxTools.Main(child.MaxSize, Direction);
+
+                    float clampedSize = Math.Clamp(mainSize, minSize, maxSize);
+
+                    if (mainSize !=  clampedSize)
+                    {
+                        resolvedMainSizes[i] = clampedSize;
+                        frozenItems[i] = true;
+                        remainingSpace -= clampedSize;
+                        anyFrozenThisPass = true;
+                    }
+                }
+
+
+                if (!anyFrozenThisPass) break;
+            }
+
+            float finalGrow = 0f;
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (!frozenItems[i])
+                {
+                    finalGrow += children[i].Layout.FlexGrowMain;
+                }
+            }
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (frozenItems[i])
+                    continue;
+
+                resolvedMainSizes[i] = finalGrow > 0f ? remainingSpace * (children[i].Layout.FlexGrowMain / finalGrow) : FlexboxTools.Main(children[i].MinSize, Direction);
+
+            }
+
+
+            float usedMain = 0f;
+            for (int i = 0; i < children.Count; i++)
+            {
+                usedMain += resolvedMainSizes[i];
+            }
+            float freeSpace = Math.Max(0, containerMain - usedMain - totalGap);
+            float gap = Gap;
+            float cursor = 0f;
+
+            FlexboxTools.ComputeJustify(Justify, freeSpace, children.Count, gap, out gap, out cursor);
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+
+                float mainSize = resolvedMainSizes[i];
+                float crossSize = Align == AlignItems.Stretch ? containerCross : FlexboxTools.Cross(child.DesiredSize, Direction);
+
+                float crossOffset = FlexboxTools.ComputeCrossOffset(Align, containerCross, crossSize);
+
+                Vector2 pos = finalRect.position + FlexboxTools.FromMainCross(cursor, crossOffset, Direction);
+                Vector2 size = FlexboxTools.FromMainCross(mainSize, crossSize, Direction);
+
+                child.Arrange(new UITransform(pos, size));
+                cursor += mainSize + gap;
+            }
+        }
+        protected override void RenderCore()
+        {
+
+        }
+
+    }
+}

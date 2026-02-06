@@ -58,9 +58,6 @@ namespace DevoidEngine.Engine.UI.Nodes
             desired.X = Math.Clamp(desired.X, MinSize.X, MaxSize.X);
             desired.Y = Math.Clamp(desired.Y, MinSize.Y, MaxSize.Y);
 
-            desired.X = Math.Min(desired.X, availableSize.X);
-            desired.Y = Math.Min(desired.Y, availableSize.Y);
-
             DesiredSize = desired;
             return desired;
         }

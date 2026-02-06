@@ -17,8 +17,8 @@ namespace DevoidEngine.Engine.UI
 
             BoxNode node = new BoxNode()
             {
-                Size = new Vector2(100, 100),
-                Layout = new LayoutOptions { FlexGrowMain = 1 }
+                Size = new Vector2(50, 100),
+                Layout = new LayoutOptions { FlexGrowMain = 0 }
             };
 
             BoxNode node1 = new BoxNode()
@@ -30,7 +30,7 @@ namespace DevoidEngine.Engine.UI
 
 
 
-            FlexNode mainContainer = new FlexNode()
+            FlexboxNode mainContainer = new FlexboxNode()
             {
                 Direction = FlexDirection.Row,
                 Gap = 10f,

@@ -48,10 +48,14 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
             Rect = finalRect;
 
+            float containerMain = FlexboxTools.Main(finalRect.size, Direction);
+            float containerCross = FlexboxTools.Cross(finalRect.size, Direction);
+
             float totalGrow = 0f;
             float fixedMain = 0f;
             int count = 0;
 
+            // ---- PASS 1: classify children ----
             foreach (var child in _children)
             {
                 if (!child.ParticipatesInLayout)
@@ -65,62 +69,95 @@ namespace DevoidEngine.Engine.UI.Nodes
                 count++;
             }
 
-            float availableMain =
-                FlexboxTools.Main(finalRect.size, Direction)
-                - fixedMain
-                - Math.Max(0, Gap * (count - 1));
+            float totalGap = Math.Max(0, Gap * (count - 1));
+            float freeForFlex = Math.Max(0, containerMain - fixedMain - totalGap);
 
-            availableMain = Math.Max(0, availableMain);
+            // ---- PASS 2: resolve final sizes ----
+            float usedMain = 0f;
 
-            float gap = Gap;
-            float cursor = 0f;
+            Span<float> resolvedMainSizes = count <= 64
+                ? stackalloc float[count]
+                : new float[count];
 
-            if (Justify != JustifyContent.Start && count > 0)
-            {
-                float free = availableMain;
-
-                switch (Justify)
-                {
-                    case JustifyContent.Center:
-                        cursor = free * 0.5f;
-                        break;
-                    case JustifyContent.End:
-                        cursor = free;
-                        break;
-                    case JustifyContent.SpaceBetween:
-                        gap = count > 1 ? free / (count - 1) : 0;
-                        break;
-                    case JustifyContent.SpaceAround:
-                        gap = free / count;
-                        cursor = gap * 0.5f;
-                        break;
-                    case JustifyContent.SpaceEvenly:
-                        gap = free / (count + 1);
-                        cursor = gap;
-                        break;
-                }
-            }
+            int index = 0;
 
             foreach (var child in _children)
             {
                 if (!child.ParticipatesInLayout)
                     continue;
 
-                float mainSize = child.Layout.FlexGrowMain > 0
-                    ? availableMain * (child.Layout.FlexGrowMain / totalGrow)
-                    : FlexboxTools.Main(child.DesiredSize, Direction);
+                float mainSize;
+
+                if (child.Layout.FlexGrowMain > 0 && totalGrow > 0)
+                {
+                    // flex-basis: 0  (matches CSS flex: 1 1 0)
+                    mainSize = freeForFlex * (child.Layout.FlexGrowMain / totalGrow);
+                }
+                else
+                {
+                    mainSize = FlexboxTools.Main(child.DesiredSize, Direction);
+                }
+
+                resolvedMainSizes[index++] = mainSize;
+                usedMain += mainSize;
+            }
+
+            float remainingSpace =
+                Math.Max(0, containerMain - usedMain - totalGap);
+
+            // ---- PASS 3: justify-content (POST flex!) ----
+            float gap = Gap;
+            float cursor = 0f;
+
+            if (Justify != JustifyContent.Start && count > 0)
+            {
+                switch (Justify)
+                {
+                    case JustifyContent.Center:
+                        cursor = remainingSpace * 0.5f;
+                        break;
+
+                    case JustifyContent.End:
+                        cursor = remainingSpace;
+                        break;
+
+                    case JustifyContent.SpaceBetween:
+                        gap = count > 1 ? remainingSpace / (count - 1) : 0;
+                        break;
+
+                    case JustifyContent.SpaceAround:
+                        gap = remainingSpace / count;
+                        cursor = gap * 0.5f;
+                        break;
+
+                    case JustifyContent.SpaceEvenly:
+                        gap = remainingSpace / (count + 1);
+                        cursor = gap;
+                        break;
+                }
+            }
+
+            // ---- PASS 4: place children ----
+            index = 0;
+
+            foreach (var child in _children)
+            {
+                if (!child.ParticipatesInLayout)
+                    continue;
+
+                float mainSize = resolvedMainSizes[index++];
 
                 float crossSize = Align == AlignItems.Stretch
-                    ? FlexboxTools.Cross(finalRect.size, Direction)
+                    ? containerCross
                     : FlexboxTools.Cross(child.DesiredSize, Direction);
 
                 float crossOffset = Align switch
                 {
-                    AlignItems.Start => 0,
-                    AlignItems.Center => (FlexboxTools.Cross(finalRect.size, Direction) - crossSize) * 0.5f,
-                    AlignItems.End => FlexboxTools.Cross(finalRect.size, Direction) - crossSize,
-                    AlignItems.Stretch => 0,
-                    _ => 0
+                    AlignItems.Start => 0f,
+                    AlignItems.Center => (containerCross - crossSize) * 0.5f,
+                    AlignItems.End => containerCross - crossSize,
+                    AlignItems.Stretch => 0f,
+                    _ => 0f
                 };
 
                 Vector2 pos = finalRect.position +
@@ -133,8 +170,6 @@ namespace DevoidEngine.Engine.UI.Nodes
 
                 cursor += mainSize + gap;
             }
-
-            //UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
         }
 
         protected override void RenderCore()

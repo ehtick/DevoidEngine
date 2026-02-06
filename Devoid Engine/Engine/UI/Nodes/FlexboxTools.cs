@@ -22,6 +22,67 @@ namespace DevoidEngine.Engine.UI.Nodes
         //    };
         //}
 
+        public static void ComputeJustify(
+            JustifyContent justify,
+            float freeSpace,
+            int count,
+            float gap,
+            out float startOffset,
+            out float interItemGap)
+        {
+            startOffset = 0f;
+            interItemGap = gap;
+
+            if (count <= 1)
+                return;
+
+            switch (justify)
+            {
+                case JustifyContent.Start:
+                    break;
+
+                case JustifyContent.End:
+                    startOffset = freeSpace;
+                    break;
+
+                case JustifyContent.Center:
+                    startOffset = freeSpace / 2f;
+                    break;
+
+                case JustifyContent.SpaceBetween:
+                    interItemGap += freeSpace / (count - 1);
+                    break;
+
+                case JustifyContent.SpaceAround:
+                    interItemGap += freeSpace / count;
+                    startOffset = interItemGap / 2f;
+                    break;
+
+                case JustifyContent.SpaceEvenly:
+                    interItemGap += freeSpace / (count + 1);
+                    startOffset = interItemGap;
+                    break;
+            }
+        }
+
+        public static float ComputeCrossOffset(
+            AlignItems align,
+            float containerCross,
+            float crossSize
+        )
+        {
+            return align switch
+            {
+                AlignItems.Start => 0f,
+                AlignItems.Center => (containerCross - crossSize) * 0.5f,
+                AlignItems.End => containerCross - crossSize,
+                AlignItems.Stretch => 0f,
+                _ => 0f
+            };
+        }
+
+
+
         public static float Main(Vector2 v, FlexDirection dir)
             => dir == FlexDirection.Row ? v.X : v.Y;
 
