@@ -34,8 +34,8 @@ namespace DevoidEngine.Engine.UI
             {
                 Direction = FlexDirection.Row,
                 Gap = 10f,
-                Align = AlignItems.Stretch,
-                Justify = JustifyContent.Start,
+                Align = AlignItems.Center,
+                Justify = JustifyContent.Center,
                 Layout = new LayoutOptions
                 {
                     FlexGrowMain = 1

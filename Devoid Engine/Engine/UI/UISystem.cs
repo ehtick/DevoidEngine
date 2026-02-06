@@ -19,7 +19,6 @@ namespace DevoidEngine.Engine.UI
             Canvas = new CanvasNode()
             {
                 Direction = FlexDirection.Row,
-                Gap = 10f,
                 Align = AlignItems.Stretch,
                 Justify = JustifyContent.Start
             };
