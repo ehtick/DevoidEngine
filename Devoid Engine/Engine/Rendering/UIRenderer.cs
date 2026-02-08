@@ -115,6 +115,7 @@ namespace DevoidEngine.Engine.Rendering
                     Matrix4x4.CreateTranslation(transform.position.X, transform.position.Y, 0.0f),
             };
             UIRenderData.id.X = count;
+            UIRenderData.id.Y = 0;
             UIRenderBuffer.SetData(ref UIRenderData);
 
             IInputLayout layout = Renderer3D.GetInputLayout(Quad, basicShader);
@@ -123,6 +124,32 @@ namespace DevoidEngine.Engine.Rendering
             Quad.VertexBuffer.Bind();
 
             basicShader.Use();
+            Renderer.graphicsDevice.Draw(Quad.VertexBuffer.VertexCount, 0);
+        }
+
+        public static void DrawTexRect(UITransform transform, Texture2D tex, int count)
+        {
+
+            UIRenderData = new UIRenderData()
+            {
+                model =
+                    Matrix4x4.CreateScale(transform.size.X, transform.size.Y, 1.0f) *
+                    Matrix4x4.CreateTranslation(transform.position.X, transform.position.Y, 0.0f),
+            };
+            UIRenderData.id.X = count;
+            UIRenderData.id.Y = 1;
+            UIRenderBuffer.SetData(ref UIRenderData);
+
+            IInputLayout layout = Renderer3D.GetInputLayout(Quad, basicShader);
+
+            layout.Bind();
+            Quad.VertexBuffer.Bind();
+
+            basicShader.Use();
+
+            tex.Bind(0);
+            tex.BindSampler(0);
+
             Renderer.graphicsDevice.Draw(Quad.VertexBuffer.VertexCount, 0);
         }
 

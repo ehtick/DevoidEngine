@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Rendering;
+﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    class BoxNode : FlexboxNode
+    class TexNode : FlexboxNode
     {
+        public Texture2D texture;
+
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {
             base.MeasureCore(availableSize);
@@ -19,7 +22,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected override void ArrangeCore(UITransform finalRect)
         {
             base.ArrangeCore(finalRect);
-            UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
+            UIRenderer.DrawTexRect(finalRect, texture, DEBUG_NUM_LOCAL);
         }
 
         //protected override Vector2 MeasureCore(Vector2 available)

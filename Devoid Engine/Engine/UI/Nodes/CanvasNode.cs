@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    public class CanvasNode : FlexNode
+    public class CanvasNode : FlexboxNode
     {
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {

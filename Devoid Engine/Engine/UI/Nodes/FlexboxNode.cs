@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    class FlexboxNode : UINode
+    public class FlexboxNode : UINode
     {
         public FlexDirection Direction = FlexDirection.Row;
         public JustifyContent Justify = JustifyContent.Start;
@@ -58,9 +58,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             List<UINode> children = _children.Where(x => x.Visible && x.ParticipatesInLayout).ToList();
 
             float totalGap = Math.Max(0, Gap * (children.Count - 1));
-
-            // we compute the remaining space
-            float remainingSpace = containerMain - totalGap;
+            float remainingSpace = containerMain;
 
             // from my limited newly acquired knowledge of stackalloc, lets give it a go!
             Span<float> resolvedMainSizes = children.Count <= 64 ? stackalloc float[children.Count] : new float[children.Count];
@@ -86,8 +84,11 @@ namespace DevoidEngine.Engine.UI.Nodes
 
             }
 
+            remainingSpace -= totalGap;
+
+
             // here we compute the sizes for each child based on its flexGrow and redistribute
-            while (true)
+            while (remainingSpace > 0f)
             {
                 float totalGrow = 0f;
                
@@ -110,23 +111,25 @@ namespace DevoidEngine.Engine.UI.Nodes
 
                     var child = children[i];
 
-                    float mainSize = remainingSpace * (child.Layout.FlexGrowMain / totalGrow);
-
-
-                    // mainSize is the proposed size.
 
                     float minSize = FlexboxTools.Main(child.MinSize, Direction);
                     float maxSize = FlexboxTools.Main(child.MaxSize, Direction);
 
-                    float clampedSize = Math.Clamp(mainSize, minSize, maxSize);
 
-                    if (mainSize !=  clampedSize)
+                    float growDelta = remainingSpace * (child.Layout.FlexGrowMain / totalGrow);
+
+                    float proposed = resolvedMainSizes[i] + growDelta;
+
+                    float clamped = Math.Clamp(proposed, minSize, maxSize);
+
+                    if (Math.Abs(proposed - clamped) > 0.0001f)
                     {
-                        resolvedMainSizes[i] = clampedSize;
+                        remainingSpace -= (clamped - resolvedMainSizes[i]);
+                        resolvedMainSizes[i] = clamped;
                         frozenItems[i] = true;
-                        remainingSpace -= clampedSize;
                         anyFrozenThisPass = true;
                     }
+
                 }
 
 
@@ -142,13 +145,17 @@ namespace DevoidEngine.Engine.UI.Nodes
                 }
             }
 
-            for (int i = 0; i < children.Count; i++)
+            if (finalGrow > 0f && remainingSpace > 0f)
             {
-                if (frozenItems[i])
-                    continue;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    if (frozenItems[i])
+                        continue;
 
-                resolvedMainSizes[i] = finalGrow > 0f ? remainingSpace * (children[i].Layout.FlexGrowMain / finalGrow) : FlexboxTools.Main(children[i].MinSize, Direction);
+                    float growDelta = remainingSpace * (children[i].Layout.FlexGrowMain / finalGrow);
 
+                    resolvedMainSizes[i] += growDelta;
+                }
             }
 
 
@@ -157,11 +164,18 @@ namespace DevoidEngine.Engine.UI.Nodes
             {
                 usedMain += resolvedMainSizes[i];
             }
-            float freeSpace = Math.Max(0, containerMain - usedMain - totalGap);
-            float gap = Gap;
+            float freeSpace = Math.Max(0f, containerMain - usedMain - totalGap);
             float cursor = 0f;
+            float gap = Gap;
 
-            FlexboxTools.ComputeJustify(Justify, freeSpace, children.Count, gap, out gap, out cursor);
+            FlexboxTools.ComputeJustify(
+                Justify,
+                freeSpace,
+                children.Count,
+                Gap,
+                out cursor,
+                out gap
+            );
 
             for (int i = 0; i < children.Count; i++)
             {
@@ -177,6 +191,19 @@ namespace DevoidEngine.Engine.UI.Nodes
 
                 child.Arrange(new UITransform(pos, size));
                 cursor += mainSize + gap;
+            }
+
+            for (int i = 0; i < _children.Count; i++)
+            {
+                if (!_children[i].ParticipatesInLayout)
+                {
+                    var child = _children[i];
+                    Vector2 size = child.Size ?? child.DesiredSize;
+
+                    Vector2 pos = finalRect.position + child.Offset;
+
+                    child.Arrange(new UITransform(pos, size));
+                }
             }
         }
         protected override void RenderCore()

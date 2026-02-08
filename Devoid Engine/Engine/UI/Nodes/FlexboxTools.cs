@@ -46,24 +46,25 @@ namespace DevoidEngine.Engine.UI.Nodes
                     break;
 
                 case JustifyContent.Center:
-                    startOffset = freeSpace / 2f;
+                    startOffset = freeSpace * 0.5f;
                     break;
 
                 case JustifyContent.SpaceBetween:
-                    interItemGap += freeSpace / (count - 1);
+                    interItemGap = gap + freeSpace / (count - 1);
                     break;
 
                 case JustifyContent.SpaceAround:
-                    interItemGap += freeSpace / count;
-                    startOffset = interItemGap / 2f;
+                    startOffset = freeSpace / (2 * count);
+                    interItemGap = gap + freeSpace / count;
                     break;
 
                 case JustifyContent.SpaceEvenly:
-                    interItemGap += freeSpace / (count + 1);
-                    startOffset = interItemGap;
+                    startOffset = freeSpace / (count + 1);
+                    interItemGap = gap + freeSpace / (count + 1);
                     break;
             }
         }
+
 
         public static float ComputeCrossOffset(
             AlignItems align,
