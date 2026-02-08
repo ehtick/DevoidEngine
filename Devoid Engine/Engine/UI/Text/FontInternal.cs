@@ -12,6 +12,35 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Text
 {
+    public struct GlyphMetric
+    {
+        public uint CharCode;
+
+        // The position of the glyph in the atlas (UV coordinates usually calculated from this)
+        public int AtlasIndex;
+
+        // The size of the actual pixel data inside the tile
+        public int Width;
+        public int Height;
+
+        // Positioning logic (Values are normalized to the Atlas Tile Size)
+        public float HorizontalAdvance;
+        public float BearingX;
+        public float BearingY;
+
+        public float U;
+        public float V;
+        public float S;
+        public float T;
+    }
+
+    public struct BitmapData
+    {
+        public byte[] bitmap;
+        public int width;
+        public int height;
+    }
+
     public class FontInternal
     {
         string path;
@@ -19,15 +48,18 @@ namespace DevoidEngine.Engine.UI.Text
 
         Face face;
 
-        private const int upscaleResolution = 512;
-        private const int spread = upscaleResolution / 2;
-        private const int padding = spread + 2;
+       
+        private const int TargetSpread = 8;
+        private const int AtlasTileSize = 64;
+        private const int highResSourceSize = 1024;
 
         public readonly float Ascender;
         public readonly float Descender;
         public readonly float LineHeight;
 
-        Dictionary<uint, Glyph> glyphs;
+        public Dictionary<uint, GlyphMetric> Metrics { get; private set; }
+
+        public GlyphAtlas Atlas { get; private set; }
 
         public FontInternal(Library ftLibrary, string path, int size)
         {
@@ -35,102 +67,177 @@ namespace DevoidEngine.Engine.UI.Text
             this.pixelSize = size;
 
             face = new Face(ftLibrary, path);
-            face.SetPixelSizes(0, (uint)size);
+            face.SetPixelSizes(0, highResSourceSize);
+            face.SelectCharmap(SharpFont.Encoding.Unicode);
 
+            float emScale = 1.0f / face.Size.Metrics.Height.ToSingle();
+            Ascender = face.Size.Metrics.Ascender.ToSingle() * emScale;
+            Descender = face.Size.Metrics.Descender.ToSingle() * emScale;
+            LineHeight = face.Size.Metrics.Height.ToSingle() * emScale;
 
-            Ascender = face.Size.Metrics.Ascender.ToSingle();
-            Descender = face.Size.Metrics.Descender.ToSingle();
-            LineHeight = face.Size.Metrics.Height.ToSingle();
+            Metrics = new Dictionary<uint, GlyphMetric>();
 
-            glyphs = new Dictionary<uint, Glyph>();
-            Load();
+            ProcessGlyphs();
         }
 
-        public void Load()
+        public void ProcessGlyphs()
         {
+            string debugPath = Path.Combine("./DebugFonts/", face.FamilyName);
 
-            face.SelectCharmap(SharpFont.Encoding.Unicode);
-            face.SetPixelSizes(upscaleResolution, upscaleResolution);
 
-            uint glyphIndex = 0;
+            uint glyphIndex;
             uint charCode = face.GetFirstChar(out glyphIndex);
+
+            float scaleFactor = (float)AtlasTileSize / highResSourceSize;
+            int highResSpread = (int)(TargetSpread / scaleFactor);
+            int highResPadding = highResSpread + 2;
+
+            var rawGlyphs = new Dictionary<uint, BitmapData>();
 
             while (glyphIndex != 0)
             {
-                if (charCode < 32 || charCode > 126)
+                // Filter: ASCII + Basic Latin (Expand this logic for full Unicode support)
+                if (charCode >= 32 && charCode <= 126)
                 {
-                    charCode = face.GetNextChar(charCode, out glyphIndex);
-                    continue;
+                    var glyphData = GenerateSingleGlyph(charCode, scaleFactor, highResSpread, highResPadding, debugPath);
+                    if (glyphData.bitmap != null)
+                    {
+                        rawGlyphs[charCode] = glyphData;
+                    }
+                    
                 }
-
-                face.LoadChar(charCode, LoadFlags.Render | LoadFlags.ForceAutohint, LoadTarget.Normal);
-
-                var bmp = face.Glyph.Bitmap;
-
-                if (bmp.Width == 0 || bmp.Rows == 0 || bmp.Buffer == IntPtr.Zero)
-                {
-                    // Still a valid glyph, just no bitmap (e.g. space)
-                    charCode = face.GetNextChar(charCode, out glyphIndex);
-                    continue;
-                }
-
-                Console.WriteLine("##################### + " + charCode);
-                Console.WriteLine(new Vector2(face.Glyph.BitmapLeft, face.Glyph.BitmapTop));
-                Console.WriteLine(new Vector2(upscaleResolution));
-                Console.WriteLine(new Vector2(face.Glyph.Bitmap.Width, face.Glyph.Bitmap.Rows));
-                Console.WriteLine("##################### + " + charCode);
-
-                Debug.Assert(bmp.PixelMode == PixelMode.Gray);
-                Debug.Assert(Math.Abs(bmp.Pitch) == bmp.Width);
-
-                int glyphWidth = bmp.Width;
-                int glyphHeight = bmp.Rows;
-                int pitch = bmp.Pitch;
-
-                (byte[], int, int) data = SDFGenerator.GenerateSDF(padding, upscaleResolution, pixelSize, spread, glyphWidth, glyphHeight, bmp.BufferData);
-
-                byte[] sdf = data.Item1;
-                int paddedW = data.Item2;
-                int paddedH = data.Item3;
-
-                SaveGrayscalePng_ImageSharp(
-                    sdf,
-                    paddedW,
-                    paddedH,
-                    $"./test_font/{charCode}.png"
-                );
-
-
 
                 charCode = face.GetNextChar(charCode, out glyphIndex);
             }
-        }
 
+            Atlas = new GlyphAtlas(1024, 1024);
+            Atlas.Pack(rawGlyphs);
 
-
-
-
-        void SaveGrayscalePng_ImageSharp(
-            byte[] buffer,
-            int width,
-            int height,
-            string path)
-        {
-            using Image<Rgba32> image = new Image<Rgba32>(width, height);
-
-            for (int y = 0; y < height; y++)
+            foreach (var kvp in rawGlyphs)
             {
-                Span<Rgba32> row = image.DangerousGetPixelRowMemory(y).Span;
-
-                for (int x = 0; x < width; x++)
+                uint key = kvp.Key;
+                if (Atlas.GlyphRectangles.TryGetValue(key, out var rect))
                 {
-                    byte v = buffer[y * width + x];
+                    var metric = Metrics[key];
+                    metric.AtlasIndex = 0;
 
-                    row[x] = new Rgba32(255,255,255,v);
+                    metric.U = (float)rect.X / Atlas.Width;
+                    metric.V = (float)rect.Y / Atlas.Height;\
+
+                    // Calculate the size in UV space
+                    metric.S = (float)(rect.Z + rect.X) / Atlas.Width;
+                    metric.T = (float)(rect.W + rect.Y) / Atlas.Height;
+
+                    Metrics[key] = metric;
                 }
             }
 
-            image.Save(path);
+            Atlas.SaveDebug(Path.Combine(debugPath, "debug_atlas.png"));
+        }
+
+        private BitmapData GenerateSingleGlyph(uint charCode, float scaleFactor, int spread, int padding, string debugPath)
+        {
+            face.LoadChar(charCode, LoadFlags.Render | LoadFlags.ForceAutohint, LoadTarget.Normal);
+            var ftBmp = face.Glyph.Bitmap;
+            if (ftBmp.Width == 0 || ftBmp.Rows == 0)
+            {
+                Metrics[charCode] = new GlyphMetric
+                {
+                    CharCode = charCode,
+                    Width = 0,
+                    Height = 0,
+                    HorizontalAdvance = face.Glyph.Metrics.HorizontalAdvance.ToSingle() * scaleFactor,
+                    BearingX = 0,
+                    BearingY = 0
+                };
+
+                return new BitmapData
+                {
+                    bitmap = null,
+                    width = 0,
+                    height = 0
+                };
+            }
+
+
+            int width  = ftBmp.Width;
+            int height = ftBmp.Rows;
+            int pitch = ftBmp.Pitch;
+            byte[] rawBuffer = ftBmp.BufferData;
+
+            int targetWidth = (int)Math.Ceiling(width * scaleFactor);
+            int targetHeight = (int)Math.Ceiling(height * scaleFactor);
+
+            int sdfWidth = targetWidth + (TargetSpread * 2);
+            int sdfHeight = targetHeight + (TargetSpread * 2);
+
+            BitmapData sdfBitmapData = SDFGenerator.Generate(
+                rawBuffer,
+                width, height, pitch,
+                padding,
+                AtlasTileSize, // Target Atlas Size (e.g., 64)
+                spread         // High res spread
+            );
+
+            byte[] sdfBytes = sdfBitmapData.bitmap;
+            int actualW = sdfBitmapData.width;
+            int actualH = sdfBitmapData.height;
+
+            byte[] tileData = new byte[AtlasTileSize * AtlasTileSize];
+            int offsetX = (AtlasTileSize - actualW) / 2;
+            int offsetY = (AtlasTileSize - actualH) / 2;
+
+            for (int y = 0; y < actualH; y++)
+            {
+                for (int x = 0; x < actualW; x++)
+                {
+                    int destIndex = (offsetY + y) * AtlasTileSize + (offsetX + x);
+                    if (destIndex < tileData.Length)
+                        tileData[destIndex] = sdfBytes[y * actualW + x];
+                }
+            }
+
+            float bearingX = face.Glyph.BitmapLeft * scaleFactor;
+            float bearingY = face.Glyph.BitmapTop * scaleFactor;
+
+            float finalBearingX = bearingX - offsetX + TargetSpread;
+            float finalBearingY = bearingY + offsetY - TargetSpread;
+
+            Metrics[charCode] = new GlyphMetric
+            {
+                CharCode = charCode,
+                Width = AtlasTileSize,
+                Height = AtlasTileSize,
+                HorizontalAdvance = face.Glyph.Metrics.HorizontalAdvance.ToSingle() * scaleFactor,
+                BearingX = finalBearingX,
+                BearingY = finalBearingY
+            };
+
+            SaveDebugImage(tileData, AtlasTileSize, AtlasTileSize, Path.Combine(debugPath, $"{charCode}.png"));
+            return new BitmapData()
+            {
+                bitmap = tileData,
+                width = AtlasTileSize,
+                height = AtlasTileSize,
+            };
+        }
+
+
+        private void SaveDebugImage(byte[] buffer, int w, int h, string path)
+        {
+            using Image<Rgba32> img = new Image<Rgba32>(w, h);
+            img.ProcessPixelRows(accessor => {
+                for (int y = 0; y < h; y++)
+                {
+                    var row = accessor.GetRowSpan(y);
+                    for (int x = 0; x < w; x++)
+                    {
+                        byte val = buffer[y * w + x];
+                        row[x] = new Rgba32(255, 255, 255, val);
+                    }
+                }
+            });
+            img.Save(path);
         }
 
 

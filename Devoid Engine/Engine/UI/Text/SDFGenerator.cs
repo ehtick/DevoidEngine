@@ -1,161 +1,136 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Text
 {
     public static class SDFGenerator
     {
-        public static (byte[], int, int) GenerateSDF
-        (
+        public static BitmapData Generate(
+            byte[] source,
+            int srcW, int srcH, int srcPitch,
             int padding,
-            int upscaleResolution,
-            int targetSize,
-            int spread,
-            int width,
-            int height,
-            byte[] source
-        )
+            int targetResolution,
+            int spread)
         {
-            int paddedWidth = width + padding * 2;
-            int paddedHeight = height + padding * 2;
-            byte[] padded = new byte[paddedWidth * paddedHeight];
+            // 1. Pad input
+            int paddedW = srcW + padding * 2;
+            int paddedH = srcH + padding * 2;
+            float[] grid = new float[paddedW * paddedH];
 
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    padded[(x + padding) + (y + padding) * paddedWidth] = source[x + y * width];
-                }
-            }
-
-
-            float[] outside = performEDT2D(padded, paddedWidth, paddedHeight);
-
-            byte[] inverted = new byte[padded.Length];
-            for (int i = 0; i < padded.Length; i++)
-            {
-                inverted[i] = Invert(padded[i]);
-            }
-
-            float[] inside = performEDT2D(inverted, paddedWidth, paddedHeight);
-
-            byte[] sdf = new byte[padded.Length];
-
-            for (int i = 0; i < sdf.Length; i++)
-            {
-                float distIn = MathF.Min(inside[i], spread);
-                float distOut = MathF.Min(outside[i], spread);
-
-                float signed = distIn - distOut;
-
-                float normalized = signed / spread;
-                normalized = normalized * 0.5f + 0.5f;
-                sdf[i] = (byte)Math.Clamp(normalized * 255f, 0f, 255f);
-            }
-
-            // 3. Downsample Loop
-            int scaleFactor = upscaleResolution / targetSize;
-            int finalWidth = paddedWidth / scaleFactor;
-            int finalHeight = paddedHeight / scaleFactor;
-            byte[] finalSDF = new byte[finalWidth * finalHeight];
-
-            for (int y = 0; y < finalHeight; y++)
-            {
-                for (int x = 0; x < finalWidth; x++)
-                {
-                    float sumSigned = 0f;
-                    int samples = 0;
-
-                    for (int ky = 0; ky < scaleFactor; ky++)
-                    {
-                        for (int kx = 0; kx < scaleFactor; kx++)
-                        {
-                            int srcX = x * scaleFactor + kx;
-                            int srcY = y * scaleFactor + ky;
-
-                            if (srcX < paddedWidth && srcY < paddedHeight)
-                            {
-                                int i = srcX + srcY * paddedWidth;
-                                sumSigned += inside[i] - outside[i]; // ✔ RAW
-                                samples++;
-                            }
-                        }
-                    }
-
-                    float avgSigned = sumSigned / samples;
-
-                    // ----------------------------------------------------
-                    // 4. Normalize ONCE (using original spread)
-                    // ----------------------------------------------------
-                    float normalized = avgSigned / spread;
-                    normalized = normalized * 0.5f + 0.5f;
-
-                    finalSDF[x + y * finalWidth] =
-                        (byte)Math.Clamp(normalized * 255f, 0f, 255f);
-                }
-            }
-
-
-
-            return (finalSDF, finalWidth, finalHeight);
-
-        }
-
-        static byte Invert(byte v) => v == 0 ? (byte)255 : (byte)0;
-
-
-        static float[] performEDT2D(byte[] bitmap, int width, int height)
-        {
+            // Initialize grid
             const float INF = 1e9f;
+            for (int i = 0; i < grid.Length; i++) grid[i] = INF;
 
-            float[] grid = new float[width * height];
-            float[] temp = new float[Math.Max(width, height)];
-            float[] dist = new float[Math.Max(width, height)];
-            int[] v = new int[Math.Max(width, height)];
-            float[] z = new float[Math.Max(width, height) + 1];
-
-            for (int i = 0; i < grid.Length; i++)
-                grid[i] = bitmap[i] > 127 ? 0f : INF; // ✔ thresholded
-
-            // Vertical pass
-            for (int x = 0; x < width; x++)
+            for (int y = 0; y < srcH; y++)
             {
-                for (int y = 0; y < height; y++)
-                    temp[y] = grid[x + y * width];
-
-                DistanceTransform1D(temp, height, dist, v, z); // ✔ FIXED
-
-                for (int y = 0; y < height; y++)
-                    grid[x + y * width] = dist[y];
+                for (int x = 0; x < srcW; x++)
+                {
+                    byte val = source[y * srcPitch + x];
+                    if (val > 127)
+                    {
+                        grid[(y + padding) * paddedW + (x + padding)] = 0f;
+                    }
+                }
             }
 
-            // Horizontal pass
-            float[] result = new float[width * height];
+            // 2. Compute Signed Distance
+            // Outside
+            float[] distOut = PerformEDT(grid, paddedW, paddedH);
 
-            for (int y = 0; y < height; y++)
+            // Inside (Invert logic)
+            for (int i = 0; i < grid.Length; i++) grid[i] = (distOut[i] == 0) ? INF : 0f;
+            float[] distIn = PerformEDT(grid, paddedW, paddedH);
+
+            // 3. Combine & Normalize
+            float[] highResSDF = new float[paddedW * paddedH];
+            for (int i = 0; i < highResSDF.Length; i++)
             {
-                for (int x = 0; x < width; x++)
-                    temp[x] = grid[x + y * width];
+                float dIn = MathF.Sqrt(distIn[i]);
+                float dOut = MathF.Sqrt(distOut[i]);
+                float sd = dIn - dOut;
 
-                DistanceTransform1D(temp, width, dist, v, z);
-
-                for (int x = 0; x < width; x++)
-                    result[x + y * width] = MathF.Sqrt(dist[x]);
+                highResSDF[i] = Math.Clamp(sd, -spread, spread);
             }
 
-            return result;
+            // 4. Downsample
+            float scale = (float)targetResolution / (float)Math.Max(paddedW, paddedH);
+            int outW = (int)(paddedW * scale);
+            int outH = (int)(paddedH * scale);
+
+            // Safety check for 0 dimensions
+            outW = Math.Max(1, outW);
+            outH = Math.Max(1, outH);
+
+            byte[] output = new byte[outW * outH];
+            float invScale = 1.0f / scale;
+
+            for (int y = 0; y < outH; y++)
+            {
+                for (int x = 0; x < outW; x++)
+                {
+                    float srcX = x * invScale;
+                    float srcY = y * invScale;
+
+                    int sx = (int)srcX;
+                    int sy = (int)srcY;
+
+                    if (sx >= 0 && sx < paddedW && sy >= 0 && sy < paddedH)
+                    {
+                        float sd = highResSDF[sy * paddedW + sx];
+                        float norm = (sd / spread) * 0.5f + 0.5f;
+                        output[y * outW + x] = (byte)(Math.Clamp(norm, 0, 1) * 255);
+                    }
+                }
+            }
+
+            return new BitmapData()
+            {
+                bitmap = output,
+                width = outW,
+                height = outH
+                
+            };
         }
 
+        private static float[] PerformEDT(float[] grid, int w, int h)
+        {
+            float[] dist = new float[w * h];
+            Array.Copy(grid, dist, grid.Length);
 
-        static void DistanceTransform1D(
-            float[] f,
-            int n,
-            float[] d,
-            int[] v,
-            float[] z)
+            int maxDim = Math.Max(w, h);
+
+            // Optimization: Allocate buffers once here, reuse in Solve1D
+            float[] dt = new float[maxDim];     // Input buffer for 1D pass
+            float[] d_out = new float[maxDim];  // Output buffer for 1D pass
+            int[] v = new int[maxDim];
+            float[] z = new float[maxDim + 1];
+
+            // Pass 1: Columns
+            for (int x = 0; x < w; x++)
+            {
+                for (int y = 0; y < h; y++) dt[y] = dist[y * w + x];
+
+                // Pass buffers explicitly
+                Solve1D(dt, d_out, h, v, z);
+
+                for (int y = 0; y < h; y++) dist[y * w + x] = d_out[y];
+            }
+
+            // Pass 2: Rows
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++) dt[x] = dist[y * w + x];
+
+                // Pass buffers explicitly
+                Solve1D(dt, d_out, w, v, z);
+
+                for (int x = 0; x < w; x++) dist[y * w + x] = d_out[x];
+            }
+
+            return dist;
+        }
+
+        // Modified to return void and take an output buffer
+        private static void Solve1D(float[] f, float[] d, int n, int[] v, float[] z)
         {
             int k = 0;
             v[0] = 0;
@@ -164,39 +139,24 @@ namespace DevoidEngine.Engine.UI.Text
 
             for (int q = 1; q < n; q++)
             {
-                float s;
                 while (true)
                 {
                     int vk = v[k];
+                    // Calculate intersection of parabolas
+                    float s = ((f[q] + q * q) - (f[vk] + vk * vk)) / (2 * (q - vk));
 
-                    // Calculate intersection of parabola q and vk
-                    // (f[q] + q*q) - (f[vk] + vk*vk) / (2 * (q - vk))
-
-                    // We use the raw formula here to ensure we calculate s 
-                    // against the CURRENT vk in this iteration of the while loop.
-                    float numer = (f[q] + q * q) - (f[vk] + vk * vk);
-                    float denom = 2 * (q - vk);
-                    s = numer / denom;
-
-                    // If the intersection is to the left of the current parabola's
-                    // starting definition, the current parabola vk is hidden.
                     if (s <= z[k])
                     {
                         k--;
-                        // We continue the loop to check against the NEXT parabola down the stack
-                        // and RECALCULATE s.
+                        continue;
                     }
-                    else
-                    {
-                        // We found the correct position
-                        break;
-                    }
-                }
 
-                k++;
-                v[k] = q;
-                z[k] = s;
-                z[k + 1] = float.PositiveInfinity;
+                    k++;
+                    v[k] = q;
+                    z[k] = s;
+                    z[k + 1] = float.PositiveInfinity;
+                    break;
+                }
             }
 
             k = 0;
@@ -208,6 +168,5 @@ namespace DevoidEngine.Engine.UI.Text
                 d[q] = dx * dx + f[vk];
             }
         }
-
     }
 }
