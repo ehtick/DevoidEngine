@@ -1,4 +1,6 @@
-﻿using DevoidEngine.Engine.UI.Nodes;
+﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Rendering;
+using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
 using System;
@@ -142,13 +144,23 @@ namespace DevoidEngine.Engine.UI
             UISystem.Canvas.Add(Root);
 
             //FontInternal font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
-            FontInternal font = FontLibrary.LoadFont("C:/Windows/Fonts/Arial.ttf", 32);
+            font = FontLibrary.LoadFont("C:/Windows/Fonts/Arial.ttf", 32);
+            mesh = TextMeshGenerator.Generate(font, (text), 1f);
+
+            UISystem.OnRender += Update;
         }
+
+        Mesh mesh;
+        FontInternal font;
 
         public override void Update()
         {
-            
+            UIRenderer.DrawText(new UITransform(new Vector2(250, 250), new Vector2(1, 1))
+                , mesh,font.Atlas.GPUTexture
+            );
         }
+
+        string text = "LOREMorem ipsum dolor sit amet";
 
     }
 }

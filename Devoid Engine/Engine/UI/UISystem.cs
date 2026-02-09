@@ -13,6 +13,7 @@ namespace DevoidEngine.Engine.UI
     public static class UISystem
     {
         public static UINode Canvas;
+        public static event Action? OnRender;
 
         static UISystem()
         {
@@ -24,11 +25,14 @@ namespace DevoidEngine.Engine.UI
             };
         }
 
+
+
         public static void PerformUI()
         {
             UIRenderer.BeginRender();
             Canvas.Measure(Screen.Size);
             Canvas.Arrange(new UITransform(Vector2.Zero, Screen.Size));
+            OnRender.Invoke();
             UIRenderer.EndRender();
         }
     }

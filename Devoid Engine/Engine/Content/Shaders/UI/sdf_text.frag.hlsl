@@ -5,21 +5,6 @@ struct PSInput
     float2 UV0 : TEXCOORD0;
 };
 
-struct GlyphMetrics
-{
-    uint charCode;
-    int AtlasIndex;
-    int Width;
-    int Height;
-    float HorizontalAdvance;
-    float BearingX;
-    float BearingY;
-    float U;
-    float V;
-};
-
-StructuredBuffer<GlyphMetrics> GlyphMetricsInfo;
-
 cbuffer TransformData : register(b1)
 {
     float4x4 Model;
@@ -31,6 +16,12 @@ SamplerState fontSDFAtlasSampler : register(s0);
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    return float4(10, 10, 10, 255);
+    float distance = fontSDFAtlas.Sample(fontSDFAtlasSampler, input.UV0).r;
+    float smoothing = fwidth(distance);
+    float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+    
+    if (alpha <= 0.01)
+        discard;
+    return float4(float3(1,1,1), alpha);
 
 }

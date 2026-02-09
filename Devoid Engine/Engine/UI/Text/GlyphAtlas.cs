@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp;
+﻿using DevoidEngine.Engine.Core;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace DevoidEngine.Engine.UI.Text
 {
     public class GlyphAtlas
     {
+        public Texture2D GPUTexture { get; private set; }
         public byte[] TextureData { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -25,6 +27,23 @@ namespace DevoidEngine.Engine.UI.Text
             Height = height;
             TextureData = new byte[width * height]; // 4 bytes per pixel (RGBA)
             GlyphRectangles = new Dictionary<uint, Vector4>();
+        }
+
+        internal void UploadGPU()
+        {
+            GPUTexture = new Texture2D(new DevoidGPU.Tex2DDescription()
+            {
+                Format = DevoidGPU.TextureFormat.R8_UNorm,
+                Width = Width,
+                Height = Height,
+                IsDepthStencil = false,
+                GenerateMipmaps = false,
+                MipLevels = 1,
+                IsRenderTarget = true,
+                IsMutable = false
+            });
+
+            GPUTexture.SetData(TextureData);
         }
 
         internal void Pack(Dictionary<uint, BitmapData> glyphs)

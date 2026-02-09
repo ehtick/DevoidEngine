@@ -33,7 +33,7 @@ cbuffer TransformData : register(b1)
     float4x4 Model;
     float4 id;
 }
-
+ 
 
 PSInput VSMain(VSInput input)
 {

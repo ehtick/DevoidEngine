@@ -112,6 +112,7 @@ namespace DevoidEngine.Engine.UI.Text
 
             Atlas = new GlyphAtlas(1024, 1024);
             Atlas.Pack(rawGlyphs);
+            Atlas.UploadGPU();
 
             foreach (var kvp in rawGlyphs)
             {
@@ -122,7 +123,7 @@ namespace DevoidEngine.Engine.UI.Text
                     metric.AtlasIndex = 0;
 
                     metric.U = (float)rect.X / Atlas.Width;
-                    metric.V = (float)rect.Y / Atlas.Height;\
+                    metric.V = (float)rect.Y / Atlas.Height;
 
                     // Calculate the size in UV space
                     metric.S = (float)(rect.Z + rect.X) / Atlas.Width;
@@ -132,7 +133,7 @@ namespace DevoidEngine.Engine.UI.Text
                 }
             }
 
-            Atlas.SaveDebug(Path.Combine(debugPath, "debug_atlas.png"));
+            //Atlas.SaveDebug(Path.Combine(debugPath, "debug_atlas.png"));
         }
 
         private BitmapData GenerateSingleGlyph(uint charCode, float scaleFactor, int spread, int padding, string debugPath)
@@ -201,7 +202,11 @@ namespace DevoidEngine.Engine.UI.Text
             float bearingY = face.Glyph.BitmapTop * scaleFactor;
 
             float finalBearingX = bearingX - offsetX + TargetSpread;
-            float finalBearingY = bearingY + offsetY - TargetSpread;
+            // Distance from baseline to TOP of tile quad
+            float finalBearingY =
+                face.Glyph.BitmapTop * scaleFactor
+                + (AtlasTileSize - actualH) * 0.5f;
+
 
             Metrics[charCode] = new GlyphMetric
             {
@@ -213,7 +218,7 @@ namespace DevoidEngine.Engine.UI.Text
                 BearingY = finalBearingY
             };
 
-            SaveDebugImage(tileData, AtlasTileSize, AtlasTileSize, Path.Combine(debugPath, $"{charCode}.png"));
+            SaveDebugImage(sdfBytes, sdfWidth, sdfHeight, Path.Combine(debugPath, $"{charCode}.png"));
             return new BitmapData()
             {
                 bitmap = tileData,

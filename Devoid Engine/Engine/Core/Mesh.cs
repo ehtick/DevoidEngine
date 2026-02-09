@@ -97,15 +97,13 @@ namespace DevoidEngine.Engine.Core
         {
             indices = indexArray;
 
-            RenderThreadDispatcher.QueueLatest("MESH_SET_INDICES", () =>
-            {
-                IndexBuffer = Renderer.graphicsDevice.BufferFactory.CreateIndexBuffer(
-                    indexArray.Length,
-                    BufferUsage.Default
-                );
+            // Create the buffer immediately so it isn't null when DrawText is called
+            IndexBuffer = Renderer.graphicsDevice.BufferFactory.CreateIndexBuffer(
+                indexArray.Length,
+                BufferUsage.Default
+            );
 
-                IndexBuffer.SetData(indexArray);
-            });
+            IndexBuffer.SetData(indexArray);
         }
 
         private void ComputeLocalBounds(Vertex[] verts)

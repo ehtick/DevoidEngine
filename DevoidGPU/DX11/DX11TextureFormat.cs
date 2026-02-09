@@ -18,6 +18,11 @@ namespace DevoidGPU.DX11
                 TextureFormat.BGRA8_UNorm => Format.B8G8R8A8_UNorm,
                 TextureFormat.RGBA16_Float => Format.R16G16B16A16_Float,
                 TextureFormat.RGBA32_Float => Format.R32G32B32A32_Float,
+                
+                TextureFormat.R8_UInt => Format.R8_UInt,
+                TextureFormat.R8_UNorm => Format.R8_UNorm,
+
+
                 TextureFormat.Depth24_Stencil8 => Format.D24_UNorm_S8_UInt,
                 TextureFormat.Depth32_Float => Format.D32_Float,
                 _ => Format.Unknown
@@ -36,6 +41,10 @@ namespace DevoidGPU.DX11
                 SharpDX.DXGI.Format.R16G16B16A16_Float => TextureFormat.RGBA16_Float,
                 SharpDX.DXGI.Format.R32G32B32A32_Float => TextureFormat.RGBA32_Float,
 
+                SharpDX.DXGI.Format.R8_UInt => TextureFormat.R8_UInt,
+                SharpDX.DXGI.Format.R8_UNorm => TextureFormat.R8_UNorm,
+
+
                 SharpDX.DXGI.Format.D24_UNorm_S8_UInt => TextureFormat.Depth24_Stencil8,
                 SharpDX.DXGI.Format.D32_Float => TextureFormat.Depth32_Float,
 
@@ -45,6 +54,7 @@ namespace DevoidGPU.DX11
 
         internal static int FormatToComponentCount(TextureFormat format)
         {
+            Console.WriteLine(format);
             return format switch
             {
                 TextureFormat.RGBA8_UNorm => 4,
@@ -53,6 +63,8 @@ namespace DevoidGPU.DX11
                 TextureFormat.RG16_Float => 2,
                 TextureFormat.RGBA16_Float => 4,
                 TextureFormat.RGBA32_Float => 4,
+                TextureFormat.R8_UInt => 1,
+                TextureFormat.R8_UNorm => 1,
                 TextureFormat.Depth24_Stencil8 => 2, // depth + stencil
                 TextureFormat.Depth32_Float => 1,
                 _ => throw new NotSupportedException($"Unsupported texture format: {format}")
@@ -69,6 +81,10 @@ namespace DevoidGPU.DX11
                 TextureFormat.RG16_Float => 2,
                 TextureFormat.RGBA16_Float => 2,
                 TextureFormat.RGBA32_Float => 4,
+
+                TextureFormat.R8_UInt => 1,
+                TextureFormat.R8_UNorm => 1,
+
                 TextureFormat.Depth24_Stencil8 => 4, // 24 bits depth + 8 bits stencil = 4 bytes
                 TextureFormat.Depth32_Float => 4,
                 _ => throw new NotSupportedException($"Unsupported texture format: {format}")

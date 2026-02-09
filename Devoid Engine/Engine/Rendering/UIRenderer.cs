@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
@@ -9,6 +10,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -21,6 +23,8 @@ namespace DevoidEngine.Engine.Rendering
     public static class UIRenderer
     {
         static Shader basicShader = new Shader("Engine/Content/Shaders/UI/basic");
+        static Shader basicTextShader = new Shader("Engine/Content/Shaders/UI/basic.vert.hlsl", "Engine/Content/Shaders/UI/sdf_text.frag.hlsl");
+
         public static Framebuffer RenderOutput;
         public static CameraData ScreenData;
         static UIRenderData UIRenderData;
@@ -151,6 +155,30 @@ namespace DevoidEngine.Engine.Rendering
             tex.BindSampler(0);
 
             Renderer.graphicsDevice.Draw(Quad.VertexBuffer.VertexCount, 0);
+        }
+
+        public static void DrawText(UITransform transform, Mesh mesh, Texture2D atlas)
+        {
+            UIRenderData = new UIRenderData()
+            {
+                model =
+                    Matrix4x4.CreateScale(transform.size.X, transform.size.Y, 1.0f) *
+                    Matrix4x4.CreateTranslation(transform.position.X, transform.position.Y, 0.0f),
+            };
+            UIRenderBuffer.SetData(ref UIRenderData);
+
+            IInputLayout layout = Renderer3D.GetInputLayout(mesh, basicTextShader);
+
+            layout.Bind();
+            mesh.VertexBuffer.Bind();
+            mesh.IndexBuffer.Bind();
+
+            basicTextShader.Use();
+
+            atlas.Bind(0);
+            atlas.BindSampler(0);
+
+            Renderer.graphicsDevice.DrawIndexed(mesh.IndexBuffer.IndexCount, 0, 0);
         }
 
         public static void EndRender()
