@@ -60,24 +60,24 @@ namespace DevoidEngine.Engine.UI.Text
                 uint charCode = kvp.Key;
                 BitmapData data = kvp.Value;
 
-                if (currentX + data.width + Padding > Width)
+                if (currentX + data.Width + Padding > Width)
                 {
                     currentX = Padding;
                     currentY += currentRowHeight + Padding; // 🔑 accumulate, don’t reset
                     currentRowHeight = 0;
                 }
-                if (currentY + data.height + Padding > Height)
+                if (currentY + data.Height + Padding > Height)
                 {
                     Console.WriteLine($"[GlyphAtlas] Atlas Full!");
                     continue;
                 }
 
-                CopyPixels(data.bitmap, data.width, data.height, currentX, currentY);
+                CopyPixels(data.Bitmap, data.Width, data.Height, currentX, currentY);
 
-                GlyphRectangles[charCode] = new Vector4(currentX, currentY, data.width, data.height);
-                currentX += data.width + Padding;
+                GlyphRectangles[charCode] = new Vector4(currentX, currentY, data.Width, data.Height);
+                currentX += data.Width + Padding;
 
-                if (data.height > currentRowHeight) currentRowHeight = data.height;
+                if (data.Height > currentRowHeight) currentRowHeight = data.Height;
             }
         }
 

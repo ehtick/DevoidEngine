@@ -36,9 +36,9 @@ namespace DevoidEngine.Engine.UI.Text
 
     public struct BitmapData
     {
-        public byte[] bitmap;
-        public int width;
-        public int height;
+        public byte[] Bitmap;
+        public int Width;
+        public int Height;
     }
 
     public class FontInternal
@@ -48,7 +48,7 @@ namespace DevoidEngine.Engine.UI.Text
 
         Face face;
 
-       
+
         private const int TargetSpread = 8;
         private const int AtlasTileSize = 64;
         private const int highResSourceSize = 1024;
@@ -99,12 +99,12 @@ namespace DevoidEngine.Engine.UI.Text
                 // Filter: ASCII + Basic Latin (Expand this logic for full Unicode support)
                 if (charCode >= 32 && charCode <= 126)
                 {
-                    var glyphData = GenerateSingleGlyph(charCode, scaleFactor, highResSpread, highResPadding, debugPath);
-                    if (glyphData.bitmap != null)
+                    var glyphData = GenerateSingleGlyph(charCode, scaleFactor, highResSpread, highResPadding);
+                    if (glyphData.Bitmap != null)
                     {
                         rawGlyphs[charCode] = glyphData;
                     }
-                    
+
                 }
 
                 charCode = face.GetNextChar(charCode, out glyphIndex);
@@ -136,10 +136,11 @@ namespace DevoidEngine.Engine.UI.Text
             //Atlas.SaveDebug(Path.Combine(debugPath, "debug_atlas.png"));
         }
 
-        private BitmapData GenerateSingleGlyph(uint charCode, float scaleFactor, int spread, int padding, string debugPath)
+        private BitmapData GenerateSingleGlyph(uint charCode, float scaleFactor, int spread, int padding)
         {
             face.LoadChar(charCode, LoadFlags.Render | LoadFlags.ForceAutohint, LoadTarget.Normal);
             var ftBmp = face.Glyph.Bitmap;
+
             if (ftBmp.Width == 0 || ftBmp.Rows == 0)
             {
                 Metrics[charCode] = new GlyphMetric
@@ -151,79 +152,75 @@ namespace DevoidEngine.Engine.UI.Text
                     BearingX = 0,
                     BearingY = 0
                 };
-
-                return new BitmapData
-                {
-                    bitmap = null,
-                    width = 0,
-                    height = 0
-                };
+                return new BitmapData { Bitmap = null, Width = 0, Height = 0 };
             }
 
-
-            int width  = ftBmp.Width;
-            int height = ftBmp.Rows;
-            int pitch = ftBmp.Pitch;
-            byte[] rawBuffer = ftBmp.BufferData;
-
-            int targetWidth = (int)Math.Ceiling(width * scaleFactor);
-            int targetHeight = (int)Math.Ceiling(height * scaleFactor);
-
-            int sdfWidth = targetWidth + (TargetSpread * 2);
-            int sdfHeight = targetHeight + (TargetSpread * 2);
-
+            // 1. Generate SDF
             BitmapData sdfBitmapData = SDFGenerator.Generate(
-                rawBuffer,
-                width, height, pitch,
+                ftBmp.BufferData,
+                ftBmp.Width, ftBmp.Rows, ftBmp.Pitch,
                 padding,
-                AtlasTileSize, // Target Atlas Size (e.g., 64)
-                spread         // High res spread
+                scaleFactor,
+                spread
             );
 
-            byte[] sdfBytes = sdfBitmapData.bitmap;
-            int actualW = sdfBitmapData.width;
-            int actualH = sdfBitmapData.height;
+            byte[] sdfBytes = sdfBitmapData.Bitmap;
+            int actualW = sdfBitmapData.Width;
+            int actualH = sdfBitmapData.Height;
+
+            // 2. Center & Clip
+            // Calculate where the Top-Left of the SDF should land on the Tile
+            int dstX = (AtlasTileSize - actualW) / 2;
+            int dstY = (AtlasTileSize - actualH) / 2;
 
             byte[] tileData = new byte[AtlasTileSize * AtlasTileSize];
-            int offsetX = (AtlasTileSize - actualW) / 2;
-            int offsetY = (AtlasTileSize - actualH) / 2;
 
-            for (int y = 0; y < actualH; y++)
+            // Calculate the Intersection Area (Clip Rect)
+            // We only iterate pixels that are valid in BOTH Source and Destination
+            int startX = Math.Max(0, dstX);
+            int startY = Math.Max(0, dstY);
+            int endX = Math.Min(AtlasTileSize, dstX + actualW);
+            int endY = Math.Min(AtlasTileSize, dstY + actualH);
+
+            for (int y = startY; y < endY; y++)
             {
-                for (int x = 0; x < actualW; x++)
+                for (int x = startX; x < endX; x++)
                 {
-                    int destIndex = (offsetY + y) * AtlasTileSize + (offsetX + x);
-                    if (destIndex < tileData.Length)
-                        tileData[destIndex] = sdfBytes[y * actualW + x];
+                    // Dest Index: Simple coordinate on the tile
+                    int destIndex = y * AtlasTileSize + x;
+
+                    // Source Index: Shift coordinates back to SDF space
+                    int srcX = x - dstX;
+                    int srcY = y - dstY;
+                    int srcIndex = srcY * actualW + srcX;
+
+                    tileData[destIndex] = sdfBytes[srcIndex];
                 }
             }
 
-            float bearingX = face.Glyph.BitmapLeft * scaleFactor;
-            float bearingY = face.Glyph.BitmapTop * scaleFactor;
+            // 3. Metric Correction
+            float originalBearingX = face.Glyph.Metrics.HorizontalBearingX.ToSingle() * scaleFactor;
+            float originalBearingY = face.Glyph.Metrics.HorizontalBearingY.ToSingle() * scaleFactor;
 
-            float finalBearingX = bearingX - offsetX + TargetSpread;
-            // Distance from baseline to TOP of tile quad
-            float finalBearingY =
-                face.Glyph.BitmapTop * scaleFactor
-                + (AtlasTileSize - actualH) * 0.5f;
-
+            // Use the calculated dstX/dstY for offset correction (even if negative)
+            float finalBearingX = originalBearingX - dstX - TargetSpread;
+            float finalBearingY = originalBearingY + dstY + TargetSpread;
 
             Metrics[charCode] = new GlyphMetric
             {
                 CharCode = charCode,
                 Width = AtlasTileSize,
                 Height = AtlasTileSize,
-                HorizontalAdvance = face.Glyph.Metrics.HorizontalAdvance.ToSingle() * scaleFactor,
+                HorizontalAdvance = (face.Glyph.Metrics.HorizontalAdvance.ToSingle()) * scaleFactor,
                 BearingX = finalBearingX,
                 BearingY = finalBearingY
             };
 
-            SaveDebugImage(sdfBytes, sdfWidth, sdfHeight, Path.Combine(debugPath, $"{charCode}.png"));
-            return new BitmapData()
+            return new BitmapData
             {
-                bitmap = tileData,
-                width = AtlasTileSize,
-                height = AtlasTileSize,
+                Bitmap = tileData,
+                Width = AtlasTileSize,
+                Height = AtlasTileSize,
             };
         }
 
