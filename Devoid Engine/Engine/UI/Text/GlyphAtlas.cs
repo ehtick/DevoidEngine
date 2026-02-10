@@ -40,8 +40,10 @@ namespace DevoidEngine.Engine.UI.Text
                 GenerateMipmaps = false,
                 MipLevels = 1,
                 IsRenderTarget = true,
-                IsMutable = false
+                IsMutable = false,
             });
+
+            GPUTexture.SetFilter(DevoidGPU.TextureFilter.Linear, DevoidGPU.TextureFilter.Linear);
 
             GPUTexture.SetData(TextureData);
         }

@@ -110,7 +110,7 @@ namespace DevoidEngine.Engine.UI.Text
                 charCode = face.GetNextChar(charCode, out glyphIndex);
             }
 
-            Atlas = new GlyphAtlas(1024, 1024);
+            Atlas = new GlyphAtlas(2048, 2048);
             Atlas.Pack(rawGlyphs);
             Atlas.UploadGPU();
 
@@ -205,6 +205,9 @@ namespace DevoidEngine.Engine.UI.Text
             // Use the calculated dstX/dstY for offset correction (even if negative)
             float finalBearingX = originalBearingX - dstX - TargetSpread;
             float finalBearingY = originalBearingY + dstY + TargetSpread;
+
+            //SaveDebugImage(tileData, AtlasTileSize, AtlasTileSize, "./DebugFonts/Arial/" + charCode + ".png");
+            //SaveDebugImage(sdfBytes, actualW, actualH, "./DebugFonts/Arial/" + charCode + ".png");
 
             Metrics[charCode] = new GlyphMetric
             {
