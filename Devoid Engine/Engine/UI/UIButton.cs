@@ -62,31 +62,34 @@ namespace DevoidEngine.Engine.UI
 
             BoxNode headerContainer = new BoxNode()
             {
-                Size = new Vector2(0, 50), // height fixed, width flexible
-                Layout = new LayoutOptions()
-                {
-                    FlexGrowMain = 0
-                },
-                Align = AlignItems.Stretch
-            };
-
-
-            LabelNode label = new LabelNode("Hey!", font, 0.5f)
-            {
-                Size = new Vector2(50, 50),
-                Layout = new LayoutOptions() { FlexGrowMain = 0 }
-            };
-
-            FlexboxNode innerFlex = new FlexboxNode()
-            {
+                Size = new Vector2(200, 50),
+                MinSize = new Vector2(250, 50),
                 Direction = FlexDirection.Row,
                 Align = AlignItems.Center,
-                Justify = JustifyContent.Center,
+                Justify = JustifyContent.End,
                 Layout = new LayoutOptions()
                 {
                     FlexGrowMain = 1
                 }
             };
+
+
+            LabelNode label = new LabelNode("Hey!", font, 1f)
+            {
+                Size = new Vector2(50, 50),
+                Layout = new LayoutOptions() { FlexGrowMain = 0 }
+            };
+
+            //FlexboxNode innerFlex = new FlexboxNode()
+            //{
+            //    Direction = FlexDirection.Column,
+            //    Align = AlignItems.End,
+            //    Justify = JustifyContent.End,
+            //    Layout = new LayoutOptions()
+            //    {
+            //        FlexGrowMain = 0
+            //    }
+            //};
 
             TexNode node1 = new TexNode()
             {
@@ -108,11 +111,11 @@ namespace DevoidEngine.Engine.UI
                 }
             };
 
-            innerFlex.Add(node1);
+            //innerFlex.Add(node1);
             //innerFlex.Add(node2);
             //innerFlex.Add(label);
 
-            headerContainer.Add(innerFlex);
+            headerContainer.Add(label);
 
             List<BoxNode> nodes = new List<BoxNode>();
 
@@ -133,7 +136,7 @@ namespace DevoidEngine.Engine.UI
 
             FlexboxNode mainContainer = new FlexboxNode()
             {
-                Size = new Vector2(200, 200),
+                Size = new Vector2(200, 300),
 
                 Offset = new Vector2(10, 10),
                 ParticipatesInLayout = false,
