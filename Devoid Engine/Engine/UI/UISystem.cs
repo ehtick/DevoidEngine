@@ -30,9 +30,9 @@ namespace DevoidEngine.Engine.UI
         public static void PerformUI()
         {
             UIRenderer.BeginRender();
+            OnRender.Invoke();
             Canvas.Measure(Screen.Size);
             Canvas.Arrange(new UITransform(Vector2.Zero, Screen.Size));
-            OnRender.Invoke();
             UIRenderer.EndRender();
         }
     }

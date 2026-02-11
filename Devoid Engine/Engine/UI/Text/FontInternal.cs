@@ -28,6 +28,9 @@ namespace DevoidEngine.Engine.UI.Text
         public float BearingX;
         public float BearingY;
 
+        public float OriginalBearingX;
+        public float OriginalBearingY;
+
         public float U;
         public float V;
         public float S;
@@ -50,8 +53,8 @@ namespace DevoidEngine.Engine.UI.Text
 
 
         private const int TargetSpread = 8;
-        private const int AtlasTileSize = 64;
-        private const int highResSourceSize = 1024;
+        public const int AtlasTileSize = 64;
+        private const int highResSourceSize = 512;
 
         public readonly float Ascender;
         public readonly float Descender;
@@ -70,10 +73,11 @@ namespace DevoidEngine.Engine.UI.Text
             face.SetPixelSizes(0, highResSourceSize);
             face.SelectCharmap(SharpFont.Encoding.Unicode);
 
-            float emScale = 1.0f / face.Size.Metrics.Height.ToSingle();
-            Ascender = face.Size.Metrics.Ascender.ToSingle() * emScale;
-            Descender = face.Size.Metrics.Descender.ToSingle() * emScale;
-            LineHeight = face.Size.Metrics.Height.ToSingle() * emScale;
+            float scaleFactor = (float)AtlasTileSize / highResSourceSize;
+
+            Ascender = face.Size.Metrics.Ascender.ToSingle() * scaleFactor;
+            Descender = face.Size.Metrics.Descender.ToSingle() * scaleFactor;
+            LineHeight = face.Size.Metrics.Height.ToSingle() * scaleFactor;
 
             Metrics = new Dictionary<uint, GlyphMetric>();
 
@@ -90,13 +94,12 @@ namespace DevoidEngine.Engine.UI.Text
 
             float scaleFactor = (float)AtlasTileSize / highResSourceSize;
             int highResSpread = (int)(TargetSpread / scaleFactor);
-            int highResPadding = highResSpread + 2;
+            int highResPadding = highResSpread + 5;
 
             var rawGlyphs = new Dictionary<uint, BitmapData>();
 
             while (glyphIndex != 0)
             {
-                // Filter: ASCII + Basic Latin (Expand this logic for full Unicode support)
                 if (charCode >= 32 && charCode <= 126)
                 {
                     var glyphData = GenerateSingleGlyph(charCode, scaleFactor, highResSpread, highResPadding);
@@ -110,7 +113,7 @@ namespace DevoidEngine.Engine.UI.Text
                 charCode = face.GetNextChar(charCode, out glyphIndex);
             }
 
-            Atlas = new GlyphAtlas(2048, 2048);
+            Atlas = new GlyphAtlas(1024, 1024);
             Atlas.Pack(rawGlyphs);
             Atlas.UploadGPU();
 
@@ -125,7 +128,6 @@ namespace DevoidEngine.Engine.UI.Text
                     metric.U = (float)rect.X / Atlas.Width;
                     metric.V = (float)rect.Y / Atlas.Height;
 
-                    // Calculate the size in UV space
                     metric.S = (float)(rect.Z + rect.X) / Atlas.Width;
                     metric.T = (float)(rect.W + rect.Y) / Atlas.Height;
 
@@ -155,7 +157,6 @@ namespace DevoidEngine.Engine.UI.Text
                 return new BitmapData { Bitmap = null, Width = 0, Height = 0 };
             }
 
-            // 1. Generate SDF
             BitmapData sdfBitmapData = SDFGenerator.Generate(
                 ftBmp.BufferData,
                 ftBmp.Width, ftBmp.Rows, ftBmp.Pitch,
@@ -168,15 +169,11 @@ namespace DevoidEngine.Engine.UI.Text
             int actualW = sdfBitmapData.Width;
             int actualH = sdfBitmapData.Height;
 
-            // 2. Center & Clip
-            // Calculate where the Top-Left of the SDF should land on the Tile
             int dstX = (AtlasTileSize - actualW) / 2;
             int dstY = (AtlasTileSize - actualH) / 2;
 
             byte[] tileData = new byte[AtlasTileSize * AtlasTileSize];
 
-            // Calculate the Intersection Area (Clip Rect)
-            // We only iterate pixels that are valid in BOTH Source and Destination
             int startX = Math.Max(0, dstX);
             int startY = Math.Max(0, dstY);
             int endX = Math.Min(AtlasTileSize, dstX + actualW);
@@ -186,10 +183,8 @@ namespace DevoidEngine.Engine.UI.Text
             {
                 for (int x = startX; x < endX; x++)
                 {
-                    // Dest Index: Simple coordinate on the tile
                     int destIndex = y * AtlasTileSize + x;
 
-                    // Source Index: Shift coordinates back to SDF space
                     int srcX = x - dstX;
                     int srcY = y - dstY;
                     int srcIndex = srcY * actualW + srcX;
@@ -198,13 +193,14 @@ namespace DevoidEngine.Engine.UI.Text
                 }
             }
 
-            // 3. Metric Correction
             float originalBearingX = face.Glyph.Metrics.HorizontalBearingX.ToSingle() * scaleFactor;
             float originalBearingY = face.Glyph.Metrics.HorizontalBearingY.ToSingle() * scaleFactor;
 
-            // Use the calculated dstX/dstY for offset correction (even if negative)
-            float finalBearingX = originalBearingX - dstX - TargetSpread;
-            float finalBearingY = originalBearingY + dstY + TargetSpread;
+            float scaledPadding = padding * scaleFactor;
+
+            float finalBearingX = originalBearingX - dstX - scaledPadding;
+
+            float finalBearingY = originalBearingY + dstY + scaledPadding;
 
             //SaveDebugImage(tileData, AtlasTileSize, AtlasTileSize, "./DebugFonts/Arial/" + charCode + ".png");
             //SaveDebugImage(sdfBytes, actualW, actualH, "./DebugFonts/Arial/" + charCode + ".png");
@@ -215,7 +211,11 @@ namespace DevoidEngine.Engine.UI.Text
                 Width = AtlasTileSize,
                 Height = AtlasTileSize,
                 HorizontalAdvance = (face.Glyph.Metrics.HorizontalAdvance.ToSingle()) * scaleFactor,
+
                 BearingX = finalBearingX,
+                OriginalBearingX = originalBearingX,
+                OriginalBearingY = originalBearingY,
+
                 BearingY = finalBearingY
             };
 
@@ -227,6 +227,11 @@ namespace DevoidEngine.Engine.UI.Text
             };
         }
 
+        public float GetScaleForFontSize(float targetPixelSize)
+        {
+
+            return targetPixelSize / AtlasTileSize;
+        }
 
         private void SaveDebugImage(byte[] buffer, int w, int h, string path)
         {

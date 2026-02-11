@@ -58,21 +58,30 @@ namespace DevoidEngine.Engine.UI
             //mainContainer.Add(node1);
             //mainContainer.Add(node2);
 
+            font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
+
             BoxNode headerContainer = new BoxNode()
             {
-                Size = new Vector2(50, 50),
+                Size = new Vector2(0, 50), // height fixed, width flexible
                 Layout = new LayoutOptions()
                 {
                     FlexGrowMain = 0
-                }
-                
+                },
+                Align = AlignItems.Stretch
+            };
+
+
+            LabelNode label = new LabelNode("Hey!", font, 0.5f)
+            {
+                Size = new Vector2(50, 50),
+                Layout = new LayoutOptions() { FlexGrowMain = 0 }
             };
 
             FlexboxNode innerFlex = new FlexboxNode()
             {
                 Direction = FlexDirection.Row,
-                Align = AlignItems.Start,
-                Justify = JustifyContent.SpaceEvenly,
+                Align = AlignItems.Center,
+                Justify = JustifyContent.Center,
                 Layout = new LayoutOptions()
                 {
                     FlexGrowMain = 1
@@ -100,7 +109,8 @@ namespace DevoidEngine.Engine.UI
             };
 
             innerFlex.Add(node1);
-            innerFlex.Add(node2);
+            //innerFlex.Add(node2);
+            //innerFlex.Add(label);
 
             headerContainer.Add(innerFlex);
 
@@ -130,6 +140,7 @@ namespace DevoidEngine.Engine.UI
 
                 Direction = FlexDirection.Column,
                 Align = AlignItems.Stretch,
+                Justify = JustifyContent.Center,
                 Gap = 10
             };
 
@@ -143,9 +154,9 @@ namespace DevoidEngine.Engine.UI
             Root = mainContainer;
             UISystem.Canvas.Add(Root);
 
-            //FontInternal font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
-            font = FontLibrary.LoadFont("C:/Windows/Fonts/Arial.ttf", 32);
-            mesh = TextMeshGenerator.Generate(font, (text), 1f);
+            font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
+            //font = FontLibrary.LoadFont("C:/Windows/Fonts/Arial.ttf", 32);
+            mesh = TextMeshGenerator.Generate(font, (text), font.GetScaleForFontSize(50));
 
             UISystem.OnRender += Update;
         }
@@ -155,12 +166,12 @@ namespace DevoidEngine.Engine.UI
 
         public override void Update()
         {
-            UIRenderer.DrawText(new UITransform(new Vector2(250, 250), new Vector2(1, 1))
-                , mesh,font.Atlas.GPUTexture
-            );
+            //UIRenderer.DrawText(new UITransform(new Vector2(10), new Vector2(1))
+            //    , mesh,font.Atlas.GPUTexture
+            //);
         }
 
-        string text = "LOREMorem ipsum dolor sit amet";
+        string text = @"Hey!";
 
     }
 }

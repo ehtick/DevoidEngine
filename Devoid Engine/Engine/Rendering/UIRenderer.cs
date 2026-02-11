@@ -4,209 +4,195 @@ using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DevoidEngine.Engine.Rendering
 {
+    [StructLayout(LayoutKind.Sequential)]
     struct UIRenderData
     {
-        public Matrix4x4 model;
-        public Vector4 id;
+        public Matrix4x4 Model;
+        public Vector4 Id;
     }
 
     public static class UIRenderer
     {
-        static Shader basicShader = new Shader("Engine/Content/Shaders/UI/basic");
-        static Shader basicTextShader = new Shader("Engine/Content/Shaders/UI/basic.vert.hlsl", "Engine/Content/Shaders/UI/sdf_text.frag.hlsl");
+        private static readonly Shader _basicShader =
+            new("Engine/Content/Shaders/UI/basic");
+
+        private static readonly Shader _textShader =
+            new("Engine/Content/Shaders/UI/basic.vert.hlsl",
+                "Engine/Content/Shaders/UI/sdf_text.frag.hlsl");
 
         public static Framebuffer RenderOutput;
+
+        private static IUniformBuffer _screenDataBuffer;
+        private static IUniformBuffer _uiRenderBuffer;
+
+        private static Mesh _quad;
+
         public static CameraData ScreenData;
-        static UIRenderData UIRenderData;
-
-        static IUniformBuffer ScreendataBuffer;
-        static IUniformBuffer UIRenderBuffer;
-
-        static Mesh Quad;
+        private static UIRenderData _uiRenderData;
 
         public static void Initialize(int width, int height)
         {
-            Console.WriteLine("Initializing UI Renderer at " + width + " " + height);
+            Console.WriteLine($"Initializing UI Renderer at {width} x {height}");
 
-            RenderOutput = new();
-            RenderOutput.AttachRenderTexture(new Texture2D(new DevoidGPU.Tex2DDescription()
+            CreateFramebuffer(width, height);
+            CreateCameraData(width, height);
+            CreateBuffers();
+            CreateQuad();
+        }
+
+        private static void CreateFramebuffer(int width, int height)
+        {
+            RenderOutput = new Framebuffer();
+
+            RenderOutput.AttachRenderTexture(new Texture2D(new Tex2DDescription
             {
                 Width = width,
                 Height = height,
-                Format = DevoidGPU.TextureFormat.RGBA16_Float,
-                GenerateMipmaps = false,
-                IsDepthStencil = false,
-                IsRenderTarget = true,
-                IsMutable = false,
+                Format = TextureFormat.RGBA16_Float,
+                IsRenderTarget = true
             }));
 
-            RenderOutput.AttachDepthTexture(new Texture2D(new DevoidGPU.Tex2DDescription()
+            RenderOutput.AttachDepthTexture(new Texture2D(new Tex2DDescription
             {
                 Width = width,
                 Height = height,
-                Format = DevoidGPU.TextureFormat.Depth24_Stencil8,
-                GenerateMipmaps = false,
-                IsDepthStencil = true,
-                IsRenderTarget = false,
-                IsMutable = false,
+                Format = TextureFormat.Depth24_Stencil8,
+                IsDepthStencil = true
             }));
+        }
 
+        private static void CreateCameraData(int width, int height)
+        {
             Matrix4x4 ortho = Matrix4x4.CreateOrthographicOffCenter(
-                0f, Screen.Size.X,
-                0f, Screen.Size.Y,
-                -1f,
-                1f
+                0f, width,
+                0f, height,
+                -1f, 1f
             );
 
-
-            ScreenData = new CameraData()
+            ScreenData = new CameraData
             {
-                FarClip = 1f,
-                NearClip = -1f,
+                View = Matrix4x4.Identity,
                 Projection = ortho,
-                Position = new Vector3( 0f, 0f, 0f ),
-                ScreenSize = Screen.Size,
-                View = Matrix4x4.Identity
-            };
-
-            UIRenderData = new UIRenderData()
-            {
-                model = Matrix4x4.Identity,
+                Position = Vector3.Zero,
+                NearClip = -1f,
+                FarClip = 1f,
+                ScreenSize = new Vector2(width, height)
             };
 
             Matrix4x4.Invert(ortho, out ScreenData.InverseProjection);
-
-            ScreendataBuffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer(Marshal.SizeOf<CameraData>(), BufferUsage.Dynamic);
-            UIRenderBuffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer(Marshal.SizeOf<UIRenderData>(), BufferUsage.Dynamic);
-
-            Quad = new Mesh();
-            Quad.SetVertices(Primitives.GetQuadVertex());
-
-            ScreendataBuffer.SetData(ref ScreenData);
-
         }
+
+        private static void CreateBuffers()
+        {
+            _screenDataBuffer =
+                Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer(
+                    Marshal.SizeOf<CameraData>(), BufferUsage.Dynamic);
+
+            _uiRenderBuffer =
+                Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer(
+                    Marshal.SizeOf<UIRenderData>(), BufferUsage.Dynamic);
+
+            _screenDataBuffer.SetData(ref ScreenData);
+        }
+
+        private static void CreateQuad()
+        {
+            _quad = new Mesh();
+            _quad.SetVertices(Primitives.GetQuadVertex());
+        }
+
 
         public static void BeginRender()
         {
             RenderOutput.Bind();
             RenderOutput.Clear();
 
-            Renderer.graphicsDevice.SetRasterizerState(CullMode.None);
-            Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
-            Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
+            var device = Renderer.graphicsDevice;
 
-            UIRenderBuffer.Bind(1, ShaderStage.Vertex | ShaderStage.Fragment);
-            ScreendataBuffer.Bind(0, ShaderStage.Vertex);
+            device.SetRasterizerState(CullMode.None);
+            device.SetPrimitiveType(PrimitiveType.Triangles);
+            device.SetBlendState(BlendMode.AlphaBlend);
+            device.SetViewport(0, 0, Renderer.Width, Renderer.Height);
 
-        }
-        public static void DrawRect(UITransform transform, int count)
-        {
-
-            UIRenderData = new UIRenderData()
-            {
-                model =
-                    Matrix4x4.CreateScale(transform.size.X, transform.size.Y, 1.0f) *
-                    Matrix4x4.CreateTranslation(transform.position.X, transform.position.Y, 0.0f),
-            };
-            UIRenderData.id.X = count;
-            UIRenderData.id.Y = 0;
-            UIRenderBuffer.SetData(ref UIRenderData);
-
-            IInputLayout layout = Renderer3D.GetInputLayout(Quad, basicShader);
-
-            layout.Bind();
-            Quad.VertexBuffer.Bind();
-
-            basicShader.Use();
-            Renderer.graphicsDevice.Draw(Quad.VertexBuffer.VertexCount, 0);
+            _screenDataBuffer.Bind(0, ShaderStage.Vertex);
+            _uiRenderBuffer.Bind(1, ShaderStage.Vertex | ShaderStage.Fragment);
         }
 
-        public static void DrawTexRect(UITransform transform, Texture2D tex, int count)
+        public static void EndRender()
         {
+            // Intentionally empty – pipeline handles presentation
+        }
 
-            UIRenderData = new UIRenderData()
-            {
-                model =
-                    Matrix4x4.CreateScale(transform.size.X, transform.size.Y, 1.0f) *
-                    Matrix4x4.CreateTranslation(transform.position.X, transform.position.Y, 0.0f),
-            };
-            UIRenderData.id.X = count;
-            UIRenderData.id.Y = 1;
-            UIRenderBuffer.SetData(ref UIRenderData);
 
-            IInputLayout layout = Renderer3D.GetInputLayout(Quad, basicShader);
+        private static Matrix4x4 BuildModel(UITransform t)
+        {
+            return
+                Matrix4x4.CreateScale(t.size.X, t.size.Y, 1f) *
+                Matrix4x4.CreateTranslation(t.position.X, t.position.Y, 0f);
+        }
 
+        private static void PrepareQuadDraw(Shader shader)
+        {
+            IInputLayout layout = Renderer3D.GetInputLayout(_quad, shader);
             layout.Bind();
-            Quad.VertexBuffer.Bind();
+            _quad.VertexBuffer.Bind();
+            shader.Use();
+        }
 
-            basicShader.Use();
 
-            tex.Bind(0);
-            tex.BindSampler(0);
+        public static void DrawRect(UITransform transform, int id)
+        {
+            _uiRenderData.Model = BuildModel(transform);
+            _uiRenderData.Id = new Vector4(id, 0, 0, 0);
+            _uiRenderBuffer.SetData(ref _uiRenderData);
 
-            Renderer.graphicsDevice.Draw(Quad.VertexBuffer.VertexCount, 0);
+            PrepareQuadDraw(_basicShader);
+            Renderer.graphicsDevice.Draw(_quad.VertexBuffer.VertexCount, 0);
+        }
+
+        public static void DrawTexRect(UITransform transform, Texture2D texture, int id)
+        {
+            _uiRenderData.Model = BuildModel(transform);
+            _uiRenderData.Id = new Vector4(id, 1, 0, 0);
+            _uiRenderBuffer.SetData(ref _uiRenderData);
+
+            PrepareQuadDraw(_basicShader);
+
+            texture.Bind(0);
+            texture.BindSampler(0);
+
+            Renderer.graphicsDevice.Draw(_quad.VertexBuffer.VertexCount, 0);
         }
 
         public static void DrawText(UITransform transform, Mesh mesh, Texture2D atlas)
         {
-            UIRenderData = new UIRenderData()
-            {
-                model =
-                    Matrix4x4.CreateScale(transform.size.X, transform.size.Y, 1.0f) *
-                    Matrix4x4.CreateTranslation(transform.position.X, transform.position.Y, 0.0f),
-            };
-            UIRenderBuffer.SetData(ref UIRenderData);
+            _uiRenderData.Model = BuildModel(transform);
+            _uiRenderData.Id = Vector4.Zero;
+            _uiRenderBuffer.SetData(ref _uiRenderData);
 
-            IInputLayout layout = Renderer3D.GetInputLayout(mesh, basicTextShader);
-
+            IInputLayout layout = Renderer3D.GetInputLayout(mesh, _textShader);
             layout.Bind();
+
             mesh.VertexBuffer.Bind();
             mesh.IndexBuffer.Bind();
 
-            basicTextShader.Use();
-
+            _textShader.Use();
             atlas.Bind(0);
             atlas.BindSampler(0);
 
             Renderer.graphicsDevice.DrawIndexed(mesh.IndexBuffer.IndexCount, 0, 0);
         }
 
-        public static void EndRender()
-        {
-        }
 
         public static void Resize(int width, int height)
         {
-            Matrix4x4 ortho = Matrix4x4.CreateOrthographicOffCenter(
-                0f, width,
-                0f, height,
-                -1f,
-                1f
-            );
-
-            ScreenData = new CameraData()
-            {
-                FarClip = 1f,
-                NearClip = -1f,
-                Projection = ortho,
-                Position = new Vector3(0f, 0f, 0f),
-                ScreenSize = new Vector2(Renderer.Width, Renderer.Height),
-                View = Matrix4x4.Identity
-            };
-
-            Matrix4x4.Invert(ortho, out ScreenData.InverseProjection);
-            ScreendataBuffer.SetData(ref ScreenData);
-
+            CreateCameraData(width, height);
+            _screenDataBuffer.SetData(ref ScreenData);
             RenderOutput.Resize(width, height);
         }
     }

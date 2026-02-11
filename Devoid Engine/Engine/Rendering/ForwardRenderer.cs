@@ -112,7 +112,6 @@ namespace DevoidEngine.Engine.Rendering
 
         public void Resize(int width, int height)
         {
-            Console.WriteLine("Resize to: " + width + " " +  height);
         }
     }
 }

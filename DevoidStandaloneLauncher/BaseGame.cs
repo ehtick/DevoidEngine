@@ -39,7 +39,6 @@ namespace DevoidStandaloneLauncher
 
         public override void OnResize(int width, int height)
         {
-            Console.WriteLine(width);
             Renderer.Resize(width, height);
 
             Screen.Size = new System.Numerics.Vector2(width, height);
