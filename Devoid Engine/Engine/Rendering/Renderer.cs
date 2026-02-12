@@ -30,6 +30,17 @@ namespace DevoidEngine.Engine.Rendering
             UIRenderer.Initialize(width, height);
         }
 
+        public static IInputLayout GetInputLayout(Mesh mesh, Shader shader)
+        {
+            var key = (mesh.VertexBuffer.Layout, shader.vShader);
+            if (!InputLayoutManager.inputLayoutCache.TryGetValue(key, out var layout))
+            {
+                layout = graphicsDevice.CreateInputLayout(mesh.VertexBuffer.Layout, shader.vShader);
+                InputLayoutManager.inputLayoutCache[key] = layout;
+            }
+            return layout;
+        }
+
         public static void Resize(int width, int height)
         {
             Width = width;

@@ -118,10 +118,6 @@ namespace DevoidEngine.Engine.UI
             Root = mainContainer;
             UISystem.Canvas.Add(Root);
 
-            //font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
-            //font = FontLibrary.LoadFont("C:/Windows/Fonts/Arial.ttf", 32);
-            //mesh = TextMeshGenerator.Generate(font, (text), font.GetScaleForFontSize(50));
-
             UISystem.OnRender += Update;
         }
 

@@ -105,7 +105,7 @@ namespace DevoidEngine.Engine.Rendering
             Renderer.graphicsDevice.SetRasterizerState(CullMode.None);
             Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
 
-            IInputLayout inputLayout = Renderer3D.GetInputLayout(mesh, ShaderLibrary.GetShader("Screen/RENDER_SCREEN"));
+            IInputLayout inputLayout = Renderer.GetInputLayout(mesh, ShaderLibrary.GetShader("Screen/RENDER_SCREEN"));
 
             inputLayout.Bind();
             mesh.VertexBuffer.Bind();

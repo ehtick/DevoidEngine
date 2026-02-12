@@ -44,7 +44,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             Renderer.graphicsDevice.UnbindAllShaderResources();
 
-            IInputLayout LAYOUT = Renderer3D.GetInputLayout(cubeMesh, BasicForward.BaseMaterial.Shader);
+            IInputLayout LAYOUT = Renderer.GetInputLayout(cubeMesh, BasicForward.BaseMaterial.Shader);
             LAYOUT.Bind();
 
             cubeMesh.VertexBuffer.Bind();

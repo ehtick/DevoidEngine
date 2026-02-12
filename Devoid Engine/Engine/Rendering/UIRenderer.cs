@@ -144,7 +144,7 @@ namespace DevoidEngine.Engine.Rendering
 
         private static void PrepareQuadDraw(Shader shader)
         {
-            IInputLayout layout = Renderer3D.GetInputLayout(_quad, shader);
+            IInputLayout layout = Renderer.GetInputLayout(_quad, shader);
             layout.Bind();
             _quad.VertexBuffer.Bind();
             shader.Use();
@@ -181,7 +181,7 @@ namespace DevoidEngine.Engine.Rendering
             _uiRenderData.Id = Vector4.Zero;
             _uiRenderBuffer.SetData(ref _uiRenderData);
 
-            IInputLayout layout = Renderer3D.GetInputLayout(mesh, _textShader);
+            IInputLayout layout = Renderer.GetInputLayout(mesh, _textShader);
             layout.Bind();
 
             mesh.VertexBuffer.Bind();

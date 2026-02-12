@@ -60,17 +60,6 @@ namespace DevoidEngine.Engine.Rendering
             ActiveRenderingPipeline.EndRender();
         }
 
-        public static IInputLayout GetInputLayout(Mesh mesh, Shader shader)
-        {
-            var key = (mesh.VertexBuffer.Layout, shader.vShader);
-            if (!InputLayoutManager.inputLayoutCache.TryGetValue(key, out var layout))
-            {
-                layout = Renderer.graphicsDevice.CreateInputLayout(mesh.VertexBuffer.Layout, shader.vShader);
-                InputLayoutManager.inputLayoutCache[key] = layout;
-            }
-            return layout;
-        }
-
         public static void Resize(int width, int height)
         {
             ActiveRenderingPipeline.Resize(width, height);

@@ -99,7 +99,7 @@ namespace DevoidEngine.Engine.Rendering
 
                 BasicForward.Apply();
 
-                IInputLayout inputLayout = Renderer3D.GetInputLayout(instance.Mesh, BasicForward.BaseMaterial.Shader);
+                IInputLayout inputLayout = Renderer.GetInputLayout(instance.Mesh, BasicForward.BaseMaterial.Shader);
 
                 inputLayout.Bind();
 
