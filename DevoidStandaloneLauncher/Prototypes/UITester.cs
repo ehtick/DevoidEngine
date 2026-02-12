@@ -13,13 +13,23 @@ namespace DevoidStandaloneLauncher.Prototypes
     internal class UITester : Prototype
     {
         Scene scene;
-        GameObject cube;
+        GameObject canvas;
         GameObject camera;
 
         public override void OnInit(Scene main)
         {
+            this.scene = main;
+
             UIButton button = new UIButton();
             button.Setup();
+
+            canvas = scene.addGameObject("Canvas");
+            CanvasComponent canvasComponent = canvas.AddComponent<CanvasComponent>();
+            
+
+            camera = scene.addGameObject("Camera");
+            CameraComponent3D cameraComponent = camera.AddComponent<CameraComponent3D>();
+            camera.transform.Position = new System.Numerics.Vector3(0, 0, 0);
         }
 
         public override void OnUpdate(float delta)

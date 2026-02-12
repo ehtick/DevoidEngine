@@ -22,71 +22,71 @@ namespace DevoidEngine.Engine.Rendering
         private static List<RenderBatch> RenderBatches = new List<RenderBatch>();
 
 
-        public static List<RenderBatch> BuildRenderBatches(List<IRenderCommand> commands)
-        {
-            RenderBatch currentRenderBatch = null;
+        //public static List<RenderBatch> BuildRenderBatches(List<IRenderCommand> commands)
+        //{
+        //    RenderBatch currentRenderBatch = null;
 
-            foreach (IRenderCommand command in commands)
-            {
-                if (command is SetViewInfoCommand3D)
-                {
-                    SetViewInfoCommand3D viewInfo3D = (SetViewInfoCommand3D)command;
+        //    foreach (IRenderCommand command in commands)
+        //    {
+        //        if (command is SetViewInfoCommand3D)
+        //        {
+        //            SetViewInfoCommand3D viewInfo3D = (SetViewInfoCommand3D)command;
 
-                    currentRenderBatch = RenderBatchPool.Get();
-                    currentRenderBatch.instances = new List<RenderInstance>();
+        //            currentRenderBatch = RenderBatchPool.Get();
+        //            currentRenderBatch.instances = new List<RenderInstance>();
 
-                    currentRenderBatch.camera = viewInfo3D.camera;
+        //            currentRenderBatch.camera = viewInfo3D.camera;
 
-                    EnginePipeline.SetViewInfoPool.Return(ref viewInfo3D);
+        //            EnginePipeline.SetViewInfoPool.Return(ref viewInfo3D);
 
-                }
-                else if (command is DrawMeshIndexed)
-                {
-                    DrawMeshIndexed drawMeshIndexed = (DrawMeshIndexed)command;
+        //        }
+        //        else if (command is DrawMeshIndexed)
+        //        {
+        //            DrawMeshIndexed drawMeshIndexed = (DrawMeshIndexed)command;
 
-                    currentRenderBatch.instances.Add(drawMeshIndexed.instance);
+        //            currentRenderBatch.instances.Add(drawMeshIndexed.instance);
 
-                    EnginePipeline.DrawMeshIndexedPool.Return(ref drawMeshIndexed);
-                }
-                else if (command is Render3DStateCommand)
-                {
-                    Render3DStateCommand render3DStartCommand = (Render3DStateCommand)command;
+        //            EnginePipeline.DrawMeshIndexedPool.Return(ref drawMeshIndexed);
+        //        }
+        //        else if (command is Render3DStateCommand)
+        //        {
+        //            Render3DStateCommand render3DStartCommand = (Render3DStateCommand)command;
 
-                    if (currentRenderBatch.camera == null)
-                        throw new InvalidOperationException("Cannot call render commands without active camera");
+        //            if (currentRenderBatch.camera == null)
+        //                throw new InvalidOperationException("Cannot call render commands without active camera");
 
-                    if (render3DStartCommand.state == RendererStateCommnandType.End)
-                    {
-                        RenderBatches.Add(currentRenderBatch);
-                        currentRenderBatch = RenderBatchPool.Get();
-                    }
+        //            if (render3DStartCommand.state == RendererStateCommnandType.End)
+        //            {
+        //                RenderBatches.Add(currentRenderBatch);
+        //                currentRenderBatch = RenderBatchPool.Get();
+        //            }
 
-                    EnginePipeline.Renderer3DStateCommand.Return(ref render3DStartCommand);
-                }
-            }
+        //            EnginePipeline.Renderer3DStateCommand.Return(ref render3DStartCommand);
+        //        }
+        //    }
 
-            return RenderBatches;
-        }
+        //    return RenderBatches;
+        //}
 
-        public static void ProcessCommands(List<IRenderCommand> commands)
-        {
-            List<RenderBatch> renderBatches =  BuildRenderBatches(commands);
+        //public static void ProcessCommands(List<IRenderCommand> commands)
+        //{
+        //    List<RenderBatch> renderBatches =  BuildRenderBatches(commands);
 
-            for (int i = 0; i < renderBatches.Count; i++)
-            {
-                RenderBatch renderBatch = renderBatches[i];
+        //    for (int i = 0; i < renderBatches.Count; i++)
+        //    {
+        //        RenderBatch renderBatch = renderBatches[i];
 
-                Renderer3D.BeginRender(renderBatch.camera);
+        //        Renderer3D.BeginRender(renderBatch.camera);
 
-                Renderer3D.Render(renderBatch.instances);
+        //        Renderer3D.Render(renderBatch.instances);
 
-                Renderer3D.EndRender();
+        //        Renderer3D.EndRender();
 
-                RenderBatchPool.Return(ref renderBatch);
-            }
+        //        RenderBatchPool.Return(ref renderBatch);
+        //    }
 
-            RenderBatches.Clear();
-        }
+        //    RenderBatches.Clear();
+        //}
 
         static RenderAPI()
         {

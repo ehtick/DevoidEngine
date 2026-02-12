@@ -1,119 +1,119 @@
-﻿using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//using DevoidEngine.Engine.Rendering;
+//using DevoidEngine.Engine.Utilities;
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
 
-namespace DevoidEngine.Engine.Core
-{
-    public static class EnginePipeline
-    {
-        public static Pool<DrawMeshIndexed> DrawMeshIndexedPool;
-        public static Pool<SetViewInfoCommand3D> SetViewInfoPool;
-        public static Pool<Render3DStateCommand> Renderer3DStateCommand;
+//namespace DevoidEngine.Engine.Core
+//{
+//    public static class EnginePipeline
+//    {
+//        //public static Pool<DrawMeshIndexed> DrawMeshIndexedPool;
+//        //public static Pool<SetViewInfoCommand3D> SetViewInfoPool;
+//        //public static Pool<Render3DStateCommand> Renderer3DStateCommand;
 
-        public static Dictionary<Camera, List<RenderInstance>> VisibleInstances;
-
-
-        public static List<IRenderCommand> RenderCommands;
-        public static DoubleBuffer<List<IRenderCommand>> InstanceBuffers;
-
-        static EnginePipeline()
-        {
-            DrawMeshIndexedPool = new Pool<DrawMeshIndexed>();
-            SetViewInfoPool = new Pool<SetViewInfoCommand3D>();
-            Renderer3DStateCommand = new Pool<Render3DStateCommand>();
-
-            InstanceBuffers = new DoubleBuffer<List<IRenderCommand>>(new List<IRenderCommand>(), new List<IRenderCommand>());
-
-            RenderCommands = new List<IRenderCommand>();
-            VisibleInstances = new Dictionary<Camera, List<RenderInstance>>();
-        }
-
-        public static void ExecuteUpdateThread(float deltaTime)
-        {
-            if (!SceneManager.IsSceneLoaded()) { return; }
+//        public static Dictionary<Camera, List<RenderInstance>> VisibleInstances;
 
 
-            RenderCommands.Clear();
+//        public static List<IRenderCommand> RenderCommands;
+//        public static DoubleBuffer<List<IRenderCommand>> InstanceBuffers;
 
-            SceneManager.Update(deltaTime);
+//        static EnginePipeline()
+//        {
+//            //DrawMeshIndexedPool = new Pool<DrawMeshIndexed>();
+//            //SetViewInfoPool = new Pool<SetViewInfoCommand3D>();
+//            //Renderer3DStateCommand = new Pool<Render3DStateCommand>();
 
-            List<RenderInstance> renderInstances = SceneRenderSystem.RenderInstances;
+//            InstanceBuffers = new DoubleBuffer<List<IRenderCommand>>(new List<IRenderCommand>(), new List<IRenderCommand>());
 
+//            RenderCommands = new List<IRenderCommand>();
+//            VisibleInstances = new Dictionary<Camera, List<RenderInstance>>();
+//        }
 
-            SceneManager.Render(deltaTime);
-
-            // Frustum culling per camera
-            PerformFrustumCull(renderInstances);
-
-            foreach (var cameraRenderInstances in VisibleInstances)
-            {
-
-                Camera camera = cameraRenderInstances.Key;
-                List<RenderInstance> visibleInstances = cameraRenderInstances.Value;
-
-
-                Graphics.SetCamera(camera);
+//        public static void ExecuteUpdateThread(float deltaTime)
+//        {
+//            if (!SceneManager.IsSceneLoaded()) { return; }
 
 
+//            RenderCommands.Clear();
 
-                RenderPipeline.BeginCameraRender();
+//            SceneManager.Update(deltaTime);
 
-                Graphics.SetRendererState(RendererStateCommnandType.Begin);
-                foreach (var renderInstance in visibleInstances)
-                {
-                    Graphics.DrawMeshIndexed(renderInstance);
-                }
-                Graphics.SetRendererState(RendererStateCommnandType.End);
+//            List<RenderInstance> renderInstances = SceneRenderSystem.RenderInstances;
 
-                RenderPipeline.EndCameraRender();
-            }
 
-            RenderCommands = InstanceBuffers.UpdateSwap(RenderCommands);
-        }
+//            SceneManager.Render(deltaTime);
 
-        public static void ExecuteRenderThread(float deltaTime)
-        {
-            List<IRenderCommand> commandList = InstanceBuffers.Front;
+//            // Frustum culling per camera
+//            PerformFrustumCull(renderInstances);
 
-            RenderAPI.ProcessCommands(commandList);
+//            foreach (var cameraRenderInstances in VisibleInstances)
+//            {
 
-            commandList.Clear();
+//                Camera camera = cameraRenderInstances.Key;
+//                List<RenderInstance> visibleInstances = cameraRenderInstances.Value;
 
-            InstanceBuffers.RenderSwap();
-        }
 
-        static void PerformFrustumCull(List<RenderInstance> renderInstances)
-        {
+//                Graphics.SetCamera(camera);
+
+
+
+//                RenderPipeline.BeginCameraRender();
+
+//                Graphics.SetRendererState(RendererStateCommnandType.Begin);
+//                foreach (var renderInstance in visibleInstances)
+//                {
+//                    Graphics.DrawMeshIndexed(renderInstance);
+//                }
+//                Graphics.SetRendererState(RendererStateCommnandType.End);
+
+//                RenderPipeline.EndCameraRender();
+//            }
+
+//            RenderCommands = InstanceBuffers.UpdateSwap(RenderCommands);
+//        }
+
+//        public static void ExecuteRenderThread(float deltaTime)
+//        {
+//            List<IRenderCommand> commandList = InstanceBuffers.Front;
+
+//            RenderAPI.ProcessCommands(commandList);
+
+//            commandList.Clear();
+
+//            InstanceBuffers.RenderSwap();
+//        }
+
+//        static void PerformFrustumCull(List<RenderInstance> renderInstances)
+//        {
             
 
-            VisibleInstances.Clear();
-            foreach (var camera in SceneManager.MainScene.Cameras)
-            {
-                var cam = camera.Camera;
-                var list = new List<RenderInstance>();
-                for (int i = 0; i < renderInstances.Count; i++)
-                {
-                    var instance = renderInstances[i];
+//            VisibleInstances.Clear();
+//            foreach (var camera in SceneManager.MainScene.Cameras)
+//            {
+//                var cam = camera.Camera;
+//                var list = new List<RenderInstance>();
+//                for (int i = 0; i < renderInstances.Count; i++)
+//                {
+//                    var instance = renderInstances[i];
                     
-                    list.Add(instance);
-                    continue;
+//                    list.Add(instance);
+//                    continue;
 
-                    if (cam.Frustum.Intersects(instance.Mesh.LocalBounds.Transform(instance.WorldMatrix)))
-                        list.Add(instance);
-                }
-                if (list.Count > 0)
-                {
-                    VisibleInstances[cam] = list;
-                }
+//                    if (cam.Frustum.Intersects(instance.Mesh.LocalBounds.Transform(instance.WorldMatrix)))
+//                        list.Add(instance);
+//                }
+//                if (list.Count > 0)
+//                {
+//                    VisibleInstances[cam] = list;
+//                }
 
-            }
-        }
+//            }
+//        }
 
 
 
-    }
-}
+//    }
+//}

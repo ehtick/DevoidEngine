@@ -218,12 +218,16 @@ namespace DevoidEngine.Engine.UI.Nodes
                 }
             }
 
-            UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
+            //UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
         }
-        protected override void RenderCore()
+        protected override void RenderCore(List<RenderItem> renderList)
         {
 
         }
 
+        protected override void InitializeCore()
+        {
+
+        }
     }
 }

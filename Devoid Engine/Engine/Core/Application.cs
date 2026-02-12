@@ -79,6 +79,7 @@ namespace DevoidEngine.Engine.Core
             graphicsDevice = appSpec.graphicsDevice;
             graphicsDevice.Initialize(MainWindow.GetWindowPtr(), presentationParameters);
             Renderer.Initialize(graphicsDevice, appSpec.Width, appSpec.Height);
+            UISystem.Initialize();
 
             MainWindow.OnLoad += OnLoad;
             MainWindow.OnUpdateFrame += OnUpdateFrame;
@@ -173,10 +174,9 @@ namespace DevoidEngine.Engine.Core
             ImGuiRenderer.PerFrame((float)deltaTime);
 
             LayerHandler.RenderLayers((float)deltaTime);
-            
-            EnginePipeline.ExecuteRenderThread((float)deltaTime);
 
-            UISystem.PerformUI();
+            FramePipeline.ExecuteRenderThread((float)deltaTime);
+
             LayerHandler.LateRenderLayers();
 
             graphicsDevice.MainSurface.Bind();
@@ -192,7 +192,9 @@ namespace DevoidEngine.Engine.Core
 
             LayerHandler.UpdateLayers((float)deltaTime);
 
-            EnginePipeline.ExecuteUpdateThread((float)deltaTime);
+            UISystem.Update();
+
+            FramePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();
 

@@ -172,9 +172,14 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
         }
 
-        protected override void RenderCore()
+        protected override void RenderCore(List<RenderItem> renderList)
         {
-            throw new NotImplementedException();
+
+        }
+
+        protected override void InitializeCore()
+        {
+
         }
     }
 }

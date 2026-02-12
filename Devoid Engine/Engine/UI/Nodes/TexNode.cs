@@ -22,7 +22,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected override void ArrangeCore(UITransform finalRect)
         {
             base.ArrangeCore(finalRect);
-            UIRenderer.DrawTexRect(finalRect, texture, DEBUG_NUM_LOCAL);
+            //UIRenderer.DrawTexRect(finalRect, texture, DEBUG_NUM_LOCAL);
         }
 
         //protected override Vector2 MeasureCore(Vector2 available)
@@ -54,9 +54,8 @@ namespace DevoidEngine.Engine.UI.Nodes
         //    UIRenderer.DrawRect( finalRect , DEBUG_NUM_LOCAL);
         //}
 
-        protected override void RenderCore()
+        protected override void RenderCore(List<RenderItem> renderList)
         {
-            throw new NotImplementedException();
         }
     }
 }

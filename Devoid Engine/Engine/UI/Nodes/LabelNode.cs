@@ -55,19 +55,24 @@ namespace DevoidEngine.Engine.UI.Nodes
 
 
             // Render text inside the allocated rect
-            UIRenderer.DrawText(
-                new UITransform(
-                    finalRect.position,
-                    finalRect.size
-                ),
-                _mesh,
-                Font.Atlas.GPUTexture
-            );
+            //UIRenderer.DrawText(
+            //    new UITransform(
+            //        finalRect.position,
+            //        finalRect.size
+            //    ),
+            //    _mesh,
+            //    Font.Atlas.GPUTexture
+            //);
         }
 
-        protected override void RenderCore()
+        protected override void RenderCore(List<RenderItem> renderList)
         {
             // Not used — rendering happens in ArrangeCore like BoxNode
+        }
+
+        protected override void InitializeCore()
+        {
+
         }
     }
 }

@@ -5,7 +5,7 @@ struct PSInput
     float2 UV0 : TEXCOORD0;
 };
 
-cbuffer TransformData : register(b1)
+cbuffer RenderData : register(b1)
 {
     float4x4 Model;
     float4 id;

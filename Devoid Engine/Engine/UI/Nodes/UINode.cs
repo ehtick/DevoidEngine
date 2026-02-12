@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -22,7 +24,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         public UITransform Rect { get; protected set; }
         public Vector2 DesiredSize { get; private set; }
         public LayoutOptions Layout { get; set; } = new LayoutOptions();
-
+        public MaterialInstance Material { get; set; }
 
         public bool Visible = true;
         public bool Interactable = true;
@@ -42,6 +44,12 @@ namespace DevoidEngine.Engine.UI.Nodes
         public void Add(UINode child)
         {
             _children.Add(child);
+            child.Initialize();
+        }
+
+        public void Initialize()
+        {
+            InitializeCore();
         }
 
         // ENTRY POINT
@@ -71,15 +79,20 @@ namespace DevoidEngine.Engine.UI.Nodes
 
             ArrangeCore(finalRect);
         }
-        public void Render()
+        public void Render(List<RenderItem> renderList)
         {
-            RenderCore();
+            RenderCore(renderList);
+            for (int i = 0; i < _children.Count; i++)
+            {
+                _children[i].Render(renderList);
+            }
         }
 
         // OVERRIDES
+        protected abstract void InitializeCore();
         protected abstract Vector2 MeasureCore(Vector2 availableSize);
         protected abstract void ArrangeCore(UITransform finalRect);
-        protected abstract void RenderCore();
+        protected abstract void RenderCore(List<RenderItem> renderList);
     }
 
 }

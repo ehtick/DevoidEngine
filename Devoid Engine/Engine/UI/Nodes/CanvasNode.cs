@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DevoidEngine.Engine.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -20,7 +21,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             base.ArrangeCore(finalRect);
         }
 
-        protected override void RenderCore()
+        protected override void RenderCore(List<RenderItem> renderList)
         {
 
         }

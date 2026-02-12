@@ -28,7 +28,7 @@ cbuffer CameraData : register(b0)
     float _padding0;
 };
 
-cbuffer TransformData : register(b1)
+cbuffer RenderData : register(b1)
 {
     float4x4 Model;
     float4 id;

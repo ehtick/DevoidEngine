@@ -13,8 +13,22 @@ class BoxNode : UINode
     protected override void ArrangeCore(UITransform finalRect)
     {
         Rect = finalRect;
-        UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
+        //UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
     }
 
-    protected override void RenderCore() { }
+    protected override void RenderCore(List<RenderItem> renderList)
+    {
+        renderList.Add(new RenderItem()
+        {
+            Mesh = UISystem.QuadMesh,
+            Material = Material,
+            Model = UISystem.BuildModel(Rect),
+        });
+    }
+
+    protected override void InitializeCore()
+    {
+        Material = UISystem.GetMaterial();
+        Material.PropertiesVec4Override["Configuration"] = new Vector4(DEBUG_NUM_LOCAL, 0, 0, 0);
+    }
 }

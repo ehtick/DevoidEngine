@@ -16,6 +16,7 @@ namespace DevoidEngine.Engine.Core
         public List<GameObject> GameObjects { get; set; }
 
         public List<CameraComponent3D> Cameras;
+        public List<IRenderComponent> Renderables;
 
 
         public bool IsPlaying = false;
@@ -31,6 +32,7 @@ namespace DevoidEngine.Engine.Core
         public void Initialize()
         {
             Cameras = new List<CameraComponent3D>();
+            Renderables = new List<IRenderComponent>();
         }
 
         public GameObject addGameObject(string name)
@@ -216,6 +218,12 @@ namespace DevoidEngine.Engine.Core
             if (component is CameraComponent3D)
             {
                 AddCamera((CameraComponent3D)component);
+            }
+
+            if (component is IRenderComponent)
+            {
+                Renderables.Add((IRenderComponent)component);
+                Console.WriteLine("[Scene]: Added " + component.Type + " as Renderable.");
             }
 
             if (IsPlaying)

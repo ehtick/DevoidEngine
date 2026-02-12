@@ -1,5 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
+using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
@@ -7,18 +7,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
-namespace DevoidEngine.Engine.UI
+namespace DevoidEngine.Engine.Components
 {
-    public class UIButton : UIElement
+    public class CanvasComponent : Component, IRenderComponent
     {
-        public UINode Root;
-        public override void Setup()
+        public override string Type => nameof(CanvasComponent);
+
+        CanvasNode Canvas = new CanvasNode()
+        {
+            Direction = FlexDirection.Row,
+            Align = AlignItems.Stretch,
+            Justify = JustifyContent.Start
+        };
+
+        public void Collect(CameraComponent3D camera, CameraRenderContext viewData)
+        {
+            Canvas.Render(viewData.renderItemsUI);
+        }
+
+        public override void OnStart()
+        {
+            UISystem.Roots.Add(Canvas);
+
+            Setup();
+
+            base.OnStart();
+        }
+
+        public void Setup()
         {
 
-            font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
+            FontInternal font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
             //font = FontLibrary.LoadFont("C:/Windows/Fonts/HARLOWSI.ttf", 32);
 
             FlexboxNode headerContainer = new FlexboxNode()
@@ -36,7 +60,7 @@ namespace DevoidEngine.Engine.UI
 
 
 
-            label = new LabelNode("Hey!\u0124", font, 20f)
+            LabelNode label = new LabelNode("Hey!\u0124", font, 20f)
             {
                 Layout = new LayoutOptions() { FlexGrowMain = 0 }
             };
@@ -115,23 +139,13 @@ namespace DevoidEngine.Engine.UI
                 mainContainer.Add(nodes[i]);
             }
 
-            Root = mainContainer;
+            Canvas.Add(mainContainer);
         }
 
-        Mesh mesh;
-        FontInternal font;
-        LabelNode label;
-        int i = 0;
-        public override void Update()
+        public override void OnUpdate(float dt)
         {
-            //UIRenderer.DrawText(new UITransform(new Vector2(10), new Vector2(1))
-            //    , mesh,font.Atlas.GPUTexture
-            //);
-            label.Text = "Counter: " + i;
-            i += 500;
+            
         }
-
-        string text = @"Hey!";
 
     }
 }

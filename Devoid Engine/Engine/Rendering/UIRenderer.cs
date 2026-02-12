@@ -161,6 +161,16 @@ namespace DevoidEngine.Engine.Rendering
             Renderer.graphicsDevice.Draw(_quad.VertexBuffer.VertexCount, 0);
         }
 
+        public static void DrawRect(Matrix4x4 model, int id)
+        {
+            _uiRenderData.Model = model;
+            _uiRenderData.Id = new Vector4(id, 0, 0, 0);
+            _uiRenderBuffer.SetData(ref _uiRenderData);
+
+            PrepareQuadDraw(_basicShader);
+            Renderer.graphicsDevice.Draw(_quad.VertexBuffer.VertexCount, 0);
+        }
+
         public static void DrawTexRect(UITransform transform, Texture2D texture, int id)
         {
             _uiRenderData.Model = BuildModel(transform);
