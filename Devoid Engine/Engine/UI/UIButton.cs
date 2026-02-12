@@ -18,55 +18,16 @@ namespace DevoidEngine.Engine.UI
         public override void Setup()
         {
 
-
-            //BoxNode node = new BoxNode()
-            //{
-            //    Size = new Vector2(50, 100),
-            //    Layout = new LayoutOptions { FlexGrowMain = 1 }
-            //};
-
-            //BoxNode node1 = new BoxNode()
-            //{
-            //    Size = new Vector2(100, 20),
-            //    Layout = new LayoutOptions { FlexGrowMain = 0 }
-            //};
-
-            //BoxNode node2 = new BoxNode()
-            //{
-            //    Size = new Vector2(100, 100),
-            //    Layout = new LayoutOptions { FlexGrowMain = 1 }
-            //};
-
-
-
-            //FlexboxNode mainContainer = new FlexboxNode()
-            //{
-            //    Offset = new Vector2(50, 50),
-            //    ParticipatesInLayout = false,
-
-            //    Direction = FlexDirection.Column,
-            //    Gap = 0f,
-            //    Align = AlignItems.Stretch,
-            //    Justify = JustifyContent.Start,
-            //    Layout = new LayoutOptions
-            //    {
-            //        FlexGrowMain = 1
-            //    }
-            //};
-
-            //mainContainer.Add(node);
-            //mainContainer.Add(node1);
-            //mainContainer.Add(node2);
-
             font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
+            //font = FontLibrary.LoadFont("C:/Windows/Fonts/HARLOWSI.ttf", 32);
 
-            BoxNode headerContainer = new BoxNode()
+            FlexboxNode headerContainer = new FlexboxNode()
             {
-                Size = new Vector2(200, 50),
-                MinSize = new Vector2(250, 50),
-                Direction = FlexDirection.Row,
+                Size = new Vector2(50, 50),
+
+                Direction = FlexDirection.Column,
                 Align = AlignItems.Center,
-                Justify = JustifyContent.End,
+                Justify = JustifyContent.Center,
                 Layout = new LayoutOptions()
                 {
                     FlexGrowMain = 1
@@ -74,9 +35,9 @@ namespace DevoidEngine.Engine.UI
             };
 
 
-            LabelNode label = new LabelNode("Hey!", font, 1f)
+
+            label = new LabelNode("Hey!\u0124", font, 20f)
             {
-                Size = new Vector2(50, 50),
                 Layout = new LayoutOptions() { FlexGrowMain = 0 }
             };
 
@@ -157,21 +118,24 @@ namespace DevoidEngine.Engine.UI
             Root = mainContainer;
             UISystem.Canvas.Add(Root);
 
-            font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
+            //font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
             //font = FontLibrary.LoadFont("C:/Windows/Fonts/Arial.ttf", 32);
-            mesh = TextMeshGenerator.Generate(font, (text), font.GetScaleForFontSize(50));
+            //mesh = TextMeshGenerator.Generate(font, (text), font.GetScaleForFontSize(50));
 
             UISystem.OnRender += Update;
         }
 
         Mesh mesh;
         FontInternal font;
-
+        LabelNode label;
+        int i = 0;
         public override void Update()
         {
             //UIRenderer.DrawText(new UITransform(new Vector2(10), new Vector2(1))
             //    , mesh,font.Atlas.GPUTexture
             //);
+            label.Text = "Counter: " + i;
+            i += 500;
         }
 
         string text = @"Hey!";

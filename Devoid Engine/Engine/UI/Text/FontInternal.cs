@@ -100,7 +100,7 @@ namespace DevoidEngine.Engine.UI.Text
 
             while (glyphIndex != 0)
             {
-                if (charCode >= 32 && charCode <= 126)
+                if (charCode >= 32 && charCode <= 383)
                 {
                     var glyphData = GenerateSingleGlyph(charCode, scaleFactor, highResSpread, highResPadding);
                     if (glyphData.Bitmap != null)
@@ -113,7 +113,7 @@ namespace DevoidEngine.Engine.UI.Text
                 charCode = face.GetNextChar(charCode, out glyphIndex);
             }
 
-            Atlas = new GlyphAtlas(1024, 1024);
+            Atlas = new GlyphAtlas(2048, 2048);
             Atlas.Pack(rawGlyphs);
             Atlas.UploadGPU();
 

@@ -136,6 +136,12 @@ namespace DevoidEngine.Engine.Rendering
                 Matrix4x4.CreateTranslation(t.position.X, t.position.Y, 0f);
         }
 
+        private static Matrix4x4 BuildTranslationModel(UITransform t)
+        {
+            return Matrix4x4.CreateTranslation(t.position.X, t.position.Y, 0f);
+        }
+
+
         private static void PrepareQuadDraw(Shader shader)
         {
             IInputLayout layout = Renderer3D.GetInputLayout(_quad, shader);
@@ -171,7 +177,7 @@ namespace DevoidEngine.Engine.Rendering
 
         public static void DrawText(UITransform transform, Mesh mesh, Texture2D atlas)
         {
-            _uiRenderData.Model = BuildModel(transform);
+            _uiRenderData.Model = BuildTranslationModel(transform);
             _uiRenderData.Id = Vector4.Zero;
             _uiRenderBuffer.SetData(ref _uiRenderData);
 

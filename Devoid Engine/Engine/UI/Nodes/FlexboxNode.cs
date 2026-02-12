@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DevoidEngine.Engine.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -52,6 +53,12 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         protected override void ArrangeCore(UITransform finalRect)
         {
+            Rect = finalRect;
+            //Console.WriteLine("---- HEADER CONTAINER ----");
+            //Console.WriteLine($"finalRect.size: {finalRect.size}");
+            //Console.WriteLine($"DesiredSize: {DesiredSize}");
+
+
             float containerMain = FlexboxTools.Main(finalRect.size, Direction);
             float containerCross = FlexboxTools.Cross(finalRect.size, Direction);
 
@@ -83,6 +90,11 @@ namespace DevoidEngine.Engine.UI.Nodes
                 }
 
             }
+
+            //if (resolvedMainSizes.Length > 0)
+            //{
+            //    Console.WriteLine($"child resolvedMainSize: {resolvedMainSizes[0]}");
+            //}
 
             remainingSpace -= totalGap;
 
@@ -205,6 +217,8 @@ namespace DevoidEngine.Engine.UI.Nodes
                     child.Arrange(new UITransform(pos, size));
                 }
             }
+
+            UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
         }
         protected override void RenderCore()
         {

@@ -16,10 +16,8 @@ namespace DevoidEngine.Engine.UI.Nodes
             set
             {
                 _text = value;
-                Console.WriteLine(_text);
-                Console.WriteLine(Font);
-                Console.WriteLine(Scale);
                 _mesh = TextMeshGenerator.Generate(Font, _text, Font.GetScaleForFontSize(Scale));
+                Size = TextMeshGenerator.Measure(Font, Text, Font.GetScaleForFontSize(Scale));
             }
         }
         public FontInternal Font;
@@ -45,10 +43,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             if (Font == null || string.IsNullOrEmpty(Text))
                 return Vector2.Zero;
 
-            // Compute intrinsic text size
-            _measuredTextSize = TextMeshGenerator.Measure(Font, Text, Scale);
-
-            return _measuredTextSize;
+            return Size ?? Vector2.Zero;
         }
 
         protected override void ArrangeCore(UITransform finalRect)
@@ -59,7 +54,6 @@ namespace DevoidEngine.Engine.UI.Nodes
                 return;
 
 
-
             // Render text inside the allocated rect
             UIRenderer.DrawText(
                 new UITransform(
@@ -68,11 +62,6 @@ namespace DevoidEngine.Engine.UI.Nodes
                 ),
                 _mesh,
                 Font.Atlas.GPUTexture
-                //Font,
-                //Text,
-                //finalRect.position,
-                //Scale,
-                //finalRect.size
             );
         }
 

@@ -26,8 +26,8 @@ namespace DevoidEngine.Engine.Core
 
         public void RunAll()
         {
-            const double updateHz = 60.0;
-            const double renderHz = 165.0;
+            const double updateHz = 165;
+            const double renderHz = 165;
 
             double updateStep = 1.0 / updateHz;
             double renderStep = 1.0 / renderHz;

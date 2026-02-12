@@ -33,8 +33,9 @@ namespace DevoidEngine.Engine.UI.Nodes
             startOffset = 0f;
             interItemGap = gap;
 
-            if (count <= 1)
+            if (count == 0)
                 return;
+
 
             switch (justify)
             {

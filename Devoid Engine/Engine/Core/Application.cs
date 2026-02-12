@@ -201,7 +201,6 @@ namespace DevoidEngine.Engine.Core
             {
                 InternalInputState.UpdateFrame();
             });
-
         }
     }
 }

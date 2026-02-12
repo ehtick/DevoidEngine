@@ -20,9 +20,7 @@ namespace DevoidEngine.Engine.UI.Text
                 return new Mesh();
             }
 
-            float fontAscender = font.Ascender + font.Descender;
-            Console.WriteLine(fontAscender);
-            Console.WriteLine(scale);
+            float fontAscender = font.Ascender;
 
             if (fontAscender == 0)
             {
@@ -110,6 +108,7 @@ namespace DevoidEngine.Engine.UI.Text
                 cursor.X += metric.HorizontalAdvance * scale;
             }
 
+
             Mesh mesh = new Mesh();
             mesh.SetVertices(vertices.ToArray());
             mesh.SetIndices(indices.ToArray());
@@ -123,29 +122,35 @@ namespace DevoidEngine.Engine.UI.Text
                 return Vector2.Zero;
             }
 
-            float currentLineWidth = 0;
-            float maxLineWidth = 0;
+            // Initialize dimensions
+            float maxLineWidth = 0f;
+            //float lineHeight = font.LineHeight * scale;
+            float lineHeight = (font.Ascender - font.Descender) * scale;
+            float totalHeight = lineHeight; // Start with one line height
 
-            // Start with height of one line
-            float totalHeight = font.LineHeight * scale;
+            float startX = 0;
 
-            bool isFirstCharOfLine = true;
+            // We only need to track X for width; Y is calculated via line counts
+            float cursorX = startX;
+            bool isFirstCharacterOfLine = true;
 
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];
 
-                // --- 1. Handle Newlines ---
                 if (c == '\n')
                 {
-                    // Lock in the width of the line we just finished
-                    if (currentLineWidth > maxLineWidth)
-                        maxLineWidth = currentLineWidth;
+                    // End of line: Check if this was the widest line so far
+                    if (cursorX > maxLineWidth)
+                        maxLineWidth = cursorX;
 
-                    // Reset for next line
-                    currentLineWidth = 0;
-                    totalHeight += font.LineHeight * scale;
-                    isFirstCharOfLine = true;
+                    // Reset X cursor
+                    cursorX = startX;
+
+                    // Add a new line to height
+                    totalHeight += lineHeight;
+
+                    isFirstCharacterOfLine = true;
                     continue;
                 }
 
@@ -155,25 +160,27 @@ namespace DevoidEngine.Engine.UI.Text
                     continue;
                 }
 
-                // --- 2. Handle "Flush Left" Fix ---
-                // Just like Generate(), we subtract the empty bearing from the start.
-                // This ensures the box starts exactly where the ink starts.
-                if (isFirstCharOfLine)
+                // --- Layout Logic (Identical to Generate) ---
+
+                // 1. Flush Left Adjustment
+                // (Removes the left-side bearing of the first char so it aligns with x=0)
+                if (isFirstCharacterOfLine)
                 {
-                    currentLineWidth -= metric.OriginalBearingX * scale;
-                    isFirstCharOfLine = false;
+                    cursorX -= metric.OriginalBearingX * scale;
+                    isFirstCharacterOfLine = false;
                 }
 
-                // --- 3. Advance ---
-                // Simply add the horizontal advance (no kerning lookup)
-                currentLineWidth += metric.HorizontalAdvance * scale;
+                // 2. Advance Cursor
+                // (Includes visible width + whitespace/kerning)
+                cursorX += metric.HorizontalAdvance * scale;
             }
 
-            // Capture the width of the final line
-            if (currentLineWidth > maxLineWidth)
-                maxLineWidth = currentLineWidth;
+            // Check the width of the final line (since the loop ends before the newline check)
+            if (cursorX > maxLineWidth)
+                maxLineWidth = cursorX;
 
             return new Vector2(maxLineWidth, totalHeight);
         }
+
     }
 }
