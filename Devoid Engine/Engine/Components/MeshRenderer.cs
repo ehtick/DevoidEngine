@@ -39,7 +39,8 @@ namespace DevoidEngine.Engine.Components
                 Mesh = mesh,
                 Model = RenderBase.BuildModel(
                     gameObject.transform.Position,
-                    gameObject.transform.Scale
+                    gameObject.transform.Scale,
+                    gameObject.transform.Rotation
                 )
             });
         }

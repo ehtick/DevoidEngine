@@ -24,7 +24,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             mesh.SetVertices(Primitives.GetCubeVertex());
 
             cube = scene.addGameObject("Cube");
-            cube.transform.Position = new System.Numerics.Vector3(10, 0, 0);
+            cube.transform.Position = new System.Numerics.Vector3(0, 0, -10);
             MeshRenderer renderer = cube.AddComponent<MeshRenderer>();
 
             renderer.AddMesh(mesh);
@@ -32,7 +32,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         public override void OnUpdate(float delta)
         {
-            //cube.transform.Rotation = new System.Numerics.Vector3(cube.transform.Rotation.X + delta * 10, cube.transform.Rotation.Y + delta, cube.transform.Rotation.Z + delta);
+            cube.transform.Rotation = new System.Numerics.Vector3(cube.transform.Rotation.X + delta * 10, cube.transform.Rotation.Y + delta, cube.transform.Rotation.Z + delta);
         }
 
     }

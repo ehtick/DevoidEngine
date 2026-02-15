@@ -18,5 +18,5 @@ cbuffer Material : register(b2)
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    return float4(input.UV0.x, input.UV0.y, 0, 0) - Albedo;
+    return float4(input.UV0.x, input.UV0.y, 1, 1);
 }

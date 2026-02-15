@@ -26,7 +26,7 @@ namespace DevoidEngine.Engine.Core
             cpuBuffer = new byte[BaseMaterial.MaterialBufferSize];
             BaseMaterial.GetDefaultMaterialBuffer().CopyTo(cpuBuffer);
 
-            gpuBuffer = new UniformBuffer(BaseMaterial.MaterialBufferSize, BufferUsage.Dynamic);
+            gpuBuffer = new UniformBuffer(BaseMaterial.MaterialBufferSize == 0 ? 1 : BaseMaterial.MaterialBufferSize, BufferUsage.Dynamic);
 
             textureOverrides = new Dictionary<string, Texture>();
             isDirty = true;

@@ -45,6 +45,8 @@ namespace DevoidEngine.Engine.Rendering
             finalOutputBuffer.Bind();
             finalOutputBuffer.Clear();
 
+            Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
+
             RenderBase.SetupCamera(ctx.camera.GetCameraData());
             RenderBase.Execute(ctx.renderItems3D, RenderState.DefaultRenderState);
 
