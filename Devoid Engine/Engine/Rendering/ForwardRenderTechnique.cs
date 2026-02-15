@@ -45,8 +45,11 @@ namespace DevoidEngine.Engine.Rendering
             finalOutputBuffer.Bind();
             finalOutputBuffer.Clear();
 
-            RenderBase.SetupCamera(UIRenderer.ScreenData);
-            RenderBase.Execute(ctx.renderItemsUI, RenderState.DefaultRenderState);
+            RenderBase.SetupCamera(ctx.camera.GetCameraData());
+            RenderBase.Execute(ctx.renderItems3D, RenderState.DefaultRenderState);
+
+            //RenderBase.SetupCamera(UIRenderer.ScreenData);
+            //RenderBase.Execute(ctx.renderItemsUI, RenderState.DefaultRenderState);
 
 
             return finalOutputBuffer.GetRenderTexture(0);

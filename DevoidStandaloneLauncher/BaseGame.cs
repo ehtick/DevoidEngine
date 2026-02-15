@@ -7,7 +7,7 @@ namespace DevoidStandaloneLauncher
     internal class BaseGame : Layer
     {
         Scene MainScene = new Scene();
-        Prototype gamePrototype = new UITester();
+        Prototype gamePrototype = new CubeSpinForwardRenderer();
 
         public override void OnAttach()
         {

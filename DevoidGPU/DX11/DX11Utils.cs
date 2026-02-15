@@ -3,7 +3,7 @@ using SharpDX.DXGI;
 
 namespace DevoidGPU.DX11
 {
-    public class DXUtils
+    public class DX11Utils
     {
         public static InputElement[] CreateInputElements(VertexInfo vertexInfo)
         {

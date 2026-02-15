@@ -19,7 +19,7 @@ namespace DevoidEngine.Engine.Rendering
             graphicsDevice = gd;
             graphicsDevice.SetViewport(0, 0, width, height);
 
-
+            RenderingDefaults.Initialize();
             RenderBase.Initialize(width, height);
         }
         public static void Resize(int width, int height)

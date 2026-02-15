@@ -1,4 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.UI;
 using DevoidGPU;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -127,7 +128,7 @@ namespace DevoidEngine.Engine.Rendering
 
                         currentShader.Use();
                     }
-                    currentMaterial.Apply();
+                    currentMaterial.Bind();
                 }
 
                 if (item.Mesh != currentMesh) { currentMesh = item.Mesh; }
@@ -150,6 +151,13 @@ namespace DevoidEngine.Engine.Rendering
             };
             Matrix4x4.Invert(model, out _meshRenderData.ModelMatrixInv);
             _meshRenderDataBuffer.SetData(_meshRenderData);
+        }
+
+        public static Matrix4x4 BuildModel(Vector3 pos, Vector3 scale)
+        {
+            return
+                Matrix4x4.CreateScale(scale) *
+                Matrix4x4.CreateTranslation(pos);
         }
 
         static void ApplyRenderState(RenderState renderState)

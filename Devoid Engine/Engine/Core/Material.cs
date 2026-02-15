@@ -1,100 +1,133 @@
-﻿using DevoidEngine.Engine.Rendering;
-using DevoidGPU;
+﻿using DevoidGPU;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Core
 {
-
-    public class MaterialGPUData
-    {
-        public IUniformBuffer UniformBuffer;
-        public bool Dirty;
-    }
-
     public class Material
     {
-        public RenderState RenderState;
-        public Guid Id;
-
-        public Shader Shader { get; set; } = ShaderLibrary.GetShader("BASIC_SHADER");
-        public MaterialLayout MaterialLayout { get; set; }
-
-        // PROPERTIES
-        public Dictionary<string, int> PropertiesInt = new();
-        public Dictionary<string, float> PropertiesFloat = new();
-        public Dictionary<string, Vector2> PropertiesVec2 = new();
-        public Dictionary<string, Vector3> PropertiesVec3 = new();
-        public Dictionary<string, Vector4> PropertiesVec4 = new();
-        public Dictionary<string, Matrix4x4> PropertiesMat4 = new();
+        public Shader Shader { get; }
+        public int MaterialBufferSize => materialBufferSize;
+        public int MaterialBufferBindSlot => materialBufferBindSlot;
 
 
-        public Dictionary<string, Texture2D> Textures2D = new();
+        private readonly Dictionary<string, ShaderVariableInfo> variables;
+        private readonly Dictionary<string, TextureBindingInfo> textureBindings;
 
-    }
+        private readonly Dictionary<string, Texture> textures;
 
-    public class MaterialInstance
-    {
-        public Material BaseMaterial;
-        public MaterialGPUData GPUData { get; set; }
+        private byte[] defaultBuffer;
 
-        public Dictionary<string, int> PropertiesIntOverride = new();
-        public Dictionary<string, float> PropertiesFloatOverride = new();
-        public Dictionary<string, Vector2> PropertiesVec2Override = new();
-        public Dictionary<string, Vector3> PropertiesVec3Override = new();
-        public Dictionary<string, Vector4> PropertiesVec4Override = new();
-        public Dictionary<string, Matrix4x4> PropertiesMat4Override = new();
+        private int materialBufferBindSlot;
+        private int materialBufferSize;
 
-        public Dictionary<string, Texture2D> Textures2DOverride = new();
-
-        public MaterialInstance(Material material)
+        public Material(Shader shader)
         {
-            this.BaseMaterial = material;
+            Shader = shader ?? throw new ArgumentNullException(nameof(shader));
 
-            this.GPUData = new MaterialGPUData();
-            this.GPUData.UniformBuffer = Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer(material.MaterialLayout.bufferSize, BufferUsage.Dynamic);
-            this.GPUData.Dirty = true;
+            variables = new Dictionary<string, ShaderVariableInfo>();
+            textureBindings = new Dictionary<string, TextureBindingInfo>();
+            textures = new Dictionary<string, Texture>();
 
-            MaterialHelper.Update(this);
+            var reflection = shader.fShader.ReflectionData;
 
+            foreach (var cb in reflection.UniformBuffers)
+            {
+                if (!string.Equals(cb.Name, "Material", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                materialBufferSize = cb.Size;
+                materialBufferBindSlot = cb.BindSlot;
+
+                defaultBuffer = new byte[cb.Size];
+
+                foreach (var variable in cb.Variables)
+                {
+                    variables[variable.Name] = variable;
+                }
+
+                break;
+            }
+
+            foreach (var tb in reflection.TextureBindings)
+            {
+                if (!tb.Name.StartsWith("MAT_", StringComparison.Ordinal))
+                    continue;
+
+                if (tb.ResourceType != ShaderResourceType.Texture2D)
+                    continue;
+
+                textureBindings[tb.Name] = tb;
+
+                textures[tb.Name] = Texture2D.WhiteTexture;
+            }
         }
 
-        public void Set(string name, int value)
+        public bool TryGetVariable(string name, out ShaderVariableInfo info)
+            => variables.TryGetValue(name, out info);
+
+        public bool HasTextureBinding(string name)
+            => textureBindings.ContainsKey(name);
+
+        public TextureBindingInfo GetTextureBinding(string name)
+            => textureBindings[name];
+
+        public Texture GetDefaultTexture(string name)
+            => textures[name];
+
+        public ReadOnlySpan<byte> GetDefaultMaterialBuffer()
+            => defaultBuffer;
+
+        public IEnumerable<string> GetTextureNames()
+            => textureBindings.Keys;
+
+        public void SetTexture(string name, Texture texture)
         {
-            PropertiesIntOverride[name] = value;
-            GPUData.Dirty = true;
-        }
-        public void Set(string name, float value)
-        {
-            PropertiesFloatOverride[name] = value;
-            GPUData.Dirty = true;
-        }
-        public void Set(string name, Vector2 value)
-        {
-            PropertiesVec2Override[name] = value;
-            GPUData.Dirty = true;
-        }
-        public void Set(string name, Vector3 value)
-        {
-            PropertiesVec3Override[name] = value;
-            GPUData.Dirty = true;
-        }
-        public void Set(string name, Vector4 value)
-        {
-            PropertiesVec4Override[name] = value;
-            GPUData.Dirty = true;
+            if (!textureBindings.ContainsKey(name))
+                throw new Exception($"Texture '{name}' not found in material layout.");
+
+            textures[name] = texture ?? Texture2D.WhiteTexture;
         }
 
-        public void Set(string name, Matrix4x4 value)
+        #region SETTERS
+        public void SetFloat(string name, float value)
         {
-            PropertiesMat4Override[name] = value;
-            GPUData.Dirty = true;
+            Write(name, value);
         }
 
-        public void Apply()
+        public void SetVector2(string name, Vector2 value)
         {
-            MaterialHelper.Update(this);
-
-            GPUData.UniformBuffer.Bind(2, ShaderStage.Fragment | ShaderStage.Vertex);
+            Write(name, value);
         }
+
+        public void SetVector3(string name, Vector3 value)
+        {
+            Write(name, value);
+        }
+
+        public void SetVector4(string name, Vector4 value)
+        {
+            Write(name, value);
+        }
+
+        public void SetMatrix4x4(string name, Matrix4x4 value)
+        {
+            Write(name, value);
+        }
+        #endregion
+
+        private void Write<T>(string name, T value) where T : struct
+        {
+            if (!variables.TryGetValue(name, out var varInfo))
+            {
+                Console.WriteLine($"Variable '{name}' not found in material.");
+                return;
+            }
+
+            var span = defaultBuffer.AsSpan(varInfo.Offset);
+
+            MemoryMarshal.Write(span, ref value);
+        }
+
     }
 }

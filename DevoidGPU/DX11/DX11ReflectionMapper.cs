@@ -2,7 +2,7 @@
 
 namespace DevoidGPU.DX11
 {
-    public static class DXReflectionMapper
+    public static class DX11ReflectionMapper
     {
         public static ShaderResourceType ConvertResourceType(ShaderInputType type)
         {

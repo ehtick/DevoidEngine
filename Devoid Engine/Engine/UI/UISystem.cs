@@ -25,25 +25,7 @@ namespace DevoidEngine.Engine.UI
             QuadMesh = new Mesh();
             QuadMesh.SetVertices(Primitives.GetQuadVertex());
 
-            UIMaterial = new Material();
-            UIMaterial.Shader = new Shader("Engine/Content/Shaders/UI/basic");
-
-            UIMaterial.MaterialLayout = new MaterialLayout()
-            {
-                bufferSize = 16,
-                Properties =
-                {
-                    new ShaderPropertyInfo()
-                    {
-                        Name = "Color",
-                        Offset = 0,
-                        Type = ShaderPropertyType.Vector4
-                    }
-                }
-            };
-
-
-            MaterialManager.RegisterMaterial(UIMaterial);
+            UIMaterial = new Material(new Shader("Engine/Content/Shaders/UI/basic"));
 
             for (int i = 0; i < Roots.Count; i++)
             {

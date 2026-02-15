@@ -50,7 +50,7 @@ namespace DevoidGPU.DX11
             }
             else
             {
-                result = ShaderBytecode.Compile(source, entryPoint, profile, flags, EffectFlags.None, new ShaderMacro[] { }, new DXShaderIncludeHandler(path));
+                result = ShaderBytecode.Compile(source, entryPoint, profile, flags, EffectFlags.None, new ShaderMacro[] { }, new DX11ShaderIncludeHandler(path));
             }
             if (result.HasErrors)
                 throw new Exception($"Shader compile error ({Name}): {result.Message}");
@@ -139,7 +139,7 @@ namespace DevoidGPU.DX11
                     var varDesc = variable.Description;
                     var varType = variable.GetVariableType();
                     var typeDesc = varType.Description;
-                    var svt = DXReflectionMapper.ConvertResourceType(typeDesc.Name);
+                    var svt = DX11ReflectionMapper.ConvertResourceType(typeDesc.Name);
 
                     BufferInfo.Variables.Add(new ShaderVariableInfo
                     {

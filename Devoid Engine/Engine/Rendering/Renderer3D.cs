@@ -21,7 +21,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             DrawCommandList = new List<DrawCommand>();
 
-            ActiveRenderingPipeline = new ForwardRenderer();
+            //ActiveRenderingPipeline = new ForwardRenderer();
             ActiveRenderingPipeline.Initialize(width, height);
         }
 

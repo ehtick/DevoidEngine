@@ -13,8 +13,8 @@ namespace DevoidStandaloneLauncher.Prototypes
         GameObject camera;
 
         Mesh testRender;
-        MaterialNew testRenderMat;
-        MaterialInstanceNew testRenderMatInstance;
+        Material testRenderMat;
+        MaterialInstance testRenderMatInstance;
 
         public override void OnInit(Scene main)
         {
@@ -30,16 +30,6 @@ namespace DevoidStandaloneLauncher.Prototypes
             camera = scene.addGameObject("Camera");
             CameraComponent3D cameraComponent = camera.AddComponent<CameraComponent3D>();
             camera.transform.Position = new System.Numerics.Vector3(0, 0, 0);
-
-            testRenderMat = new MaterialNew(new Shader("Engine/Content/Shaders/Testing/basic"));
-            testRenderMat.SetVector4("color", new Vector4(1, 69, 1, 1));
-            testRenderMat.SetVector4("Fail", new Vector4(1));
-
-            testRenderMatInstance = new MaterialInstanceNew(testRenderMat);
-            testRenderMatInstance.SetVector4("Fail", new Vector4(1, 420, 1, 1));
-
-            testRender = new Mesh();
-            testRender.SetVertices(Primitives.GetQuadVertex());
 
 
         }

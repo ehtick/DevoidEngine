@@ -2,14 +2,14 @@
 
 namespace DevoidGPU.DX11
 {
-    class DXShaderIncludeHandler : Include
+    class DX11ShaderIncludeHandler : Include
     {
         private readonly string rootDirectory;
 
         // Track opened streams to dispose safely
         private readonly List<Stream> openedStreams = new();
 
-        public DXShaderIncludeHandler(string root)
+        public DX11ShaderIncludeHandler(string root)
         {
             rootDirectory = root;
         }
@@ -18,9 +18,6 @@ namespace DevoidGPU.DX11
 
         public Stream Open(IncludeType type, string fileName, Stream parentStream)
         {
-            Console.WriteLine(fileName);
-            Console.WriteLine(rootDirectory);
-            Console.WriteLine(Path.GetFullPath(Path.Combine(rootDirectory, fileName)));
 
             string baseDirectory = rootDirectory;
 

@@ -19,7 +19,7 @@ namespace DevoidGPU.DX11
             NativeLayout = new InputLayout(
                 device,
                 shader.ByteCode,
-                DXUtils.CreateInputElements(vertexInfo)
+                DX11Utils.CreateInputElements(vertexInfo)
             );
         }
 

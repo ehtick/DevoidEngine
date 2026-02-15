@@ -36,6 +36,6 @@ class BoxNode : UINode
             (DEBUG_NUM_LOCAL * 69621u % 255) / 255.0f
         );
 
-        Material.PropertiesVec4Override["Color"] = new Vector4(color, 1);
+        Material.SetVector4("COLOR", new Vector4(color, 1));
     }
 }
