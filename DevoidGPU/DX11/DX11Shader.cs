@@ -1,17 +1,14 @@
 ﻿using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace DevoidGPU.DX11
 {
     public class DX11Shader : IShader
     {
         public ShaderType Type { get; private set; }
+        public ShaderReflectionData ReflectionData { get; private set; }
 
         public string Name { get; private set; }
 
@@ -31,7 +28,7 @@ namespace DevoidGPU.DX11
         }
 
 
-        public void Compile(string source, string entryPoint)
+        public void Compile(string source, string entryPoint, string path)
         {
             if (string.IsNullOrWhiteSpace(source))
                 throw new ArgumentException("Shader source cannot be empty.", nameof(source));
@@ -45,14 +42,33 @@ namespace DevoidGPU.DX11
 #if DEBUG
             flags |= ShaderFlags.Debug | ShaderFlags.SkipOptimization;
 #endif
-
-            var result = ShaderBytecode.Compile(source, entryPoint, profile, flags);
+            CompilationResult result;
+            if (string.IsNullOrEmpty(path))
+            {
+                source = RemoveIncludes(source);
+                result = ShaderBytecode.Compile(source, entryPoint, profile, flags);
+            }
+            else
+            {
+                result = ShaderBytecode.Compile(source, entryPoint, profile, flags, EffectFlags.None, new ShaderMacro[] { }, new DXShaderIncludeHandler(path));
+            }
             if (result.HasErrors)
                 throw new Exception($"Shader compile error ({Name}): {result.Message}");
 
             ByteCode = result.Bytecode;
 
+            CreateReflectionInfoFromBytecode();
             CreateShaderFromBytecode();
+        }
+
+        public string RemoveIncludes(string source)
+        {
+            return Regex.Replace(
+                source,
+                @"^\s*#include\s+[<""][^>""]+[>""]\s*$",
+                "",
+                RegexOptions.Multiline
+            );
         }
 
         public void LoadPrecompiled(byte[] bytecode)
@@ -97,6 +113,83 @@ namespace DevoidGPU.DX11
             };
         }
 
+        private void CreateReflectionInfoFromBytecode()
+        {
+            ReflectionData = new ShaderReflectionData();
+
+            ShaderReflection reflection = new ShaderReflection(ByteCode);
+            ShaderDescription desc = reflection.Description;
+
+            // Fill in constant buffers
+            for (int i = 0; i < desc.ConstantBuffers; i++)
+            {
+                ConstantBuffer cb = reflection.GetConstantBuffer(i);
+                ConstantBufferDescription cbDesc = cb.Description;
+
+                UniformBufferInfo BufferInfo = new UniformBufferInfo()
+                {
+                    Name = cbDesc.Name,
+                    Size = cbDesc.Size,
+                    BindSlot = GetBindSlot(reflection, cbDesc.Name)
+                };
+
+                for (int v = 0; v < cbDesc.VariableCount; v++)
+                {
+                    var variable = cb.GetVariable(v);
+                    var varDesc = variable.Description;
+                    var varType = variable.GetVariableType();
+                    var typeDesc = varType.Description;
+                    var svt = DXReflectionMapper.ConvertResourceType(typeDesc.Name);
+
+                    BufferInfo.Variables.Add(new ShaderVariableInfo
+                    {
+                        Name = varDesc.Name,
+                        Offset = varDesc.StartOffset,
+                        Size = varDesc.Size,
+                        Type = svt
+                    });
+
+                }
+
+                ReflectionData.UniformBuffers.Add(BufferInfo);
+            }
+
+            for (int i = 0; i < desc.BoundResources; i++)
+            {
+                var resc = reflection.GetResourceBindingDescription(i);
+
+                if (resc.Type == ShaderInputType.Texture)
+                {
+                    ReflectionData.TextureBindings.Add(new TextureBindingInfo()
+                    {
+                        Name = resc.Name,
+                        BindSlot = resc.BindPoint,
+                        Stage = DX11StateMapper.ToDXShaderStage(Type),
+                        ArraySize = 1
+                    });
+
+                }
+            }
+
+        }
+
+        private int GetBindSlot(ShaderReflection reflection, string cbName)
+        {
+            var desc = reflection.Description;
+
+            for (int i = 0; i < desc.BoundResources; i++)
+            {
+                var res = reflection.GetResourceBindingDescription(i);
+                if (res.Name == cbName)
+                    return res.BindPoint;
+            }
+
+            return -1;
+        }
+
+
+
+
         public void Dispose()
         {
             VertexShader?.Dispose();
@@ -104,5 +197,7 @@ namespace DevoidGPU.DX11
             GeometryShader?.Dispose();
             ComputeShader?.Dispose();
         }
+
+
     }
 }

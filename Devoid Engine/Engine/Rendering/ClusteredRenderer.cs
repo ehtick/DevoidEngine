@@ -1,12 +1,7 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -34,7 +29,7 @@ namespace DevoidEngine.Engine.Rendering
 
 
         RendererData data;
-        
+
         Cluster[] clusters;
         int numClusters;
 
@@ -44,9 +39,9 @@ namespace DevoidEngine.Engine.Rendering
 
         // Buffers
 
-        UniformBuffer<CameraData> cameraDataBuffer;
+        UniformBuffer cameraDataBuffer;
         BufferObject<Cluster> clusterBuffer;
-        UniformBuffer<RendererData> rendererDataBuffer;
+        UniformBuffer rendererDataBuffer;
 
         public void Initialize(int width, int height)
         {
@@ -54,16 +49,16 @@ namespace DevoidEngine.Engine.Rendering
 
             data = new RendererData() { groupSize = ClusterGroupSize };
             numClusters = (int)(ClusterGroupSize.X * ClusterGroupSize.Y * ClusterGroupSize.Z);
-            
+
             clusters = new Cluster[numClusters];
 
 
             clusterBuffer = new BufferObject<Cluster>(clusters.Length, DevoidGPU.BufferUsage.Default, true);
 
-            cameraDataBuffer = new UniformBuffer<CameraData>();
+            cameraDataBuffer = new UniformBuffer(Marshal.SizeOf<CameraData>(), DevoidGPU.BufferUsage.Default);
 
-            rendererDataBuffer = new UniformBuffer<RendererData>(DevoidGPU.BufferUsage.Default);
-            rendererDataBuffer.SetData(ref data);
+            rendererDataBuffer = new UniformBuffer(Marshal.SizeOf<RendererData>(), DevoidGPU.BufferUsage.Default);
+            rendererDataBuffer.SetData(data);
 
             //ClusteredRendererHelper.Initialize();
         }
@@ -74,7 +69,7 @@ namespace DevoidEngine.Engine.Rendering
             rendererDataBuffer.Bind(1, DevoidGPU.ShaderStage.Compute);
 
             clusterBuffer.BindMutable(1);
-            
+
 
 
             ClusterFormationShader.Use();
@@ -100,7 +95,7 @@ namespace DevoidEngine.Engine.Rendering
         public void BeginRender(Camera camera)
         {
             CameraData cameraData = camera.GetCameraData();
-            cameraDataBuffer.SetData(ref cameraData);
+            cameraDataBuffer.SetData(cameraData);
 
             GenerateClusters();
             AssignClusterLights();

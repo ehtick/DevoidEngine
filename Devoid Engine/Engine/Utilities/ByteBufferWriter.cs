@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Utilities
 {
-    public static class UniformBufferHelper
+    public static class ByteBufferWriter
     {
+        public static void Write<T>(Span<byte> buffer, int offset, T value) where T : struct
+        {
+            MemoryMarshal.Write(buffer.Slice(offset, Unsafe.SizeOf<T>()), ref value);
+        }
+
+
         public static void WriteInt(Span<byte> buffer, int offset, int value)
         {
             MemoryMarshal.Write(buffer.Slice(offset, sizeof(int)), ref value);

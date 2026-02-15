@@ -1,8 +1,5 @@
-﻿using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.Utilities;
+﻿using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -22,7 +19,7 @@ namespace DevoidEngine.Engine.Rendering
         public static BufferObject<GPUSpotLight> spotLightBuffer;
         public static BufferObject<GPUDirectionalLight> dirLightBuffer;
 
-        public static UniformBuffer<LightCounts> countsBuffer;
+        public static UniformBuffer countsBuffer;
 
         public static void Initialize()
         {
@@ -38,7 +35,7 @@ namespace DevoidEngine.Engine.Rendering
             spotLightBuffer = new BufferObject<GPUSpotLight>(RenderGraph.MAX_SPOT_LIGHTS, BufferUsage.Dynamic, false);
             dirLightBuffer = new BufferObject<GPUDirectionalLight>(RenderGraph.MAX_DIR_LIGHTS, BufferUsage.Dynamic, false);
 
-            countsBuffer = new UniformBuffer<LightCounts>();
+            countsBuffer = new UniformBuffer(Marshal.SizeOf<LightCounts>(), BufferUsage.Dynamic);
         }
 
         public static void Update()
@@ -51,7 +48,7 @@ namespace DevoidEngine.Engine.Rendering
                 numDirectionalLights = (uint)(directionalLight.enabled ? 1 : 0),
                 _padding = 0
             };
-            countsBuffer.SetData(ref counts);
+            countsBuffer.SetData(counts);
 
             for (int i = 0; i < pointLights.Count; i++)
             {

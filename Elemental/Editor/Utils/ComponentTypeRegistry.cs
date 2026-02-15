@@ -1,12 +1,7 @@
 ﻿using DevoidEngine.Engine.Components;
 using Elemental.Editor.Attributes;
 using Elemental.Editor.CustomEditors;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elemental.Editor.Utils
 {

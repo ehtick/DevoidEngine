@@ -88,7 +88,7 @@
 
 //        static void PerformFrustumCull(List<RenderInstance> renderInstances)
 //        {
-            
+
 
 //            VisibleInstances.Clear();
 //            foreach (var camera in SceneManager.MainScene.Cameras)
@@ -98,7 +98,7 @@
 //                for (int i = 0; i < renderInstances.Count; i++)
 //                {
 //                    var instance = renderInstances[i];
-                    
+
 //                    list.Add(instance);
 //                    continue;
 

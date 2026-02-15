@@ -9,7 +9,7 @@ namespace DevoidEngine.Engine.UI.Nodes
     {
         public string Text
         {
-            get 
+            get
             {
                 return _text;
             }

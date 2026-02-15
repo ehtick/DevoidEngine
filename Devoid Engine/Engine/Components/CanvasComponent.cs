@@ -3,14 +3,7 @@ using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DevoidEngine.Engine.Components
 {
@@ -34,7 +27,7 @@ namespace DevoidEngine.Engine.Components
         {
             UISystem.Roots.Add(Canvas);
 
-            Setup();
+            //Setup();
 
             base.OnStart();
         }
@@ -144,7 +137,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnUpdate(float dt)
         {
-            
+
         }
 
     }

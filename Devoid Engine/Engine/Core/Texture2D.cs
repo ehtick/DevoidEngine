@@ -1,32 +1,16 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidGPU;
-using SharpDX.DXGI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Core
 {
-    public class Texture2D
+    public class Texture2D : Texture
     {
-        ISampler sampler;
-        ITexture2D texture;
-
-        public TextureFormat TextureFormat { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public Tex2DDescription Description { get; private set; }
-
-        private bool isMutable = false;
-        private bool isRenderTarget = false;
-        private bool isDepthTarget = false;
-        
-        SamplerDescription samplerDescription = SamplerDescription.Default;
+        private ITexture2D _deviceTexture;
 
         public static Texture2D WhiteTexture { get; private set; }
         public static ISampler DefaultSampler { get; private set; }
+
+        public Tex2DDescription Description { get; private set; }
 
         static Texture2D()
         {
@@ -43,108 +27,72 @@ namespace DevoidEngine.Engine.Core
             });
             DefaultSampler = Renderer.graphicsDevice.CreateSampler(SamplerDescription.Default);
         }
+
         public Texture2D(Tex2DDescription description)
         {
-            this.Description = description;
-            this.Width = description.Width;
-            this.Height = description.Height;
-            this.TextureFormat = description.Format;
+            Description = description;
 
-            this.isMutable = description.IsMutable;
-            this.isRenderTarget = description.IsRenderTarget;
-            this.isDepthTarget = description.IsDepthStencil;
+            Width = description.Width;
+            Height = description.Height;
 
-            sampler = Renderer.graphicsDevice.CreateSampler(samplerDescription);
-            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(description);
+            _deviceTexture = Renderer.graphicsDevice
+                .TextureFactory
+                .CreateTexture2D(description);
 
+            _sampler = Renderer.graphicsDevice
+                .CreateSampler(_samplerDescription);
+        }
+
+        public override void Bind(int slot = 0,
+                                  ShaderStage stage = ShaderStage.Fragment,
+                                  BindMode mode = BindMode.ReadOnly)
+        {
+            if (mode == BindMode.ReadOnly)
+                _deviceTexture.Bind(slot);
+            else
+                _deviceTexture.BindMutable(slot);
+
+            _sampler?.Bind(slot);
+        }
+
+        public override void UnBind(int slot)
+        {
+            _deviceTexture.UnBind(slot);
         }
 
         public void SetData(byte[] data)
         {
-            texture.SetData(data);
+            _deviceTexture.SetData(data);
         }
 
         public void SetData<T>(T[] data) where T : unmanaged
         {
-            texture.SetData<T>(data);
+            _deviceTexture.SetData(data);
         }
 
         public void GenerateMipmaps()
         {
-            texture.GenerateMipmaps();
+            _deviceTexture.GenerateMipmaps();
         }
+
+        public ITexture2D GetDeviceTexture() { return _deviceTexture; }
 
         public void Resize(int width, int height)
         {
-            texture?.Dispose();
+            _deviceTexture?.Dispose();
 
-            Tex2DDescription desc = Description;
+            var desc = Description;
             desc.Width = width;
             desc.Height = height;
 
-            Width = desc.Width;
-            Height = desc.Height;
+            Width = width;
+            Height = height;
 
-            texture = Renderer.graphicsDevice.TextureFactory.CreateTexture2D(desc);
-            this.Description = desc;
+            _deviceTexture = Renderer.graphicsDevice
+                .TextureFactory
+                .CreateTexture2D(desc);
+
+            Description = desc;
         }
-
-        public void SetFilter(TextureFilter min, TextureFilter mag)
-        {
-            samplerDescription.MinFilter = min;
-            samplerDescription.MagFilter = mag;
-
-            RecreateSampler();
-        }
-
-        public void SetWrapMode(TextureWrapMode wrapS, TextureWrapMode wrapT)
-        {
-            samplerDescription.WrapU = wrapS;
-            samplerDescription.WrapV = wrapT;
-            
-            RecreateSampler();
-        }
-
-        public void SetAnisotropy(float value)
-        {
-            samplerDescription.MaxAnisotropy = (int)value;
-
-            RecreateSampler();
-        }
-
-        public void Bind(int slot = 0, ShaderStage stages = ShaderStage.Fragment, BindMode mode = BindMode.ReadOnly)
-        {
-            if (mode == BindMode.ReadOnly)
-            {
-                texture.Bind(slot);
-            } else if (mode == BindMode.ReadWrite)
-            {
-                texture.BindMutable(slot);
-            }
-        }
-
-        public void BindSampler(int slot)
-        {
-            sampler.Bind(slot);
-        }
-
-        public void UnBind(int slot)
-        {
-            texture.UnBind(slot);
-        }
-
-        public ITexture2D GetDeviceTexture()
-        {
-            return texture;
-        }
-
-        public void RecreateSampler()
-        {
-            this.sampler = Renderer.graphicsDevice.CreateSampler(samplerDescription);
-        }
-
-        
-
-
     }
 }

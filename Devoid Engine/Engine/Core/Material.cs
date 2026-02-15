@@ -1,6 +1,5 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidGPU;
-using System;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Core
@@ -101,8 +100,6 @@ namespace DevoidEngine.Engine.Core
 
         public void Apply()
         {
-
-
             MaterialHelper.Update(this);
 
             BaseMaterial.Shader.Use();

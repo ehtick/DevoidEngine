@@ -1,9 +1,7 @@
-﻿using DevoidEngine.Engine.Components;
-using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
-using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -97,7 +95,7 @@ namespace DevoidEngine.Engine.Rendering
                 Renderer.graphicsDevice.BufferFactory.CreateUniformBuffer(
                     Marshal.SizeOf<UIRenderData>(), BufferUsage.Dynamic);
 
-            _screenDataBuffer.SetData(ref ScreenData);
+            _screenDataBuffer.SetData(ScreenData);
         }
 
         private static void CreateQuad()
@@ -128,6 +126,15 @@ namespace DevoidEngine.Engine.Rendering
             // Intentionally empty – pipeline handles presentation
         }
 
+        public static void Render(List<RenderItem> renderItems)
+        {
+            for (int i = 0; i < renderItems.Count; i++)
+            {
+                var renderItem = renderItems[i];
+
+            }
+        }
+
 
         private static Matrix4x4 BuildModel(UITransform t)
         {
@@ -155,7 +162,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             _uiRenderData.Model = BuildModel(transform);
             _uiRenderData.Id = new Vector4(id, 0, 0, 0);
-            _uiRenderBuffer.SetData(ref _uiRenderData);
+            _uiRenderBuffer.SetData(_uiRenderData);
 
             PrepareQuadDraw(_basicShader);
             Renderer.graphicsDevice.Draw(_quad.VertexBuffer.VertexCount, 0);
@@ -165,23 +172,9 @@ namespace DevoidEngine.Engine.Rendering
         {
             _uiRenderData.Model = model;
             _uiRenderData.Id = new Vector4(id, 0, 0, 0);
-            _uiRenderBuffer.SetData(ref _uiRenderData);
+            _uiRenderBuffer.SetData(_uiRenderData);
 
             PrepareQuadDraw(_basicShader);
-            Renderer.graphicsDevice.Draw(_quad.VertexBuffer.VertexCount, 0);
-        }
-
-        public static void DrawTexRect(UITransform transform, Texture2D texture, int id)
-        {
-            _uiRenderData.Model = BuildModel(transform);
-            _uiRenderData.Id = new Vector4(id, 1, 0, 0);
-            _uiRenderBuffer.SetData(ref _uiRenderData);
-
-            PrepareQuadDraw(_basicShader);
-
-            texture.Bind(0);
-            texture.BindSampler(0);
-
             Renderer.graphicsDevice.Draw(_quad.VertexBuffer.VertexCount, 0);
         }
 
@@ -189,7 +182,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             _uiRenderData.Model = BuildTranslationModel(transform);
             _uiRenderData.Id = Vector4.Zero;
-            _uiRenderBuffer.SetData(ref _uiRenderData);
+            _uiRenderBuffer.SetData(_uiRenderData);
 
             IInputLayout layout = Renderer.GetInputLayout(mesh, _textShader);
             layout.Bind();
@@ -203,12 +196,10 @@ namespace DevoidEngine.Engine.Rendering
 
             Renderer.graphicsDevice.DrawIndexed(mesh.IndexBuffer.IndexCount, 0, 0);
         }
-
-
         public static void Resize(int width, int height)
         {
             CreateCameraData(width, height);
-            _screenDataBuffer.SetData(ref ScreenData);
+            _screenDataBuffer.SetData(ScreenData);
             RenderOutput.Resize(width, height);
         }
     }

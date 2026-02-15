@@ -1,5 +1,4 @@
-﻿using System;
-using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Core;
 
 namespace DevoidEngine.Engine.Components
 {

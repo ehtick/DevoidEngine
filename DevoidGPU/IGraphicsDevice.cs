@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DevoidGPU
+﻿namespace DevoidGPU
 {
     public interface IGraphicsDevice
     {
@@ -39,6 +33,6 @@ namespace DevoidGPU
         ISampler CreateSampler(SamplerDescription samplerDescription);
         ITexture GetTexture(IntPtr handle);
 
-        
+
     }
 }

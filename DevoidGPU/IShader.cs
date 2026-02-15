@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DevoidGPU
+﻿namespace DevoidGPU
 {
     public enum ShaderType
     {
@@ -18,9 +12,10 @@ namespace DevoidGPU
     public interface IShader
     {
         ShaderType Type { get; }
+        ShaderReflectionData ReflectionData { get; }
         string Name { get; }
 
-        void Compile(string source, string entryPoint);
+        void Compile(string source, string entryPoint, string path);
 
     }
 }

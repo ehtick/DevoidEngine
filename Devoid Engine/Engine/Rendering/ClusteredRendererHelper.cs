@@ -1,11 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -40,7 +35,7 @@ namespace DevoidEngine.Engine.Rendering
             SetupMaterial();
         }
 
-        public static void VisualizeClusters(BufferObject<Cluster> clusterBuffer, UniformBuffer<CameraData> cameraBuffer)
+        public static void VisualizeClusters(BufferObject<Cluster> clusterBuffer, UniformBuffer cameraBuffer)
         {
             Renderer.graphicsDevice.UnbindAllShaderResources();
 

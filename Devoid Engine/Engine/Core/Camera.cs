@@ -1,6 +1,5 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Utilities;
-using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 

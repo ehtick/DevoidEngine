@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using SharpFont;
+﻿using SharpFont;
 
 namespace DevoidEngine.Engine.UI.Text
 {

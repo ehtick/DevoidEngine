@@ -1,7 +1,6 @@
-﻿using System;
-using DevoidEngine.Engine.Core;
-using Elemental.Editor;
+﻿using DevoidEngine.Engine.Core;
 using DevoidGPU.DX11;
+using Elemental.Editor;
 
 namespace Elemental
 {
@@ -11,8 +10,8 @@ namespace Elemental
         {
             ApplicationSpecification applicationSpecification = new ApplicationSpecification()
             {
-                Width = (int)(1920/1.5f),
-                Height = (int)(1080/1.5f),
+                Width = (int)(1920 / 1.5f),
+                Height = (int)(1080 / 1.5f),
                 forceVsync = true,
                 Name = "Devoid D3D11",
 

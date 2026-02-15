@@ -3,14 +3,7 @@ using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering;
 using Elemental.Editor.Utils;
 using ImGuiNET;
-using MaterialIconFont;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static Elemental.Editor.Utils.ButtonGroup;
 
 namespace Elemental.Editor.Panels
 {
@@ -25,9 +18,9 @@ namespace Elemental.Editor.Panels
         {
             supportedResolutions = editor.application.MainWindow.GetSupportedResolutions();
 
-            foreach(var resolution in supportedResolutions)
+            foreach (var resolution in supportedResolutions)
             {
-                if (resolution.height == 1080 &&  resolution.width == 1920)
+                if (resolution.height == 1080 && resolution.width == 1920)
                 {
                     selectedResolution = resolution;
                     Renderer.Resize(resolution.width, resolution.height);
@@ -86,7 +79,7 @@ namespace Elemental.Editor.Panels
 
                     });
 
-                    
+
 
                     btnGroup.Render();
 

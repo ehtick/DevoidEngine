@@ -1,6 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.Utilities;
 using DevoidStandaloneLauncher.Prototypes;
 
 namespace DevoidStandaloneLauncher
@@ -33,7 +32,7 @@ namespace DevoidStandaloneLauncher
         {
             //if (SceneManager.MainScene.GetMainCamera() == null) return;
             Texture2D renderOutput = UIRenderer.RenderOutput.GetRenderTexture(0);//SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0);
-            
+
             RenderAPI.RenderToScreen(renderOutput);
         }
 

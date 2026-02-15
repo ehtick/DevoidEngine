@@ -1,13 +1,7 @@
-﻿using Elemental.Editor.Utils;
-using DevoidEngine.Engine.Components;
-using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Components;
 using ImGuiNET;
-using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Resources;
 using System.Numerics;
+using System.Reflection;
 
 namespace Elemental.Editor.Utils
 {
@@ -312,7 +306,8 @@ namespace Elemental.Editor.Utils
                 {
 
                     hasChanged |= DrawVec3Property(property, component);
-                } else if (property.PropertyType == typeof(Vector4))
+                }
+                else if (property.PropertyType == typeof(Vector4))
                 {
 
                 }
@@ -602,7 +597,8 @@ namespace Elemental.Editor.Utils
                 {
 
                     hasChanged |= DrawVec3Field(field, component);
-                } else if (field.FieldType == typeof(Vector4))
+                }
+                else if (field.FieldType == typeof(Vector4))
                 {
 
                 }

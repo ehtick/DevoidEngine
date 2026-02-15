@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DevoidGPU
+﻿namespace DevoidGPU
 {
     public enum ShaderStage
     {
@@ -17,8 +11,12 @@ namespace DevoidGPU
 
     public interface IUniformBuffer
     {
-        void SetData<T>(ref T data) where T : struct;
+        int SizeInBytes { get; }
+
+        void SetData<T>(T data) where T : struct;
         void SetData(ReadOnlySpan<byte> data);
+        void SetData(IntPtr data, int size);
         void Bind(int slot, ShaderStage stage);
     }
+
 }

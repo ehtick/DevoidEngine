@@ -1,11 +1,4 @@
-﻿using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DevoidEngine.Engine.Core
+﻿namespace DevoidEngine.Engine.Core
 {
     public static class ShaderLibrary
     {
@@ -25,7 +18,8 @@ namespace DevoidEngine.Engine.Core
             if (shaders.ContainsKey(name))
             {
                 return;
-            } else
+            }
+            else
             {
                 shaders.Add(name, shader);
             }

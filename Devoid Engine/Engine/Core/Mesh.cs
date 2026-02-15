@@ -1,8 +1,7 @@
-﻿using System;
-using System.Numerics;
-using DevoidEngine.Engine.Rendering;
+﻿using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.Core
 {

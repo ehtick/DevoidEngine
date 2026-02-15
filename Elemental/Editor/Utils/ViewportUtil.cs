@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using OpenTK.Graphics.OpenGL;
-using DevoidEngine.Engine.Rendering;
-using ImGuiNET;
+﻿using ImGuiNET;
 using System.Numerics;
-using MaterialIconFont;
 
 namespace DevoidEngine.Editor.Utils
 {

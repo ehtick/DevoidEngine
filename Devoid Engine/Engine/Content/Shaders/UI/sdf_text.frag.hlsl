@@ -5,11 +5,12 @@
     float2 UV0 : TEXCOORD0;
 };
 
-cbuffer TransformData : register(b1)
+
+cbuffer MeshData : register(b1)
 {
     float4x4 Model;
-    float4 id;
-}
+    float4x4 invModel;
+};
 
 Texture2D fontSDFAtlas : register(t0);
 SamplerState fontSDFAtlasSampler : register(s0);

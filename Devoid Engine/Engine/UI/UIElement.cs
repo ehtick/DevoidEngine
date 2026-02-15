@@ -1,12 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Nodes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI
 {

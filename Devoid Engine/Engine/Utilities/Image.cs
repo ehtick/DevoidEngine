@@ -1,13 +1,6 @@
-﻿using OpenTK.Compute.OpenCL;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
+﻿using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
 using StbImageSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Utilities
 {

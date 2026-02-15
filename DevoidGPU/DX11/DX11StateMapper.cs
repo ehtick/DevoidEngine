@@ -71,6 +71,18 @@ namespace DevoidGPU.DX11
             };
         }
 
+        public static ShaderStage ToDXShaderStage(ShaderType func)
+        {
+            return func switch
+            {
+                ShaderType.Vertex => ShaderStage.Vertex,
+                ShaderType.Fragment => ShaderStage.Fragment,
+                ShaderType.Geometry => ShaderStage.Geometry,
+                ShaderType.Compute => ShaderStage.Compute,
+                _ => throw new NotImplementedException()
+            };
+        }
+
         public static StencilOperation ToDXStencilOp(StencilOp op) => op switch
         {
             StencilOp.Keep => StencilOperation.Keep,
@@ -140,9 +152,9 @@ namespace DevoidGPU.DX11
         public static TextureAddressMode ToDXWrap(TextureWrapMode wrap) =>
             wrap switch
             {
-                TextureWrapMode.Repeat        => TextureAddressMode.Wrap,
-                TextureWrapMode.ClampToEdge   => TextureAddressMode.Clamp,
-                TextureWrapMode.MirroredRepeat=> TextureAddressMode.Mirror,
+                TextureWrapMode.Repeat => TextureAddressMode.Wrap,
+                TextureWrapMode.ClampToEdge => TextureAddressMode.Clamp,
+                TextureWrapMode.MirroredRepeat => TextureAddressMode.Mirror,
                 _ => TextureAddressMode.Clamp
             };
 

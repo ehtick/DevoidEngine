@@ -1,10 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Utilities
 {
@@ -27,7 +22,7 @@ namespace DevoidEngine.Engine.Utilities
                 IsMutable = false
             });
             texture.SetFilter(textureFilter, textureFilter);
-            texture.SetAnisotropy(8f);
+            texture.SetAnisotropy(8);
             texture.SetWrapMode(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
 
             float[] floatPixels = image.PixelHP;

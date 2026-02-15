@@ -1,10 +1,7 @@
-﻿using DevoidEngine.Engine.Components;
-using Elemental.Editor.Utils;
+﻿using DevoidEngine.Engine.Attributes;
 using DevoidEngine.Engine.Components;
 using System.Numerics;
-using System.Collections.Generic;
 using System.Reflection;
-using DevoidEngine.Engine.Attributes;
 
 namespace Elemental.Editor.Utils
 {
@@ -82,13 +79,14 @@ namespace Elemental.Editor.Utils
 
                 _typeToCategory[type] = name;
                 return name;
-            } else
+            }
+            else
             {
                 if (_typeToCategory.TryGetValue(type, out var category))
                     return category;
             }
 
-                _typeToCategory[type] = "Other";
+            _typeToCategory[type] = "Other";
             return "Other";
         }
 

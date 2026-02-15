@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DevoidGPU
+﻿namespace DevoidGPU
 {
     public enum TextureFormat
     {
@@ -19,7 +13,7 @@ namespace DevoidGPU
 
         R8_UInt,
         R8_UNorm,
-        
+
         Depth24_Stencil8,
         Depth32_Float
     }

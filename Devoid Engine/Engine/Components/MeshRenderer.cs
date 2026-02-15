@@ -1,12 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Components
 {
@@ -26,7 +19,7 @@ namespace DevoidEngine.Engine.Components
         public void AddMesh(Mesh mesh)
         {
             this.mesh = mesh;
-            instance = SceneRenderSystem.SubmitMesh(mesh, 0, Matrix4x4.Identity);   
+            instance = SceneRenderSystem.SubmitMesh(mesh, 0, Matrix4x4.Identity);
         }
 
         private void RenderPipeline_OnBeginCameraRender()

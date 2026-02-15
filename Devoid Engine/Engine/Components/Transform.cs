@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Attributes;
-using System;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
 {
@@ -93,7 +91,7 @@ namespace DevoidEngine.Engine.Components
             {
                 hasMoved = false;
             }
-           
+
         }
     }
 }

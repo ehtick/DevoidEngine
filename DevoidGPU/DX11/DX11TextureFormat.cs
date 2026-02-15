@@ -1,9 +1,4 @@
 ﻿using SharpDX.DXGI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidGPU.DX11
 {
@@ -18,7 +13,7 @@ namespace DevoidGPU.DX11
                 TextureFormat.BGRA8_UNorm => Format.B8G8R8A8_UNorm,
                 TextureFormat.RGBA16_Float => Format.R16G16B16A16_Float,
                 TextureFormat.RGBA32_Float => Format.R32G32B32A32_Float,
-                
+
                 TextureFormat.R8_UInt => Format.R8_UInt,
                 TextureFormat.R8_UNorm => Format.R8_UNorm,
 

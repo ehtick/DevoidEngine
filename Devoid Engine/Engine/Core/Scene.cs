@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-using DevoidEngine.Engine.Components;
-using DevoidEngine.Engine.Rendering;
+﻿using DevoidEngine.Engine.Components;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -146,7 +142,7 @@ namespace DevoidEngine.Engine.Core
         {
             this.Cameras.Add(camera);
         }
-        
+
         public void RemoveCamera(CameraComponent3D camera)
         {
             this.Cameras.Remove(camera);

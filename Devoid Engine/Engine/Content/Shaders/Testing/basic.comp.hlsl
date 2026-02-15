@@ -35,6 +35,8 @@ StructuredBuffer<GPUDirectionalLight> g_DirectionalLights : register(t2);
 
 RWTexture2D<float4> OutputTexture : register(u0);
 
+Texture2D MAT_REFLECTION_YAY : register(t3);
+
 [numthreads(8, 8, 1)]
 void CSMain(uint3 DTid : SV_DispatchThreadID)
 {

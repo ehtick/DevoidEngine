@@ -1,12 +1,7 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -37,7 +32,7 @@ namespace DevoidEngine.Engine.Rendering
             Material pbrMaterial = new Material();
             pbrMaterial.Shader = ShaderLibrary.GetShader("PBR/ForwardPBR");
 
-            
+
             pbrMaterial.MaterialLayout = new MaterialLayout()
             {
                 bufferSize = 32,
@@ -66,7 +61,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             CameraData cameraData = camera.GetCameraData();
 
-            CameraDataBuffer.SetData(ref cameraData);
+            CameraDataBuffer.SetData(cameraData);
 
             CameraDataBuffer.Bind(0, ShaderStage.Vertex | ShaderStage.Fragment);
 
@@ -95,7 +90,7 @@ namespace DevoidEngine.Engine.Rendering
                 MeshRenderData.WorldMatrix = instance.WorldMatrix;
                 Matrix4x4.Invert(instance.WorldMatrix, out MeshRenderData.invWorldMatrix);
 
-                MeshDataBuffer.SetData(ref MeshRenderData);
+                MeshDataBuffer.SetData(MeshRenderData);
 
                 BasicForward.Apply();
 

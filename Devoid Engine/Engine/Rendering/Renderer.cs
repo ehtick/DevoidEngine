@@ -1,11 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -26,10 +20,14 @@ namespace DevoidEngine.Engine.Rendering
             graphicsDevice.SetViewport(0, 0, width, height);
 
 
-            Renderer3D.Initialize(width, height);
-            UIRenderer.Initialize(width, height);
+            RenderBase.Initialize(width, height);
         }
-
+        public static void Resize(int width, int height)
+        {
+            Width = width;
+            Height = height;
+            RenderBase.Resize(width, height);
+        }
         public static IInputLayout GetInputLayout(Mesh mesh, Shader shader)
         {
             var key = (mesh.VertexBuffer.Layout, shader.vShader);
@@ -40,14 +38,5 @@ namespace DevoidEngine.Engine.Rendering
             }
             return layout;
         }
-
-        public static void Resize(int width, int height)
-        {
-            Width = width;
-            Height = height;
-            Renderer3D.Resize(width, height);
-            UIRenderer.Resize(width, height);
-        }
-
     }
 }

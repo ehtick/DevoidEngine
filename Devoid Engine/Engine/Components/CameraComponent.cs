@@ -1,7 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Utilities;
 using DevoidEngine.Engine.Rendering;
-using System;
+using DevoidEngine.Engine.Utilities;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
@@ -10,7 +9,9 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(CameraComponent3D);
 
-        public bool IsDefault { get => isDefault; set
+        public bool IsDefault
+        {
+            get => isDefault; set
             {
                 isDefault = value;
                 if (value == true)

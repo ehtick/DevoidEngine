@@ -210,13 +210,13 @@
 
 
 //            lightGridBuffer.BindMutable((int)RenderGraph.SSBOBindIndex.LightGridBuffer);
-            
+
 //            // Already bound while ComputeCluster();
 //            //clusterBuffer.BindMutable((int)RenderGraph.SSBOBindIndex.ClusterBuffer);
 //            globalIndexCount.BindMutable((int)RenderGraph.SSBOBindIndex.GlobalLightIndexCount);
 //            globalLightIndexListSSBO.BindMutable((int)RenderGraph.SSBOBindIndex.GlobalLightIndexList);
 
-            
+
 //            clusterLightCull.Dispatch(1, 1, 6);
 //            clusterLightCull.Wait();
 
@@ -230,7 +230,7 @@
 
 //            currentRenderContext = new RenderContext();
 //            currentRenderContext.Camera = camera;
-            
+
 
 //            CameraData cameraInfo = camera.GetCameraData();
 //            cameraBuffer.SetData(ref cameraInfo);

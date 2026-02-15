@@ -1,10 +1,5 @@
 ﻿using DevoidEngine.Engine.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
@@ -103,7 +98,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             while (remainingSpace > 0f)
             {
                 float totalGrow = 0f;
-               
+
                 for (int i = 0; i < children.Count; i++)
                 {
                     if (!frozenItems[i])

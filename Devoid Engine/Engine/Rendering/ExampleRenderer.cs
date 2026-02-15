@@ -32,7 +32,7 @@
 
 //            VertexBuffer = Renderer.graphicsDevice.BufferFactory.CreateVertexBuffer(BufferUsage.Default, Vertex.VertexInfo, 6);
 //            VertexBuffer.SetData<Vertex>(Quad);
-            
+
 //            simpleShader = new Shader("Engine/Content/Shaders/Testing/basic.vert.hlsl", "Engine/Content/Shaders/Testing/basic.frag.hlsl");
 
 

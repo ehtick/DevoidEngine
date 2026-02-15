@@ -1,14 +1,6 @@
-﻿using SharpDX;
-using SharpFont;
+﻿using SharpFont;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI.Text
 {
@@ -236,7 +228,8 @@ namespace DevoidEngine.Engine.UI.Text
         private void SaveDebugImage(byte[] buffer, int w, int h, string path)
         {
             using Image<Rgba32> img = new Image<Rgba32>(w, h);
-            img.ProcessPixelRows(accessor => {
+            img.ProcessPixelRows(accessor =>
+            {
                 for (int y = 0; y < h; y++)
                 {
                     var row = accessor.GetRowSpan(y);

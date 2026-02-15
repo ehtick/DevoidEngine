@@ -8,11 +8,14 @@ namespace DevoidGPU.DX11
     public class DX11UniformBuffer : IUniformBuffer
     {
         public BufferUsage Usage { get; private set; }
+        public int SizeInBytes => bufferSize;
 
         private readonly Device device;
         private readonly DeviceContext deviceContext;
         private readonly SharpDX.Direct3D11.Buffer buffer;
         private readonly int bufferSize;
+
+
 
         public DX11UniformBuffer(Device device, DeviceContext deviceContext, int sizeInBytes, BufferUsage bufferUsage)
         {
@@ -39,7 +42,7 @@ namespace DevoidGPU.DX11
             this.bufferSize = alignedSize;
         }
 
-        public void SetData<T>(ref T data) where T : struct
+        public void SetData<T>(T data) where T : struct
         {
             if (this.Usage == BufferUsage.Dynamic)
             {
@@ -97,6 +100,41 @@ namespace DevoidGPU.DX11
             deviceContext.UnmapSubresource(buffer, 0);
         }
 
+        public unsafe void SetData(IntPtr dataPtr, int size)
+        {
+            if (size > bufferSize)
+                throw new ArgumentException("Data exceeds constant buffer size.");
+
+            if (Usage == BufferUsage.Dynamic)
+            {
+                var mapped = deviceContext.MapSubresource(
+                    buffer,
+                    0,
+                    MapMode.WriteDiscard,
+                    MapFlags.None);
+
+                System.Buffer.MemoryCopy(
+                    dataPtr.ToPointer(),
+                    (void*)mapped.DataPointer,
+                    bufferSize,
+                    size);
+
+                if (size < bufferSize)
+                {
+                    Span<byte> tail = new Span<byte>(
+                        (void*)((byte*)mapped.DataPointer + size),
+                        bufferSize - size);
+
+                    tail.Clear();
+                }
+
+                deviceContext.UnmapSubresource(buffer, 0);
+            }
+            else
+            {
+                deviceContext.UpdateSubresource(ref dataPtr, buffer);
+            }
+        }
 
 
         public void Bind(int slot, ShaderStage stages)

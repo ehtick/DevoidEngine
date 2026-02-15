@@ -1,7 +1,4 @@
-﻿using DevoidEngine.Engine.Rendering;
-using System;
-
-namespace DevoidEngine.Engine.Core
+﻿namespace DevoidEngine.Engine.Core
 {
     public class Graphics
     {

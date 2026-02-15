@@ -1,9 +1,6 @@
 ﻿using OpenTK.Windowing.Desktop;
-using System.Numerics;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -13,7 +10,7 @@ namespace DevoidEngine.Engine.Core
         public Vector2 WindowSize;
         public Vector2 WindowMinimumSize;
         public Vector2 WindowMaximumSize;
-        
+
         public float EventTimeout;
 
         public double TargetUpdateRate;
@@ -74,7 +71,7 @@ namespace DevoidEngine.Engine.Core
             ClientSize = new OpenTK.Mathematics.Vector2i((int)windowSpec.WindowSize.X, (int)windowSpec.WindowSize.Y),
             //MaximumClientSize = new OpenTK.Mathematics.Vector2i((int)windowSpec.WindowMaximumSize.X, (int)windowSpec.WindowMaximumSize.Y),
             //MinimumClientSize = new OpenTK.Mathematics.Vector2i((int)windowSpec.WindowMinimumSize.X, (int)windowSpec.WindowMinimumSize.Y)
-            
+
             Title = windowSpec.WindowTitle
         })
         {

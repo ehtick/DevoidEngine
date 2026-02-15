@@ -1,14 +1,7 @@
 ﻿using DevoidEngine.Engine.Core;
 using Elemental.Editor.Utils;
 using ImGuiNET;
-using MaterialIconFont;
-using OpenTK.Graphics.ES20;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elemental.Editor.Panels
 {
@@ -22,7 +15,7 @@ namespace Elemental.Editor.Panels
 
         public override void OnAttach()
         {
-            
+
         }
 
         public override void OnGUI()
@@ -245,7 +238,7 @@ namespace Elemental.Editor.Panels
 
         void ContextMenu()
         {
-            
+
             if (ImGui.BeginPopupContextWindow("GameObjectMenu", ImGuiPopupFlags.MouseButtonRight))
             {
                 if (ImGui.MenuItem("Action 1"))
@@ -267,7 +260,7 @@ namespace Elemental.Editor.Panels
                 }
                 ImGui.EndPopup();
             }
-            
+
         }
 
     }

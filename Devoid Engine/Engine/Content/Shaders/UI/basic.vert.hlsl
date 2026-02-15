@@ -28,11 +28,12 @@ cbuffer CameraData : register(b0)
     float _padding0;
 };
 
-cbuffer RenderData : register(b1)
+
+cbuffer MeshData : register(b1)
 {
     float4x4 Model;
-    float4 id;
-}
+    float4x4 invModel;
+};
  
 
 PSInput VSMain(VSInput input)

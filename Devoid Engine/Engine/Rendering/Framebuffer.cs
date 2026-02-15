@@ -1,11 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -30,7 +25,7 @@ namespace DevoidEngine.Engine.Rendering
 
         public void Clear()
         {
-            frameBuffer.ClearColor(new Vector4(0,0.5f,0.5f,1));
+            frameBuffer.ClearColor(new Vector4(0, 0.5f, 0.5f, 1));
             frameBuffer.ClearDepth(1);
         }
 
@@ -48,7 +43,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             frameBuffer = Renderer.graphicsDevice.BufferFactory.CreateFramebuffer();
 
-            for (int i = 0; i <  RenderTextures.Count; i++)
+            for (int i = 0; i < RenderTextures.Count; i++)
             {
                 RenderTextures[i].Resize(width, height);
                 frameBuffer.AddColorAttachment(RenderTextures[i].GetDeviceTexture());

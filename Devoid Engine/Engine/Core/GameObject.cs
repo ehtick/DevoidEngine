@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DevoidEngine.Engine.Components;
+﻿using DevoidEngine.Engine.Components;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -46,7 +44,7 @@ namespace DevoidEngine.Engine.Core
             transform = new Transform();
             transform.gameObject = this;
             Components.Add(transform);
-            
+
 
         }
 
@@ -93,7 +91,7 @@ namespace DevoidEngine.Engine.Core
 
         public void RemoveComponent<T>() where T : Component
         {
-            for (int i = 0;i < Components.Count;i++)
+            for (int i = 0; i < Components.Count; i++)
             {
                 if (typeof(T) == Components[i].GetType())
                 {

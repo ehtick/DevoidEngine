@@ -2,13 +2,8 @@
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Device = SharpDX.Direct3D11.Device;
 
 namespace DevoidGPU.DX11
@@ -38,7 +33,7 @@ namespace DevoidGPU.DX11
         private readonly DeviceContext deviceContext;
         private Tex2DDescription Description;
         private Format format;
-        
+
 
         public DX11Texture2D(Device device, DeviceContext deviceContext, Tex2DDescription texture2DDescription)
         {
@@ -193,6 +188,6 @@ namespace DevoidGPU.DX11
             deviceContext.PixelShader.SetShaderResource(slot, null);
         }
 
-        
+
     }
 }

@@ -1,11 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D11;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidGPU.DX11
 {
@@ -97,7 +91,8 @@ namespace DevoidGPU.DX11
                 stream.WriteRange(data);
                 deviceContext.UnmapSubresource(buffer, 0);
                 stream.Dispose();
-            } else
+            }
+            else
             {
                 deviceContext.UpdateSubresource(data, buffer);
             }

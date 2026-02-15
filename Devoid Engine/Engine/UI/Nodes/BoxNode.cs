@@ -29,6 +29,13 @@ class BoxNode : UINode
     protected override void InitializeCore()
     {
         Material = UISystem.GetMaterial();
-        Material.PropertiesVec4Override["Configuration"] = new Vector4(DEBUG_NUM_LOCAL, 0, 0, 0);
+
+        Vector3 color = new Vector3(
+            (DEBUG_NUM_LOCAL * 16807u % 255) / 255.0f,
+            (DEBUG_NUM_LOCAL * 48271u % 255) / 255.0f,
+            (DEBUG_NUM_LOCAL * 69621u % 255) / 255.0f
+        );
+
+        Material.PropertiesVec4Override["Color"] = new Vector4(color, 1);
     }
 }

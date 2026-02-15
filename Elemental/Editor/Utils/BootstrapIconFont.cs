@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Elemental.Editor.Utils
+﻿namespace Elemental.Editor.Utils
 {
     public static class BootstrapIconFont
     {

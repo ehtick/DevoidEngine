@@ -2,8 +2,6 @@
 using DevoidEngine.Engine.Core;
 using Elemental.Editor.Panels;
 using Elemental.Editor.Utils;
-using ImGuiNET;
-using System;
 
 namespace Elemental.Editor
 {
@@ -26,7 +24,7 @@ namespace Elemental.Editor
 
 
             EditorUI.SetEditorStyling();
-            
+
             EditorUI.DefaultFontLarge = application.ImGuiRenderer.AddFontFromFile("Editor/Content/Fonts/JetBrainsMono-Bold.ttf", 32);
             EditorUI.DefaultFontMedium = application.ImGuiRenderer.AddFontFromFile("Editor/Content/Fonts/JetBrainsMono-Regular.ttf", 21);
             EditorUI.DefaultFontSmall = application.ImGuiRenderer.AddFontFromFile("Editor/Content/Fonts/JetBrainsMono-Regular.ttf", 19);
@@ -65,7 +63,7 @@ namespace Elemental.Editor
 
         public override void OnDetach()
         {
-            
+
         }
 
         public override void OnUpdate(float deltaTime)

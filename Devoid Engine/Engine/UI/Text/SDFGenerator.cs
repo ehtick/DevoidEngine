@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DevoidEngine.Engine.UI.Text
+﻿namespace DevoidEngine.Engine.UI.Text
 {
     public static class SDFGenerator
     {

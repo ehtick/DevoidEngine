@@ -1,16 +1,11 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Utilities
 {
     public unsafe class BufferObject<T> where T : struct
     {
-        
+
 
         IShaderStorageBuffer<T> shaderStorageBuffer;
 
@@ -20,7 +15,7 @@ namespace DevoidEngine.Engine.Utilities
 
         }
 
-        public void SetData(in T[] data, int start, int count,  int offset = 0)
+        public void SetData(in T[] data, int start, int count, int offset = 0)
         {
             shaderStorageBuffer.UpdatePartial(data, start, count, offset);
         }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DevoidEngine.Engine.Utilities;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+﻿using DevoidEngine.Engine.Utilities;
 
 namespace DevoidEngine.Engine.Core
 {

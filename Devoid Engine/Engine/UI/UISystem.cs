@@ -2,19 +2,14 @@
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.UI
 {
     public static class UISystem
     {
         public static List<UINode> Roots;
-        
+
         public static Material UIMaterial;
         public static Material TextMaterial;
 
@@ -35,15 +30,18 @@ namespace DevoidEngine.Engine.UI
 
             UIMaterial.MaterialLayout = new MaterialLayout()
             {
-                bufferSize = 80,
+                bufferSize = 16,
                 Properties =
                 {
-                    new ShaderPropertyInfo() {Name = "Model", Type = ShaderPropertyType.Matrix4},
-                    new ShaderPropertyInfo() {Name = "Configuration", Offset = 64, Type = ShaderPropertyType.Vector4 }
+                    new ShaderPropertyInfo()
+                    {
+                        Name = "Color",
+                        Offset = 0,
+                        Type = ShaderPropertyType.Vector4
+                    }
                 }
             };
 
-            UIMaterial.PropertiesVec4["Configuration"] = new Vector4(0,0,0,0);
 
             MaterialManager.RegisterMaterial(UIMaterial);
 

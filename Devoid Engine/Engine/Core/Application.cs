@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using DevoidEngine.Engine.Imgui;
+﻿using DevoidEngine.Engine.Imgui;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
-using ImGuiNET;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -137,7 +134,7 @@ namespace DevoidEngine.Engine.Core
         private void OnTextInput(OpenTK.Windowing.Common.TextInputEventArgs obj)
         {
             LayerHandler.TextInput(obj.Unicode);
-            
+
         }
 
         private void OnResize(OpenTK.Windowing.Common.ResizeEventArgs obj)
@@ -153,7 +150,7 @@ namespace DevoidEngine.Engine.Core
 
         private void OnKeyDown(OpenTK.Windowing.Common.KeyboardKeyEventArgs obj)
         {
-        
+
         }
 
         private void OnKeyUp(OpenTK.Windowing.Common.KeyboardKeyEventArgs obj)

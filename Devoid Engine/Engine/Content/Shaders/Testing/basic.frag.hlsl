@@ -4,12 +4,21 @@ struct PSInput
     float3 Normal : NORMAL;
     float4 Tangent : TANGENT; // xyz = tangent, w = handedness
     float3 BiTangent : BINORMAL;
-    float2 UV1 : TEXCOORD0;
+    float2 UV0 : TEXCOORD0;
     float3 FragPos : TEXCOORD1;
     float3 WorldPos : TEXCOORD2;
 };
 
+cbuffer Material : register(b0)
+{
+    float4 color;
+};
+
+Texture2D MAT_Albedo : register(t0);
+SamplerState MAT_AlbedoSampler : register(s0);
+
+
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    return float4(input.UV1.x, input.UV1.y, 1, 1);
+    return float4(color + MAT_Albedo.Sample(MAT_AlbedoSampler, input.UV0));
 }

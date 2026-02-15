@@ -2,16 +2,9 @@
 using DevoidEngine.Engine.Rendering;
 using DevoidGPU;
 using ImGuiNET;
-using OpenTK.Windowing.Desktop;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Imgui
 {
@@ -42,7 +35,7 @@ namespace DevoidEngine.Engine.Imgui
     public class ImGuiRenderer
     {
         IGraphicsDevice graphicsDevice;
-        
+
         Shader guiShader;
         ImShaderData ImShaderData = new ImShaderData();
         IUniformBuffer ShaderConstantBuffer;
@@ -197,7 +190,7 @@ namespace DevoidEngine.Engine.Imgui
             }
 
             io.Fonts.Build();
-            
+
             // Bake the font atlas
             io.Fonts.GetTexDataAsRGBA32(out nint pixels, out int width, out int height, out int bpp);
 
@@ -214,7 +207,7 @@ namespace DevoidEngine.Engine.Imgui
                 IsDepthStencil = false,
                 IsRenderTarget = false,
                 IsMutable = false,
-                MipLevels = 0, 
+                MipLevels = 0,
             });
             _fontTexture.SetData(managedPixels);
 
@@ -329,7 +322,7 @@ namespace DevoidEngine.Engine.Imgui
             graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
 
             guiShader.Use();
-            ShaderConstantBuffer.SetData(ref ImShaderData);
+            ShaderConstantBuffer.SetData(ImShaderData);
             ShaderConstantBuffer.Bind(0, ShaderStage.Vertex);
 
             graphicsDevice.MainSurface.Bind();

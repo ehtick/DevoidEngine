@@ -1,7 +1,5 @@
-﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
+﻿using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Utilities;
-using System;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components

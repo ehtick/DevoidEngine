@@ -1,12 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -47,26 +41,26 @@ namespace DevoidEngine.Engine.Rendering
                 {
                     case ShaderPropertyType.Int:
                         if (TryResolveInt(instance, prop.Name, out int i))
-                            UniformBufferHelper.WriteInt(buffer, prop.Offset, i);
+                            ByteBufferWriter.WriteInt(buffer, prop.Offset, i);
                         break;
                     case ShaderPropertyType.Float:
                         if (TryResolveFloat(instance, prop.Name, out float f))
-                            UniformBufferHelper.WriteFloat(buffer, prop.Offset, f);
+                            ByteBufferWriter.WriteFloat(buffer, prop.Offset, f);
                         break;
 
                     case ShaderPropertyType.Vector4:
                         if (TryResolveVec4(instance, prop.Name, out Vector4 v4))
-                            UniformBufferHelper.WriteVector4(buffer, prop.Offset, v4);
+                            ByteBufferWriter.WriteVector4(buffer, prop.Offset, v4);
                         break;
 
                     case ShaderPropertyType.Vector3:
                         if (TryResolveVec3(instance, prop.Name, out Vector3 v3))
-                            UniformBufferHelper.WriteVector3(buffer, prop.Offset, v3);
+                            ByteBufferWriter.WriteVector3(buffer, prop.Offset, v3);
                         break;
 
                     case ShaderPropertyType.Matrix4:
                         if (TryResolveMat4(instance, prop.Name, out Matrix4x4 m))
-                            UniformBufferHelper.WriteMatrix4x4(buffer, prop.Offset, m);
+                            ByteBufferWriter.WriteMatrix4x4(buffer, prop.Offset, m);
                         break;
                 }
             }

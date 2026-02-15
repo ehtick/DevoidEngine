@@ -1,11 +1,6 @@
 ﻿using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -13,6 +8,8 @@ namespace DevoidEngine.Engine.Core
 
     public class CameraRenderContext
     {
+        public Camera camera;
+
         public List<RenderItem> renderItems3D = new();
         public List<RenderItem> renderItems2D = new();
         public List<RenderItem> renderItemsUI = new();
@@ -24,7 +21,6 @@ namespace DevoidEngine.Engine.Core
     {
         static Pool<CameraRenderContext> CameraContextPool = new Pool<CameraRenderContext>();
 
-        static List<CameraRenderContext> camRenderContexts = new List<CameraRenderContext>();
         static AsyncDoubleBuffer<List<CameraRenderContext>> SwapBuffer;
 
         static FramePipeline()
@@ -44,8 +40,9 @@ namespace DevoidEngine.Engine.Core
             foreach (var cameraComponent in scene.GetComponentsOfType<CameraComponent3D>())
             {
 
-                CameraRenderContext ctx = CameraContextPool.Get(); 
-                
+                CameraRenderContext ctx = CameraContextPool.Get();
+                ctx.camera = cameraComponent.Camera;
+
                 foreach (var renderable in scene.Renderables)
                 {
                     renderable.Collect(cameraComponent, ctx);
@@ -61,20 +58,13 @@ namespace DevoidEngine.Engine.Core
         {
             List<CameraRenderContext> cameraContextList = SwapBuffer.Front;
 
-            UIRenderer.BeginRender();
+            // Frame level shader bindings go here
 
-            Console.WriteLine(cameraContextList.Count);
-
-
-            foreach (var item in cameraContextList)
+            for (int i = 0; i < cameraContextList.Count; i++)
             {
-                foreach (var x in item.renderItemsUI)
-                {
-                    UIRenderer.DrawRect(x.Model, (int)x.Material.PropertiesVec4Override["Configuration"].X);
-                }
+                CameraRenderContext ctx = cameraContextList[i];
+                RenderBase.Render(ctx);
             }
-
-            UIRenderer.EndRender();
 
             for (int i = 0; i < cameraContextList.Count; i++)
             {
@@ -85,7 +75,6 @@ namespace DevoidEngine.Engine.Core
 
             cameraContextList.Clear();
 
-            //SwapBuffer.RenderSwap();
         }
 
 
