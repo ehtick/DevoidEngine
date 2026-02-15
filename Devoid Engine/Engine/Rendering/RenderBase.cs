@@ -1,31 +1,47 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidGPU;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Rendering
 {
+    [StructLayout(LayoutKind.Sequential)]
+    struct MeshRenderData
+    {
+        public Matrix4x4 ModelMatrix;
+        public Matrix4x4 ModelMatrixInv;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct CameraData
+    {
+        public Matrix4x4 View;
+        public Matrix4x4 Projection;
+        public Matrix4x4 InverseProjection;
+        public Vector3 Position;
+        public float NearClip;
+        public float FarClip;
+        public Vector2 ScreenSize;
+        private float _padding0;
+    }
+
     public static class RenderBase
     {
-        struct MeshRenderData
-        {
-            public Matrix4x4 ModelMatrix;
-            public Matrix4x4 ModelMatrixInv;
-        }
 
-        struct CameraRenderData
-        {
-
-        }
+        public static Texture2D Output { get; set; }
 
         static IRenderTechnique ActiveRenderTechnique;
 
         // Renderer objects
         static MeshRenderData _meshRenderData;
         static UniformBuffer _meshRenderDataBuffer;
+        static UniformBuffer _cameraDataBuffer;
 
-        public static void SetupCamera()
+        public static void SetupCamera(CameraData cameraData)
         {
             // Per camera data goes here
+            _cameraDataBuffer.SetData(cameraData);
+            _cameraDataBuffer.Bind(RenderBindConstants.CameraDataBindSlot, ShaderStage.Vertex | ShaderStage.Fragment);
         }
 
 
@@ -34,6 +50,10 @@ namespace DevoidEngine.Engine.Rendering
             _meshRenderData = new MeshRenderData();
             _meshRenderDataBuffer = new UniformBuffer(sizeof(MeshRenderData));
 
+            _cameraDataBuffer = new UniformBuffer(sizeof(CameraData));
+
+            // TESTING
+            ActiveRenderTechnique = new ForwardRenderTechnique();
 
             ActiveRenderTechnique?.Initialize(width, height);
         }
@@ -48,31 +68,96 @@ namespace DevoidEngine.Engine.Rendering
             if (ActiveRenderTechnique == null)
                 Console.WriteLine("[Renderer]: Render technique was not set. No Object rendered.");
 
-            SetupCamera();
-
-            ActiveRenderTechnique?.Render(ctx);
+            Output = ActiveRenderTechnique?.Render(ctx);
         }
 
-        public static void Draw(RenderItem item)
+        public static IInputLayout GetInputLayout(Mesh mesh, Shader shader)
         {
-            // 1. Bind material (shader + textures + uniforms)
-            item.Material.Apply();
-
-            item.Mesh.VertexBuffer.Bind();
-            item.Mesh.IndexBuffer?.Bind();
-
-            IInputLayout layout = Renderer.GetInputLayout(item.Mesh, item.Material.BaseMaterial.Shader);
-
-            if (item.Mesh.IndexBuffer != null)
+            var key = (mesh.VertexBuffer.Layout, shader.vShader);
+            if (!InputLayoutManager.inputLayoutCache.TryGetValue(key, out var layout))
             {
-                Renderer.graphicsDevice.DrawIndexed(item.Mesh.IndexBuffer.IndexCount, 0, 0);
+                layout = Renderer.graphicsDevice.CreateInputLayout(mesh.VertexBuffer.Layout, shader.vShader);
+                InputLayoutManager.inputLayoutCache[key] = layout;
             }
-            else
+            return layout;
+        }
+
+        public static void GetFinalOutput()
+        {
+
+        }
+
+        public static void Execute(List<RenderItem> items, RenderState renderState)
+        {
+            if (items.Count == 0) { return; }
+
+            MaterialInstance currentMaterial = null;
+            Shader currentShader = null;
+            Mesh currentMesh = null;
+
+            ApplyRenderState(renderState);
+
+            int currentObjectDataBindSlot = -1;
+
+            for (int i = 0; i < items.Count; i++)
             {
-                Renderer.graphicsDevice.Draw(item.Mesh.VertexBuffer.VertexCount, 0);
+                var item = items[i];
+
+                if (item.Material != currentMaterial)
+                {
+                    currentMaterial = item.Material;
+                    if (item.Material.BaseMaterial.Shader != currentShader)
+                    {
+                        currentShader = item.Material.BaseMaterial.Shader;
+
+                        int perObjectBindSlot = currentShader.vShader.ReflectionData.GetUniformBufferSlot("perObject");
+
+                        if (perObjectBindSlot != currentObjectDataBindSlot)
+                        {
+                            currentObjectDataBindSlot = perObjectBindSlot;
+
+                            if (currentObjectDataBindSlot == -1)
+                            {
+                                Console.WriteLine("Shader does not implement PerObject uniform buffer.\nObject data cannot be sent to shader.");
+                                continue;
+                            }
+
+                            _meshRenderDataBuffer.Bind(currentObjectDataBindSlot, ShaderStage.Vertex);
+                        }
+
+                        currentShader.Use();
+                    }
+                    currentMaterial.Apply();
+                }
+
+                if (item.Mesh != currentMesh) { currentMesh = item.Mesh; }
+
+
+                UpdatePerObjectData(item.Model);
+
+                currentMesh.Bind();
+                RenderBase.GetInputLayout(currentMesh, currentShader).Bind();
+
+                currentMesh.Draw();
             }
         }
 
+        static void UpdatePerObjectData(Matrix4x4 model)
+        {
+            _meshRenderData = new MeshRenderData()
+            {
+                ModelMatrix = model
+            };
+            Matrix4x4.Invert(model, out _meshRenderData.ModelMatrixInv);
+            _meshRenderDataBuffer.SetData(_meshRenderData);
+        }
 
+        static void ApplyRenderState(RenderState renderState)
+        {
+            Renderer.graphicsDevice.SetBlendState(renderState.BlendMode);
+            Renderer.graphicsDevice.SetDepthState(renderState.DepthTest, renderState.DepthWrite);
+            Renderer.graphicsDevice.SetRasterizerState(renderState.CullMode, renderState.FillMode);
+            Renderer.graphicsDevice.SetPrimitiveType(renderState.PrimitiveType);
+        }
     }
 }

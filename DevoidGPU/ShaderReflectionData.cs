@@ -44,6 +44,20 @@
         public List<ShaderResourceInfo> Resources { get; } = new();
         public List<TextureBindingInfo> TextureBindings { get; } = new();
         public List<InputParameterInfo> InputParameters { get; } = new();
+
+        public int GetUniformBufferSlot(string name)
+        {
+            var buffers = UniformBuffers;
+            for (int j = 0; j < buffers.Count; j++)
+            {
+                var buffer = buffers[j];
+                if (string.Equals(buffer.Name, "PerObject", StringComparison.OrdinalIgnoreCase))
+                {
+                    return j;
+                }
+            }
+            return -1;
+        }
     }
 
     public enum ShaderResourceType

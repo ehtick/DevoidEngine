@@ -11,14 +11,6 @@ namespace DevoidEngine.Engine.Core
         public bool Dirty;
     }
 
-    public class RenderState
-    {
-        public BlendMode BlendMode { get; set; } = BlendMode.Opaque;
-        public DepthTest DepthTest { get; set; } = DepthTest.LessEqual;
-        public bool DepthWrite { get; set; } = true;
-        public CullMode CullMode { get; set; } = CullMode.Back;
-    }
-
     public class Material
     {
         public RenderState RenderState;
@@ -101,8 +93,6 @@ namespace DevoidEngine.Engine.Core
         public void Apply()
         {
             MaterialHelper.Update(this);
-
-            BaseMaterial.Shader.Use();
 
             GPUData.UniformBuffer.Bind(2, ShaderStage.Fragment | ShaderStage.Vertex);
         }

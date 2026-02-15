@@ -18,29 +18,21 @@ namespace DevoidGPU.DX11
 
         public Stream Open(IncludeType type, string fileName, Stream parentStream)
         {
-            string baseDirectory;
+            Console.WriteLine(fileName);
+            Console.WriteLine(rootDirectory);
+            Console.WriteLine(Path.GetFullPath(Path.Combine(rootDirectory, fileName)));
 
-            if (parentStream is FileStream parentFile)
-            {
-                baseDirectory = Path.GetDirectoryName(parentFile.Name);
-            }
-            else
-            {
-                baseDirectory = rootDirectory;
-            }
+            string baseDirectory = rootDirectory;
 
-            string fullPath;
+            //if (parentStream is FileStream parentFile)
+            //    baseDirectory = Path.GetDirectoryName(parentFile.Name);
+            //else
+            //    baseDirectory = rootDirectory;
 
-            if (type == IncludeType.Local)
-            {
-                fullPath = Path.Combine(baseDirectory, fileName);
-            }
-            else
-            {
-                fullPath = Path.Combine(rootDirectory, "Common", fileName);
-            }
+            string fullPath = Path.GetFullPath(Path.Combine(baseDirectory, fileName));
 
-            fullPath = Path.GetFullPath(fullPath);
+            if (!File.Exists(fullPath))
+                fullPath = Path.GetFullPath(Path.Combine(rootDirectory, fileName));
 
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"Shader include not found: {fullPath}");
@@ -54,6 +46,9 @@ namespace DevoidGPU.DX11
 
             return stream;
         }
+
+
+
 
 
         public void Close(Stream stream)

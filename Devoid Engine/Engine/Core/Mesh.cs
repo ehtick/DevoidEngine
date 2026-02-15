@@ -45,25 +45,25 @@ namespace DevoidEngine.Engine.Core
             GC.SuppressFinalize(this);
         }
 
-        // Rendering handled by Renderer, not Mesh itself.
-        //public void Render(IGraphicsDevice graphicsDevice)
-        //{
-        //    if (!IsRenderable || VertexBuffer == null)
-        //        return;
-
-        //    VertexBuffer.Bind();
-        //    if (IndexBuffer != null)
-        //    {
-        //        graphicsDevice.DrawIndexed(IndexBuffer.IndexCount, 0, 0);
-        //    } else
-        //    {
-        //        graphicsDevice.Draw(VertexBuffer.VertexCount, 0);
-        //    }
-
-        //}
-
 
         public void SetStatic(bool isStatic) => IsStatic = isStatic;
+
+        public void Bind()
+        {
+            VertexBuffer?.Bind();
+            IndexBuffer?.Bind();
+        }
+
+        public void Draw()
+        {
+            if (IndexBuffer  == null)
+            {
+                Renderer.graphicsDevice.Draw(VertexBuffer.VertexCount, 0);
+            } else
+            {
+                Renderer.graphicsDevice.DrawIndexed(IndexBuffer.IndexCount, 0, 0);
+            }
+        }
 
         public void SetVertices(Vertex[] vertexArray)
         {
@@ -78,30 +78,15 @@ namespace DevoidEngine.Engine.Core
             );
 
             VertexBuffer.SetData(vertexArray);
-
-            //RenderThreadDispatcher.QueueLatest("MESH_SET_VERTICES", () =>
-            //{
-            //    Console.WriteLine("Created Vertex Buffer");
-            //    VertexBuffer = Renderer.graphicsDevice.BufferFactory.CreateVertexBuffer(
-            //        IsStatic ? BufferUsage.Default : BufferUsage.Dynamic,
-            //        Vertex.VertexInfo,
-            //        vertexArray.Length
-            //    );
-
-            //    VertexBuffer.SetData(vertexArray);
-            //});
         }
 
         public void SetIndices(int[] indexArray)
         {
             indices = indexArray;
-
-            // Create the buffer immediately so it isn't null when DrawText is called
             IndexBuffer = Renderer.graphicsDevice.BufferFactory.CreateIndexBuffer(
                 indexArray.Length,
                 BufferUsage.Default
             );
-
             IndexBuffer.SetData(indexArray);
         }
 

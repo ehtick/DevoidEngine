@@ -64,7 +64,7 @@ namespace DevoidEngine.Engine.Rendering
             }));
         }
 
-        private static void CreateCameraData(int width, int height)
+        public static void CreateCameraData(int width, int height)
         {
             Matrix4x4 ortho = Matrix4x4.CreateOrthographicOffCenter(
                 0f, width,

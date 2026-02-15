@@ -31,7 +31,7 @@ namespace DevoidStandaloneLauncher
         public override void OnLateRender()
         {
             //if (SceneManager.MainScene.GetMainCamera() == null) return;
-            Texture2D renderOutput = UIRenderer.RenderOutput.GetRenderTexture(0);//SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0);
+            Texture2D renderOutput = RenderBase.Output;//SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0);
 
             RenderAPI.RenderToScreen(renderOutput);
         }

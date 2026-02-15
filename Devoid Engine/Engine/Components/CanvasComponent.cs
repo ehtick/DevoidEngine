@@ -27,7 +27,7 @@ namespace DevoidEngine.Engine.Components
         {
             UISystem.Roots.Add(Canvas);
 
-            //Setup();
+            Setup();
 
             base.OnStart();
         }

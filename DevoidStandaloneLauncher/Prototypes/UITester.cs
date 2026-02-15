@@ -40,6 +40,8 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             testRender = new Mesh();
             testRender.SetVertices(Primitives.GetQuadVertex());
+
+
         }
 
         public override void OnUpdate(float delta)
@@ -49,12 +51,12 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         public override void OnRender(float delta)
         {
-            testRender.VertexBuffer.Bind();
-            Renderer.GetInputLayout(testRender, testRenderMat.Shader).Bind();
+            //testRender.VertexBuffer.Bind();
+            //Renderer.GetInputLayout(testRender, testRenderMat.Shader).Bind();
 
-            testRenderMatInstance.Bind();
+            //testRenderMatInstance.Bind();
 
-            Renderer.graphicsDevice.Draw(testRender.VertexBuffer.VertexCount, 0);
+            //Renderer.graphicsDevice.Draw(testRender.VertexBuffer.VertexCount, 0);
         }
 
     }

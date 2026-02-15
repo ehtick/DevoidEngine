@@ -5,18 +5,6 @@ using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Core
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct CameraData
-    {
-        public Matrix4x4 View;
-        public Matrix4x4 Projection;
-        public Matrix4x4 InverseProjection;
-        public Vector3 Position;
-        public float NearClip;
-        public float FarClip;
-        public Vector2 ScreenSize;
-        private float _padding0;
-    }
 
     public class Camera
     {

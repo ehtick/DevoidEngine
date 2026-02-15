@@ -5,11 +5,7 @@ struct PSInput
     float2 UV0 : TEXCOORD0;
 };
 
-cbuffer MeshData : register(b1)
-{
-    float4x4 Model;
-    float4x4 invModel;
-};
+#include "../Common/render_constants.hlsl"
 
 float4 PSMain(PSInput input) : SV_TARGET
 {   
@@ -19,5 +15,5 @@ float4 PSMain(PSInput input) : SV_TARGET
     //    (id.x * 69621u % 255) / 255.0
     //);
 
-    return float4(1.0, 0.5, 1.0, 1.0);
+    return float4(1.0, 0.5, 0.2, 1.0);
 }
