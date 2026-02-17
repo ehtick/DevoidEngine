@@ -50,10 +50,14 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
                 var body = simulation.Bodies.GetBodyReference(handle);
 
-                body.Velocity.Linear *= (1f - material.LinearDamping * deltaTime);
-                body.Velocity.Angular *= (1f - material.AngularDamping * deltaTime);
+                float linearFactor = MathF.Max(0f, 1f - material.LinearDamping * deltaTime);
+                float angularFactor = MathF.Max(0f, 1f - material.AngularDamping * deltaTime);
+
+                body.Velocity.Linear *= linearFactor;
+                body.Velocity.Angular *= angularFactor;
             }
         }
+
 
 
         private PhysicsMaterial LookupMaterial(CollidableReference collidable)

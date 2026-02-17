@@ -13,7 +13,7 @@ namespace DevoidEngine.Engine.Components
         // Basic Settings
         // ===============================
 
-        public float Mass = 1f;
+        public float Mass = 10f;
         public bool StartKinematic = false;
 
         // ===============================
