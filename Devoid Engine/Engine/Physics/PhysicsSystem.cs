@@ -33,9 +33,9 @@ namespace DevoidEngine.Engine.Physics
             return backend.CreateBody(desc, owner);
         }
 
-        public void CreateStaticBox(Vector3 position, Vector3 size, GameObject owner)
+        public void CreateStatic(PhysicsStaticDescription desc, GameObject owner)
         {
-            backend.CreateStaticBox(position, size, owner);
+            backend.CreateStatic(desc, owner);
         }
 
         public void RemoveBody(IPhysicsBody body)

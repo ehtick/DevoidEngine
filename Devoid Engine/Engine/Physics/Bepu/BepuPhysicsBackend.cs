@@ -56,7 +56,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
             bodyToGameObject[handle] = owner;
 
-            return new BepuPhysicsBody(handle, simulation);
+            return new BepuPhysicsBody(handle, simulation, desc.Material);
         }
 
 

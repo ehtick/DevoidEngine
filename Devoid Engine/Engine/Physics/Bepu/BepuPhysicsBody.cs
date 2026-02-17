@@ -9,11 +9,16 @@ namespace DevoidEngine.Engine.Physics.Bepu
         internal BodyHandle Handle;
         private Simulation simulation;
 
-        public BepuPhysicsBody(BodyHandle handle, Simulation simulation)
+        internal PhysicsMaterial Material;
+
+
+        public BepuPhysicsBody(BodyHandle handle, Simulation simulation, PhysicsMaterial material)
         {
             Handle = handle;
             this.simulation = simulation;
+            Material = material;
         }
+
 
         private BodyReference GetBody()
         {
@@ -144,6 +149,13 @@ namespace DevoidEngine.Engine.Physics.Bepu
             var body = GetBody();
             body.ApplyImpulse(impulse, worldOffset);
             body.Awake = true;
+        }
+
+        public void ApplyDamping(float dt)
+        {
+            var body = GetBody();
+            body.Velocity.Linear *= (1f - Material.LinearDamping * dt);
+            body.Velocity.Angular *= (1f - Material.AngularDamping * dt);
         }
 
         public void WakeUp()

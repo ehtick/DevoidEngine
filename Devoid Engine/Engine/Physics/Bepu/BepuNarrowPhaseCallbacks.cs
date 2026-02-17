@@ -10,6 +10,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
     internal struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     {
+        public Func<CollidableReference, PhysicsMaterial> MaterialLookup;
+
         public void Initialize(Simulation simulation) { }
 
         public void Dispose() { }
@@ -27,15 +29,19 @@ namespace DevoidEngine.Engine.Physics.Bepu
             out PairMaterialProperties pairMaterial)
             where TManifold : unmanaged, IContactManifold<TManifold>
         {
+            var matA = MaterialLookup(pair.A);
+            var matB = MaterialLookup(pair.B);
+
             pairMaterial = new PairMaterialProperties
             {
-                FrictionCoefficient = 1f,
+                FrictionCoefficient = (matA.Friction + matB.Friction) * 0.5f,
                 MaximumRecoveryVelocity = 2f,
                 SpringSettings = new SpringSettings(30, 1)
             };
 
             return true;
         }
+
 
         public bool ConfigureContactManifold(
             int workerIndex,

@@ -39,9 +39,10 @@ namespace DevoidEngine.Engine.Physics.Bepu
             Vector<float> dt,
             ref BodyVelocityWide velocity)
         {
-            // velocity.Linear += gravity * dt
-            Vector3Wide.Scale(gravityWide, dt, out var gravityStep);
-            Vector3Wide.Add(velocity.Linear, gravityStep, out velocity.Linear);
+            Vector3Wide.Scale(velocity.Linear,
+                Vector<float>.One - linearDamping * dt,
+                out velocity.Linear);
+
         }
     }
 

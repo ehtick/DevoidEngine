@@ -11,8 +11,13 @@ namespace DevoidEngine.Engine.Physics
     {
         public Vector3 Position;
         public Quaternion Rotation;
+
         public float Mass;
+        public bool IsKinematic;
 
         public PhysicsShapeDescription Shape;
+
+        public PhysicsMaterial Material;
     }
+
 }
