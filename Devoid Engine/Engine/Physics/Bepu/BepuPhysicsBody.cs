@@ -12,12 +12,20 @@ namespace DevoidEngine.Engine.Physics.Bepu
         internal PhysicsMaterial Material;
 
 
-        public BepuPhysicsBody(BodyHandle handle, Simulation simulation, PhysicsMaterial material)
+        private BepuPhysicsBackend backend;
+
+        public BepuPhysicsBody(
+            BodyHandle handle,
+            Simulation simulation,
+            PhysicsMaterial material,
+            BepuPhysicsBackend backend)
         {
             Handle = handle;
             this.simulation = simulation;
             Material = material;
+            this.backend = backend;
         }
+
 
 
         private BodyReference GetBody()
@@ -168,6 +176,11 @@ namespace DevoidEngine.Engine.Physics.Bepu
         {
             var body = GetBody();
             body.Awake = false;
+        }
+
+        public void Remove()
+        {
+            backend.RemoveBody(this);
         }
     }
 

@@ -16,16 +16,22 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
         private Dictionary<BodyHandle, GameObject> bodyToGameObject = new Dictionary<BodyHandle, GameObject>();
         private Dictionary<StaticHandle, GameObject> staticToGameObject = new Dictionary<StaticHandle, GameObject>();
+        private Dictionary<BodyHandle, PhysicsMaterial> bodyMaterials = new Dictionary<BodyHandle, PhysicsMaterial>();
 
 
         public void Initialize()
         {
             bufferPool = new BufferPool();
 
+            var callbacks = new BepuNarrowPhaseCallbacks
+            {
+                MaterialLookup = LookupMaterial
+            };
+
             simulation = Simulation.Create(
                 bufferPool,
-                new BepuNarrowPhaseCallbacks(),
-                new BepuPoseIntegratorCallbacks { Gravity = new Vector3(0, 9.81f, 0) },
+                callbacks,
+                new BepuPoseIntegratorCallbacks { Gravity = new Vector3(0, -9.81f, 0) },
                 new SolveDescription(8, 1),
                 new DefaultTimestepper()
             );
@@ -34,6 +40,17 @@ namespace DevoidEngine.Engine.Physics.Bepu
         public void Step(float deltaTime)
         {
             simulation.Timestep(deltaTime);
+        }
+
+        private PhysicsMaterial LookupMaterial(CollidableReference collidable)
+        {
+            if (collidable.Mobility == CollidableMobility.Dynamic)
+            {
+                if (bodyMaterials.TryGetValue(collidable.BodyHandle, out var mat))
+                    return mat;
+            }
+
+            return PhysicsMaterial.Default;
         }
 
         public IPhysicsBody CreateBody(PhysicsBodyDescription desc, GameObject owner)
@@ -45,18 +62,33 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
             var pose = new RigidPose(desc.Position, desc.Rotation);
 
-            var bodyDescription = BodyDescription.CreateDynamic(
-                pose,
-                inertia,
-                new CollidableDescription(shapeIndex, 0.1f),
-                new BodyActivityDescription(0.01f)
-            );
+            BodyDescription bodyDescription;
+
+            if (desc.IsKinematic)
+            {
+                bodyDescription = BodyDescription.CreateKinematic(
+                    pose,
+                    new CollidableDescription(shapeIndex, 0.1f),
+                    new BodyActivityDescription(0.01f)
+                );
+            }
+            else
+            {
+                bodyDescription = BodyDescription.CreateDynamic(
+                    pose,
+                    inertia,
+                    new CollidableDescription(shapeIndex, 0.1f),
+                    new BodyActivityDescription(0.01f)
+                );
+            }
+
 
             BodyHandle handle = simulation.Bodies.Add(bodyDescription);
 
             bodyToGameObject[handle] = owner;
+            bodyMaterials[handle] = desc.Material;
 
-            return new BepuPhysicsBody(handle, simulation, desc.Material);
+            return new BepuPhysicsBody(handle, simulation, desc.Material, this);
         }
 
 
@@ -211,8 +243,12 @@ namespace DevoidEngine.Engine.Physics.Bepu
             if (body is BepuPhysicsBody b)
             {
                 simulation.Bodies.Remove(b.Handle);
+
+                bodyToGameObject.Remove(b.Handle);
+                bodyMaterials.Remove(b.Handle);
             }
         }
+
 
         public bool Raycast(Ray ray, float maxDistance, out RaycastHit hit)
         {

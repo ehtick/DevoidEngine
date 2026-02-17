@@ -15,7 +15,7 @@ namespace DevoidEngine.Engine.Physics
 
 
         IPhysicsBody CreateBody(PhysicsBodyDescription desc, GameObject owner);
-        void CreateStatic(PhysicsStaticDescription desc, GameObject owner)
+        void CreateStatic(PhysicsStaticDescription desc, GameObject owner);
         void RemoveBody(IPhysicsBody body);
 
         //RaycastHit Raycast(Ray ray, float maxDistance);

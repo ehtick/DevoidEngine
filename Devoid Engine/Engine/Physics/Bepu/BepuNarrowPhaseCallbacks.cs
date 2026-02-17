@@ -12,7 +12,10 @@ namespace DevoidEngine.Engine.Physics.Bepu
     {
         public Func<CollidableReference, PhysicsMaterial> MaterialLookup;
 
-        public void Initialize(Simulation simulation) { }
+        public void Initialize(Simulation simulation)
+        {
+
+        }
 
         public void Dispose() { }
 
@@ -32,12 +35,15 @@ namespace DevoidEngine.Engine.Physics.Bepu
             var matA = MaterialLookup(pair.A);
             var matB = MaterialLookup(pair.B);
 
+            float restitution = (matA.Restitution + matB.Restitution) * 0.5f;
+
             pairMaterial = new PairMaterialProperties
             {
                 FrictionCoefficient = (matA.Friction + matB.Friction) * 0.5f,
-                MaximumRecoveryVelocity = 2f,
+                MaximumRecoveryVelocity = 2f + restitution * 10f,
                 SpringSettings = new SpringSettings(30, 1)
             };
+
 
             return true;
         }
