@@ -11,6 +11,7 @@ namespace DevoidEngine.Engine.Components
         public GameObject gameObject;
         public virtual void OnStart() { }
         public virtual void OnUpdate(float dt) { }
+        public virtual void OnLateUpdate(float dt) { }
         public virtual void OnRender(float dt) { }
 
         public virtual void OnDestroy() { }

@@ -197,6 +197,12 @@ namespace DevoidEngine.Engine.Core
             }
 
             Physics.Step(dt);
+
+
+            for (int i = 0; i < GameObjects.Count; i++)
+            {
+                GameObjects[i].OnLateUpdate(dt);
+            }
         }
 
         public void OnRender(float dt)

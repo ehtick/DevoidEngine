@@ -193,6 +193,18 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
+        public void OnLateUpdate(float dt)
+        {
+            for (int i = 0; i < Components.Count; i++)
+            {
+                Components[i].OnLateUpdate(dt);
+            }
+
+            foreach (var child in children)
+                child.OnLateUpdate(dt);
+        }
+
+
         public void OnRender(float dt)
         {
             for (int i = 0; i < Components.Count; i++)

@@ -37,11 +37,18 @@ namespace DevoidEngine.Engine.Components
             if (InternalBody.IsKinematic)
             {
                 InternalBody.Position = gameObject.transform.Position;
-
                 InternalBody.Rotation =
                     TransformMath.EulerToQuaternion(gameObject.transform.Rotation);
             }
-            else
+        }
+
+
+        public override void OnLateUpdate(float dt)
+        {
+            if (InternalBody == null)
+                return;
+
+            if (!InternalBody.IsKinematic)
             {
                 gameObject.transform.Position = InternalBody.Position;
 
@@ -49,6 +56,7 @@ namespace DevoidEngine.Engine.Components
                     TransformMath.QuaternionToEuler(InternalBody.Rotation);
             }
         }
+
 
 
         public void AddImpulse(Vector3 impulse)
