@@ -14,7 +14,15 @@ namespace DevoidEngine.Engine.Core
         public List<RenderItem> renderItems2D = new();
         public List<RenderItem> renderItemsUI = new();
 
-        public void Clear() { renderItems3D.Clear(); renderItems2D.Clear(); renderItemsUI.Clear(); }
+        public List<GPUPointLight> pointLights = new();
+        public List<GPUSpotLight> spotLights = new();
+        public List<GPUDirectionalLight> directionalLights = new();
+
+        public void Clear()
+        {
+            renderItems3D.Clear(); renderItems2D.Clear(); renderItemsUI.Clear(); pointLights.Clear();
+            spotLights.Clear(); directionalLights.Clear();
+        }
     }
 
     public static class FramePipeline
@@ -41,6 +49,7 @@ namespace DevoidEngine.Engine.Core
             {
 
                 CameraRenderContext ctx = CameraContextPool.Get();
+                ctx.Clear();
                 ctx.camera = cameraComponent.Camera;
 
                 foreach (var renderable in scene.Renderables)

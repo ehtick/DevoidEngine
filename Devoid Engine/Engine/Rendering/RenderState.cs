@@ -21,7 +21,7 @@ namespace DevoidEngine.Engine.Rendering
             BlendMode = BlendMode.Opaque,
             DepthTest = DepthTest.LessEqual,
             DepthWrite = true,
-            CullMode = CullMode.None,
+            CullMode = CullMode.Back,
             FillMode = FillMode.Solid,
             PrimitiveType = PrimitiveType.Triangles,
         };

@@ -25,14 +25,22 @@ struct PSInput
 
 PSInput VSMain(VSInput input)
 {
-    PSInput output = (PSInput) 0; // unconditional initialization
+    PSInput output = (PSInput) 0;
+
+    float4 worldPos = mul(Model, float4(input.Position, 1.0f));
+    float4 viewPos = mul(View, worldPos);
+
+    output.Position = mul(Projection, viewPos);
+
+    // Pass world position
+    output.WorldspacePosition = worldPos.xyz;
+
+    // Transform normal to world space
+    float3 worldNormal = mul((float3x3) Model, input.Normal);
+    output.Normal = normalize(worldNormal);
+
     output.UV0 = input.UV0;
     output.UV1 = input.UV1;
 
-    float4 worldPos = mul(Model, float4(input.Position, 1.0f));
-    
-    float4 viewPos = mul(View, worldPos);
-    output.Position = mul(Projection, viewPos);
-    
     return output;
 }

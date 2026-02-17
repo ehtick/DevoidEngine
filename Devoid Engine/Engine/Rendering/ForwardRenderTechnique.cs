@@ -1,4 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Utilities;
+using System.Runtime.CompilerServices;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -6,13 +8,26 @@ namespace DevoidEngine.Engine.Rendering
     {
         Framebuffer finalOutputBuffer;
 
+        // Lights
+        const int MAX_POINTLIGHTS = 100;
+        const int MAX_SPOTLIGHTS = 20;
+        const int MAX_DIRECTIONALLIGHTS = 1;
+        
+        StorageBuffer<GPUPointLight> pointLightBuffer;
+
+        UniformBuffer sceneDataBuffer;
+
+        SceneData sceneData;
+
         public void Dispose()
         {
 
         }
 
-        public void Initialize(int width, int height)
+        public unsafe void Initialize(int width, int height)
         {
+            pointLightBuffer = new StorageBuffer<GPUPointLight>(MAX_POINTLIGHTS, DevoidGPU.BufferUsage.Dynamic, false);
+            sceneDataBuffer = new UniformBuffer(Unsafe.SizeOf<SceneData>(), DevoidGPU.BufferUsage.Dynamic);
 
             finalOutputBuffer = new Framebuffer();
 
@@ -42,10 +57,14 @@ namespace DevoidEngine.Engine.Rendering
 
         public Texture2D Render(CameraRenderContext ctx)
         {
+
             finalOutputBuffer.Bind();
             finalOutputBuffer.Clear();
 
             Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
+
+            UploadLights(ctx);
+            UploadSceneData(ctx);
 
             RenderBase.SetupCamera(ctx.camera.GetCameraData());
             RenderBase.Execute(ctx.renderItems3D, RenderState.DefaultRenderState);
@@ -55,6 +74,22 @@ namespace DevoidEngine.Engine.Rendering
 
 
             return finalOutputBuffer.GetRenderTexture(0);
+        }
+
+        void UploadSceneData(CameraRenderContext ctx)
+        {
+            sceneData = new SceneData();
+            sceneData.pointLightCount = (uint)ctx.pointLights.Count;
+
+            sceneDataBuffer.SetData(sceneData);
+            sceneDataBuffer.Bind(RenderBindConstants.SceneDataBindSlot, DevoidGPU.ShaderStage.Fragment);
+        }
+
+        void UploadLights(CameraRenderContext ctx)
+        {
+            pointLightBuffer.SetData(ctx.pointLights.ToArray(), 0);
+            pointLightBuffer.Bind(RenderBindConstants.PointLightBufferBindSlot, DevoidGPU.ShaderStage.Fragment);
+
         }
 
         public void Resize(int width, int height)

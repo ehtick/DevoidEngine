@@ -26,6 +26,15 @@ namespace DevoidEngine.Engine.Rendering
         private float _padding0;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SceneData
+    {
+        public uint pointLightCount;
+        public uint spotLightCount;
+        public uint directionalLightCount;
+        public int _padding;
+    }
+
     public static class RenderBase
     {
 

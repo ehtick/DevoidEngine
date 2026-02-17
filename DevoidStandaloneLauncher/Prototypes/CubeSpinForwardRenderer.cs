@@ -9,6 +9,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         Scene scene;
         GameObject cube;
         GameObject camera;
+        GameObject light;
 
         public override void OnInit(Scene main)
         {
@@ -19,6 +20,15 @@ namespace DevoidStandaloneLauncher.Prototypes
             camera.transform.Position = new System.Numerics.Vector3(0, 0, 0);
 
             cameraComponent.IsDefault = true;
+
+            light = scene.addGameObject("light");
+            LightComponent lightComponent = light.AddComponent<LightComponent>();
+            lightComponent.Intensity = 100;
+            lightComponent.Color = new System.Numerics.Vector4(1, 1, 1, 1);
+            light.transform.Position = new System.Numerics.Vector3(0, 2, 0);
+
+
+            // Build cube mesh and upload.
 
             Mesh mesh = new Mesh();
             mesh.SetVertices(Primitives.GetCubeVertex());

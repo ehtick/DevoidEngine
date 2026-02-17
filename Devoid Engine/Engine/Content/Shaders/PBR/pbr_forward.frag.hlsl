@@ -10,13 +10,31 @@ struct PSInput
     float3 WorldPos : TEXCOORD3;
 };
 
-cbuffer Material : register(b2)
+cbuffer Material : register(b3)
 {
     float4 Albedo;
 };
 
+#include "../Common/render_constants.hlsl"
+#include "../Common/light_constructs.hlsl"
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
-    return float4(input.UV0.x, input.UV0.y, 1, 1);
+    // Normalize interpolated normal
+    float3 normal = normalize(input.Normal);
+
+    // View direction (camera position must exist in your camera cbuffer)
+    float3 viewDir = normalize(Position - input.WorldPos);
+
+    // Base color from material
+    float3 albedo = Albedo.rgb;
+
+    // Compute lighting
+    float3 lighting = ComputeLighting(
+        input.WorldPos,
+        normal,
+        viewDir,
+        albedo);
+
+    return float4(lighting, 1.0);
 }

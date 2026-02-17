@@ -4,7 +4,7 @@
     {
         IUniformBuffer CreateUniformBuffer<T>(BufferUsage bufferUsage) where T : struct;
         IUniformBuffer CreateUniformBuffer(int size, BufferUsage bufferUsage);
-        IShaderStorageBuffer<T> CreateShaderStorageBuffer<T>(int elementCount, BufferUsage usage, bool allowUAV = false) where T : struct;
+        IShaderStorageBuffer CreateShaderStorageBuffer(int size, int stride, BufferUsage usage, bool allowUAV = false);
 
         IVertexBuffer CreateVertexBuffer(BufferUsage bufferUsage, VertexInfo vertexInfo, int vertexCount);
         IIndexBuffer CreateIndexBuffer(int indexCount, BufferUsage usage, bool is16Bit = false);

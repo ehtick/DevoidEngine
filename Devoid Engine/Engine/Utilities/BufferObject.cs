@@ -1,50 +1,75 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidGPU;
+using System;
+using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Utilities
 {
-    public unsafe class BufferObject<T> where T : struct
+    public sealed class StorageBuffer<T> where T : struct
     {
+        private readonly IShaderStorageBuffer _buffer;
 
+        public int ElementCapacity { get; }
+        public int ElementSize { get; }
+        public int SizeInBytes => _buffer.SizeInBytes;
 
-        IShaderStorageBuffer<T> shaderStorageBuffer;
-
-        public BufferObject(int elementCount, BufferUsage usage, bool allowRW = false)
+        public StorageBuffer(int elementCapacity,
+                             BufferUsage usage = BufferUsage.Dynamic,
+                             bool allowRW = false)
         {
-            shaderStorageBuffer = Renderer.graphicsDevice.BufferFactory.CreateShaderStorageBuffer<T>(elementCount, usage, allowRW);
+            ElementCapacity = elementCapacity;
+            ElementSize = Marshal.SizeOf<T>();
 
+            _buffer = Renderer.graphicsDevice
+                .BufferFactory
+                .CreateShaderStorageBuffer(
+                    elementCapacity * ElementSize,
+                    ElementSize,
+                    usage,
+                    allowRW);
         }
 
-        public void SetData(in T[] data, int start, int count, int offset = 0)
+        // Full update
+        public void SetData(ReadOnlySpan<T> data)
         {
-            shaderStorageBuffer.UpdatePartial(data, start, count, offset);
+            var bytes = MemoryMarshal.AsBytes(data);
+            _buffer.SetData(bytes);
         }
 
-        public void SetData(in T[] data, int count, int offset = 0)
+        // Partial update by element offset
+        public void SetData(ReadOnlySpan<T> data, int elementOffset)
         {
-            shaderStorageBuffer.UpdatePartial(data, 0, count, offset);
+            var bytes = MemoryMarshal.AsBytes(data);
+            int byteOffset = elementOffset * ElementSize;
+
+            _buffer.UpdatePartial(bytes, byteOffset);
+        }
+
+        // List overload (no allocation)
+        public void SetData(List<T> data, int count, int elementOffset = 0)
+        {
+            var span = CollectionsMarshal.AsSpan(data).Slice(0, count);
+            SetData(span, elementOffset);
         }
 
         public void Bind(int slot = 0, ShaderStage stages = ShaderStage.Fragment)
         {
-            shaderStorageBuffer.Bind(slot, stages);
+            _buffer.Bind(slot, stages);
         }
 
         public void BindMutable(int slot = 0)
         {
-            shaderStorageBuffer.BindMutable(slot);
+            _buffer.BindMutable(slot);
         }
 
         public void UnBindMutable(int slot = 0)
         {
-            shaderStorageBuffer.UnBindMutable(slot);
+            _buffer.UnBindMutable(slot);
         }
 
         public void UnBind(int slot = 0, ShaderStage stages = ShaderStage.All)
         {
-            shaderStorageBuffer.UnBind(slot, stages);
+            _buffer.UnBind(slot, stages);
         }
     }
-
-
 }
