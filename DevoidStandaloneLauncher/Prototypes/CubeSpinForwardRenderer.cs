@@ -36,13 +36,14 @@ namespace DevoidStandaloneLauncher.Prototypes
             cube = scene.addGameObject("Cube");
             cube.transform.Position = new System.Numerics.Vector3(0, 0, -10);
             MeshRenderer renderer = cube.AddComponent<MeshRenderer>();
+            RigidBodyComponent rigidbody = cube.AddComponent<RigidBodyComponent>();
 
             renderer.AddMesh(mesh);
         }
 
         public override void OnUpdate(float delta)
         {
-            cube.transform.Rotation = new System.Numerics.Vector3(cube.transform.Rotation.X + delta * 10, cube.transform.Rotation.Y + delta, cube.transform.Rotation.Z + delta);
+            //cube.transform.Rotation = new System.Numerics.Vector3(cube.transform.Rotation.X + delta * 10, cube.transform.Rotation.Y + delta, cube.transform.Rotation.Z + delta);
         }
 
     }

@@ -1,4 +1,6 @@
 ﻿using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Physics;
+using DevoidEngine.Engine.Physics.Bepu;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -14,6 +16,7 @@ namespace DevoidEngine.Engine.Core
         public List<CameraComponent3D> Cameras;
         public List<IRenderComponent> Renderables;
 
+        public PhysicsSystem Physics { get; private set; }
 
         public bool IsPlaying = false;
 
@@ -27,6 +30,8 @@ namespace DevoidEngine.Engine.Core
 
         public void Initialize()
         {
+            Physics = new PhysicsSystem(new BepuPhysicsBackend());
+
             Cameras = new List<CameraComponent3D>();
             Renderables = new List<IRenderComponent>();
         }
@@ -190,6 +195,8 @@ namespace DevoidEngine.Engine.Core
             {
                 GameObjects[i].OnUpdate(dt);
             }
+
+            Physics.Step(dt);
         }
 
         public void OnRender(float dt)
