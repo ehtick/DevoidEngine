@@ -13,9 +13,9 @@ namespace DevoidEngine.Engine.Physics.Bepu
         public float AngularDamping;
 
 
-        private Vector3Wide gravityWide;
+        private Vector3Wide gravityWideDt;
 
-        public AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.ConserveMomentum;
+        public AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.Nonconserving;
 
         public bool AllowSubstepsForUnconstrainedBodies => false;
 
@@ -24,10 +24,13 @@ namespace DevoidEngine.Engine.Physics.Bepu
         public void Initialize(Simulation simulation)
         {
             // Convert gravity into wide representation once
-            gravityWide = Vector3Wide.Broadcast(Gravity);
+            gravityWideDt = Vector3Wide.Broadcast(Gravity);
         }
 
-        public void PrepareForIntegration(float dt) { }
+        public void PrepareForIntegration(float dt)
+        {
+            gravityWideDt = Vector3Wide.Broadcast(Gravity * dt);
+        }
 
         public void IntegrateVelocity(
             Vector<int> bodyIndices,
@@ -39,8 +42,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
             Vector<float> dt,
             ref BodyVelocityWide velocity)
         {
-            Vector3Wide.Scale(gravityWide, dt, out var gravityStep);
-            Vector3Wide.Add(velocity.Linear, gravityStep, out velocity.Linear);
+            velocity.Linear += gravityWideDt;
         }
     }
 

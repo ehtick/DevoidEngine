@@ -34,7 +34,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
                 bufferPool,
                 callbacks,
                 new BepuPoseIntegratorCallbacks { Gravity = new Vector3(0, -9.81f, 0) },
-                new SolveDescription(8, 1),
+                new SolveDescription(8, 10),
                 new DefaultTimestepper()
             );
         }
@@ -93,7 +93,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
             {
                 bodyDescription = BodyDescription.CreateKinematic(
                     pose,
-                    new CollidableDescription(shapeIndex, 0.1f),
+                    new CollidableDescription(shapeIndex, 0.01f),
                     new BodyActivityDescription(0.01f)
                 );
             }
@@ -102,7 +102,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
                 bodyDescription = BodyDescription.CreateDynamic(
                     pose,
                     inertia,
-                    new CollidableDescription(shapeIndex, 0.1f),
+                    new CollidableDescription(shapeIndex, 0.01f),
                     new BodyActivityDescription(0.01f)
                 );
             }
