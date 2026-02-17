@@ -9,11 +9,13 @@ namespace DevoidEngine.Engine.Physics.Bepu
     internal struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
     {
         public Vector3 Gravity;
+        public float LinearDamping;
+        public float AngularDamping;
+
 
         private Vector3Wide gravityWide;
 
-        public AngularIntegrationMode AngularIntegrationMode
-            => AngularIntegrationMode.ConserveMomentum;
+        public AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.ConserveMomentum;
 
         public bool AllowSubstepsForUnconstrainedBodies => false;
 

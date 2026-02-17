@@ -8,6 +8,7 @@ namespace DevoidStandaloneLauncher.Prototypes
     {
         Scene scene;
         GameObject cube;
+        GameObject cube2;
         GameObject camera;
         GameObject light;
 
@@ -34,11 +35,19 @@ namespace DevoidStandaloneLauncher.Prototypes
             mesh.SetVertices(Primitives.GetCubeVertex());
 
             cube = scene.addGameObject("Cube");
-            cube.transform.Position = new System.Numerics.Vector3(0, 0, -10);
+            cube.transform.Position = new System.Numerics.Vector3(10, 0, 0);
             MeshRenderer renderer = cube.AddComponent<MeshRenderer>();
             RigidBodyComponent rigidbody = cube.AddComponent<RigidBodyComponent>();
 
+
             renderer.AddMesh(mesh);
+
+            cube2 = scene.addGameObject("Cube");
+            cube2.transform.Position = new System.Numerics.Vector3(10, 2, 5f);
+            MeshRenderer renderer1 = cube2.AddComponent<MeshRenderer>();
+            StaticCollider rigidbody1 = cube2.AddComponent<StaticCollider>();
+            renderer1.AddMesh(mesh);
+
         }
 
         public override void OnUpdate(float delta)

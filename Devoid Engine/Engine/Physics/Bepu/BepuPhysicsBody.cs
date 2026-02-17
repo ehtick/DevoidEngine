@@ -78,9 +78,38 @@ namespace DevoidEngine.Engine.Physics.Bepu
             }
         }
 
-        public float Mass => throw new NotImplementedException();
+        public float Mass
+        {
+            get
+            {
+                var body = GetBody();
+                float invMass = body.LocalInertia.InverseMass;
 
-        public bool IsKinematic { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                if (invMass == 0f)
+                    return 0f;
+
+                return 1f / invMass;
+            }
+        }
+
+        public bool IsKinematic
+        {
+            get
+            {
+                var body = GetBody();
+                return body.Kinematic;
+            }
+            set
+            {
+                var body = GetBody();
+
+                if (value)
+                    body.BecomeKinematic();
+                else
+                    throw new NotImplementedException("Switching to dynamic requires inertia setup.");
+            }
+        }
+
 
         public void AddImpulse(Vector3 impulse)
         {

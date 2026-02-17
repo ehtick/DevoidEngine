@@ -26,6 +26,7 @@ namespace DevoidStandaloneLauncher
         public override void OnRender(float deltaTime)
         {
             gamePrototype.OnRender(deltaTime);
+            MainScene.OnUpdate(deltaTime);
         }
 
         public override void OnLateRender()

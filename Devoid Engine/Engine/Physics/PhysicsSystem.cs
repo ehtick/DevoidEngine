@@ -1,4 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.Physics
 {
@@ -30,6 +31,11 @@ namespace DevoidEngine.Engine.Physics
         public IPhysicsBody CreateBody(PhysicsBodyDescription desc, GameObject owner)
         {
             return backend.CreateBody(desc, owner);
+        }
+
+        public void CreateStaticBox(Vector3 position, Vector3 size, GameObject owner)
+        {
+            backend.CreateStaticBox(position, size, owner);
         }
 
         public void RemoveBody(IPhysicsBody body)

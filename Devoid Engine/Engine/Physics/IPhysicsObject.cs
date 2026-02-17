@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Physics
 {
-    public struct PhysicsBodyDescription
+    public interface IPhysicsObject
     {
-        public Vector3 Position;
-        public Quaternion Rotation;
-        public float Mass;
-
-        public PhysicsShapeDescription Shape;
+        Vector3 Position { get; set; }
+        Quaternion Rotation { get; set; }
+        void Remove();
     }
+
 }
