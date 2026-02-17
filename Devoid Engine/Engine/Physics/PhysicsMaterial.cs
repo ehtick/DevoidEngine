@@ -17,8 +17,8 @@ namespace DevoidEngine.Engine.Physics
         {
             Friction = 0.5f,
             Restitution = 0.1f,
-            LinearDamping = 0.05f,
-            AngularDamping = 0.05f
+            LinearDamping = 1f,
+            AngularDamping = 3f
         };
     }
 

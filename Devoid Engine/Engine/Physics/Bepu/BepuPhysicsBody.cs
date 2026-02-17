@@ -24,6 +24,9 @@ namespace DevoidEngine.Engine.Physics.Bepu
             this.simulation = simulation;
             Material = material;
             this.backend = backend;
+
+            Console.WriteLine(GetBody().LocalInertia.InverseInertiaTensor);
+
         }
 
 
