@@ -43,7 +43,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             renderer.AddMesh(mesh);
 
             cube2 = scene.addGameObject("Cube");
-            cube2.transform.Position = new System.Numerics.Vector3(10, 2, 5f);
+            cube2.transform.Position = new System.Numerics.Vector3(10, -2, 0.6f);
             MeshRenderer renderer1 = cube2.AddComponent<MeshRenderer>();
             StaticCollider rigidbody1 = cube2.AddComponent<StaticCollider>();
             renderer1.AddMesh(mesh);

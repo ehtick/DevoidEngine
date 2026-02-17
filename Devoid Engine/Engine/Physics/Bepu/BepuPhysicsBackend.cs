@@ -16,7 +16,9 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
         private Dictionary<BodyHandle, GameObject> bodyToGameObject = new Dictionary<BodyHandle, GameObject>();
         private Dictionary<StaticHandle, GameObject> staticToGameObject = new Dictionary<StaticHandle, GameObject>();
+
         private Dictionary<BodyHandle, PhysicsMaterial> bodyMaterials = new Dictionary<BodyHandle, PhysicsMaterial>();
+        private Dictionary<StaticHandle, PhysicsMaterial> staticMaterials = new Dictionary<StaticHandle, PhysicsMaterial>();
 
 
         public void Initialize()
@@ -40,7 +42,19 @@ namespace DevoidEngine.Engine.Physics.Bepu
         public void Step(float deltaTime)
         {
             simulation.Timestep(deltaTime);
+
+            foreach (var pair in bodyMaterials)
+            {
+                var handle = pair.Key;
+                var material = pair.Value;
+
+                var body = simulation.Bodies.GetBodyReference(handle);
+
+                body.Velocity.Linear *= (1f - material.LinearDamping * deltaTime);
+                body.Velocity.Angular *= (1f - material.AngularDamping * deltaTime);
+            }
         }
+
 
         private PhysicsMaterial LookupMaterial(CollidableReference collidable)
         {
@@ -49,9 +63,16 @@ namespace DevoidEngine.Engine.Physics.Bepu
                 if (bodyMaterials.TryGetValue(collidable.BodyHandle, out var mat))
                     return mat;
             }
+            else if (collidable.Mobility == CollidableMobility.Static)
+            {
+                if (staticMaterials.TryGetValue(collidable.StaticHandle, out var mat))
+                    return mat;
+            }
 
             return PhysicsMaterial.Default;
         }
+
+
 
         public IPhysicsBody CreateBody(PhysicsBodyDescription desc, GameObject owner)
         {
@@ -96,24 +117,18 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
         public void CreateStatic(PhysicsStaticDescription desc, GameObject owner)
         {
-            // 1️⃣ Create shape (no inertia needed for statics)
             TypedIndex shapeIndex = CreateShapeStatic(desc.Shape);
 
-            // 2️⃣ Create pose
             var pose = new RigidPose(desc.Position, desc.Rotation);
 
-            // 3️⃣ Create static description
-            var staticDescription = new StaticDescription(
-                pose,
-                shapeIndex
-            );
+            var staticDescription = new StaticDescription(pose, shapeIndex);
 
-            // 4️⃣ Add to simulation
             StaticHandle handle = simulation.Statics.Add(staticDescription);
 
-            // 5️⃣ Store mapping
             staticToGameObject[handle] = owner;
+            staticMaterials[handle] = desc.Material;
         }
+
 
 
 

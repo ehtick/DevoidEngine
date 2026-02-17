@@ -1,4 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Physics;
+using DevoidEngine.Engine.Utilities;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
@@ -7,15 +9,34 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(StaticCollider);
 
-        public Vector3 Size = new Vector3(10, 1, 10);
+        // ===============================
+        // Shape Definition
+        // ===============================
+
+        public PhysicsShapeDescription Shape = new PhysicsShapeDescription
+        {
+            Type = PhysicsShapeType.Box,
+            Size = new Vector3(1, 1, 1)
+        };
+
+        public PhysicsMaterial Material = PhysicsMaterial.Default;
+
+
+        // ===============================
+        // Lifecycle
+        // ===============================
 
         public override void OnStart()
         {
-            gameObject.Scene.Physics.CreateStaticBox(
-                gameObject.transform.Position,
-                Size,
-                gameObject
-            );
+            var desc = new PhysicsStaticDescription
+            {
+                Position = gameObject.transform.Position,
+                Rotation = TransformMath.EulerToQuaternion(gameObject.transform.Rotation),
+                Shape = Shape,
+                Material = Material
+            };
+
+            gameObject.Scene.Physics.CreateStatic(desc, gameObject);
         }
     }
 }
