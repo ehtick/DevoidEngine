@@ -44,15 +44,23 @@ namespace DevoidEngine.Engine.Components
         // VARIABLE RATE (INPUT SAMPLING ONLY)
         public override void OnUpdate(float dt)
         {
+            Vector2 mouseDelta = Input.MouseDelta;
+            if (mouseDelta.Y != 0)
+            {
+                Console.WriteLine($"[Input] DeltaX: {mouseDelta.X}");
+            }
+
             if (rb == null) return;
 
-            // Sample input only
             storedMoveInput = Input.MoveAxis;
-            storedMouseDelta = Input.MouseDelta;
+
+            // 🔥 ACCUMULATE instead of overwrite
+            storedMouseDelta += Input.MouseDelta;
 
             if (Input.JumpPressed)
                 jumpRequested = true;
         }
+
 
         // FIXED RATE (ALL TRANSFORM + PHYSICS)
         public override void OnFixedUpdate(float fixedDt)

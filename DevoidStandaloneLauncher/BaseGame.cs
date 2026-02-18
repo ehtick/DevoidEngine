@@ -26,18 +26,21 @@ namespace DevoidStandaloneLauncher
             // Game logic uses stable snapshot
             gamePrototype.OnUpdate(deltaTime);
             MainScene.OnUpdate(deltaTime);
+
         }
 
         public override void OnRender(float deltaTime)
         {
             gamePrototype.OnRender(deltaTime);
             MainScene.OnRender(deltaTime);
+
         }
 
         public override void OnLateRender()
         {
             Texture2D renderOutput = RenderBase.Output;
             RenderAPI.RenderToScreen(renderOutput);
+
         }
 
         public override void OnResize(int width, int height)

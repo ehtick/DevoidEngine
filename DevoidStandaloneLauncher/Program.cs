@@ -33,6 +33,8 @@ namespace DevoidStandaloneLauncher
             Console.WriteLine("Initializing Sandbox");
             InitializeEngine();
 
+            baseApplication.MainWindow.CursorState = OpenTK.Windowing.Common.CursorState.Grabbed;
+
             BaseGame baseGame = new BaseGame();
             baseApplication.AddLayer(baseGame);
 
