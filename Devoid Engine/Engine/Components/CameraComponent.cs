@@ -68,15 +68,8 @@ namespace DevoidEngine.Engine.Components
 
             Vector3 position = transform.Position;
 
-            Vector3 forward = Vector3.Normalize(
-                Vector3.Transform(Vector3.UnitZ, transform.Rotation)
-            );
-
-            Vector3 up = Vector3.Normalize(
-                Vector3.Transform(Vector3.UnitY, transform.Rotation)
-            );
-
-            Camera.UpdateView(position, forward, up);
+            // Pass world rotation directly to camera for correct prev/current orientation tracking
+            Camera.UpdateView(position, transform.Rotation);
         }
 
 
