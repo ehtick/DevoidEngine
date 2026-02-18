@@ -1,48 +1,74 @@
 ﻿using System.Numerics;
+using System.Threading;
 
 namespace DevoidEngine.Engine.Core
 {
     public static class Input
     {
-        // ============================================================
-        // BACK BUFFER (Written by Render Thread Only)
-        // ============================================================
+        // ===============================
+        // RAW THREAD-SAFE ACCUMULATORS
+        // (Written by Render Thread)
+        // ===============================
 
-        private static Vector2 _backMouseDelta;
-        private static Vector2 _backMouseScroll;
+        private static float _rawMouseDeltaX;
+        private static float _rawMouseDeltaY;
+
+        private static float _rawScrollX;
+        private static float _rawScrollY;
+
         private static readonly object _lock = new();
 
-        private static readonly HashSet<Keys> _backKeysDown = new();
-        private static readonly HashSet<MouseButton> _backMouseDown = new();
+        private static readonly HashSet<Keys> _rawKeysDown = new();
+        private static readonly HashSet<MouseButton> _rawMouseDown = new();
 
-        // ============================================================
-        // FRONT BUFFER (Read by Update Thread Only)
-        // ============================================================
+        // ===============================
+        // GAME-FACING STATE
+        // (Read by Update Thread)
+        // ===============================
 
+        public static Vector2 MousePosition { get; private set; }
         public static Vector2 MouseDelta { get; private set; }
         public static Vector2 MouseScrollDelta { get; private set; }
 
-        private static readonly HashSet<Keys> _keysDown = new();
-        private static readonly HashSet<Keys> _keysPressedThisFrame = new();
-        private static readonly HashSet<Keys> _keysReleasedThisFrame = new();
+        private static readonly HashSet<Keys> keysDown = new();
+        private static readonly HashSet<Keys> keysPressedThisFrame = new();
+        private static readonly HashSet<Keys> keysReleasedThisFrame = new();
 
-        private static readonly HashSet<MouseButton> _mouseDown = new();
-        private static readonly HashSet<MouseButton> _mousePressedThisFrame = new();
-        private static readonly HashSet<MouseButton> _mouseReleasedThisFrame = new();
+        private static readonly HashSet<MouseButton> mouseDown = new();
+        private static readonly HashSet<MouseButton> mousePressedThisFrame = new();
+        private static readonly HashSet<MouseButton> mouseReleasedThisFrame = new();
 
-        // ============================================================
-        // RENDER THREAD EVENTS
-        // ============================================================
+        // ===============================
+        // RENDER THREAD CALLS THESE
+        // ===============================
+
+        private static void AtomicAdd(ref float target, float value)
+        {
+            float initial, computed;
+            do
+            {
+                initial = target;
+                computed = initial + value;
+            }
+            while (Interlocked.CompareExchange(ref target, computed, initial) != initial);
+        }
+
 
         public static void OnMouseMove(MouseMoveEvent e)
         {
-            // DO NOT ACCUMULATE
-            _backMouseDelta = e.delta;
+            MousePosition = e.position;
+
+            AtomicAdd(ref _rawMouseDeltaX, e.delta.X);
+            AtomicAdd(ref _rawMouseDeltaY, e.delta.Y);
+
         }
 
         public static void OnMouseWheel(MouseWheelEvent e)
         {
-            _backMouseScroll = e.Offset;
+
+            AtomicAdd(ref _rawScrollX, e.Offset.X);
+            AtomicAdd(ref _rawScrollY, e.Offset.Y);
+
         }
 
         public static void OnMouseButton(MouseButtonEvent e)
@@ -50,9 +76,13 @@ namespace DevoidEngine.Engine.Core
             lock (_lock)
             {
                 if (e.IsPressed)
-                    _backMouseDown.Add(e.Button);
+                {
+                    _rawMouseDown.Add(e.Button);
+                }
                 else
-                    _backMouseDown.Remove(e.Button);
+                {
+                    _rawMouseDown.Remove(e.Button);
+                }
             }
         }
 
@@ -60,7 +90,7 @@ namespace DevoidEngine.Engine.Core
         {
             lock (_lock)
             {
-                _backKeysDown.Add(key);
+                _rawKeysDown.Add(key);
             }
         }
 
@@ -68,79 +98,85 @@ namespace DevoidEngine.Engine.Core
         {
             lock (_lock)
             {
-                _backKeysDown.Remove(key);
+                _rawKeysDown.Remove(key);
             }
         }
 
-        // ============================================================
-        // CALLED ONCE AT START OF UPDATE FRAME
-        // ============================================================
+        // ===============================
+        // UPDATE THREAD CALLS THIS
+        // ===============================
 
+        /// <summary>
+        /// Call ONCE at start of update frame.
+        /// </summary>
         public static void Update()
         {
-            // --- Copy mouse delta snapshot ---
-            MouseDelta = _backMouseDelta;
-            MouseScrollDelta = _backMouseScroll;
+            // Pull atomic deltas
+            float dx = Interlocked.Exchange(ref _rawMouseDeltaX, 0f);
+            float dy = Interlocked.Exchange(ref _rawMouseDeltaY, 0f);
+            MouseDelta = new Vector2(dx, dy);
 
-            // Clear back buffer AFTER snapshot
-            _backMouseDelta = Vector2.Zero;
-            _backMouseScroll = Vector2.Zero;
+            float sx = Interlocked.Exchange(ref _rawScrollX, 0f);
+            float sy = Interlocked.Exchange(ref _rawScrollY, 0f);
+            MouseScrollDelta = new Vector2(sx, sy);
 
+            // Update key states
             lock (_lock)
             {
-                // --- Keys ---
-                _keysPressedThisFrame.Clear();
-                _keysReleasedThisFrame.Clear();
+                keysPressedThisFrame.Clear();
+                keysReleasedThisFrame.Clear();
 
-                foreach (var key in _backKeysDown)
+                // Check newly pressed
+                foreach (var key in _rawKeysDown)
                 {
-                    if (!_keysDown.Contains(key))
-                        _keysPressedThisFrame.Add(key);
+                    if (!keysDown.Contains(key))
+                        keysPressedThisFrame.Add(key);
                 }
 
-                foreach (var key in _keysDown)
+                // Check released
+                foreach (var key in keysDown)
                 {
-                    if (!_backKeysDown.Contains(key))
-                        _keysReleasedThisFrame.Add(key);
+                    if (!_rawKeysDown.Contains(key))
+                        keysReleasedThisFrame.Add(key);
                 }
 
-                _keysDown.Clear();
-                foreach (var key in _backKeysDown)
-                    _keysDown.Add(key);
+                keysDown.Clear();
+                foreach (var key in _rawKeysDown)
+                    keysDown.Add(key);
 
-                // --- Mouse buttons ---
-                _mousePressedThisFrame.Clear();
-                _mouseReleasedThisFrame.Clear();
+                // Same for mouse
+                mousePressedThisFrame.Clear();
+                mouseReleasedThisFrame.Clear();
 
-                foreach (var btn in _backMouseDown)
+                foreach (var btn in _rawMouseDown)
                 {
-                    if (!_mouseDown.Contains(btn))
-                        _mousePressedThisFrame.Add(btn);
+                    if (!mouseDown.Contains(btn))
+                        mousePressedThisFrame.Add(btn);
                 }
 
-                foreach (var btn in _mouseDown)
+                foreach (var btn in mouseDown)
                 {
-                    if (!_backMouseDown.Contains(btn))
-                        _mouseReleasedThisFrame.Add(btn);
+                    if (!_rawMouseDown.Contains(btn))
+                        mouseReleasedThisFrame.Add(btn);
                 }
 
-                _mouseDown.Clear();
-                foreach (var btn in _backMouseDown)
-                    _mouseDown.Add(btn);
+                mouseDown.Clear();
+                foreach (var btn in _rawMouseDown)
+                    mouseDown.Add(btn);
             }
         }
 
-        // ============================================================
+        // ===============================
         // GAME QUERIES
-        // ============================================================
+        // ===============================
 
-        public static bool GetKey(Keys key) => _keysDown.Contains(key);
-        public static bool GetKeyDown(Keys key) => _keysPressedThisFrame.Contains(key);
-        public static bool GetKeyUp(Keys key) => _keysReleasedThisFrame.Contains(key);
+        public static bool GetKey(Keys key) => keysDown.Contains(key);
+        public static bool GetKeyDown(Keys key) => keysPressedThisFrame.Contains(key);
+        public static bool GetKeyUp(Keys key) => keysReleasedThisFrame.Contains(key);
 
-        public static bool GetMouse(MouseButton btn) => _mouseDown.Contains(btn);
-        public static bool GetMouseDown(MouseButton btn) => _mousePressedThisFrame.Contains(btn);
-        public static bool GetMouseUp(MouseButton btn) => _mouseReleasedThisFrame.Contains(btn);
+        public static bool GetMouse(MouseButton btn) => mouseDown.Contains(btn);
+        public static bool GetMouseDown(MouseButton btn) => mousePressedThisFrame.Contains(btn);
+        public static bool GetMouseUp(MouseButton btn) => mouseReleasedThisFrame.Contains(btn);
 
         public static Vector2 MoveAxis
         {

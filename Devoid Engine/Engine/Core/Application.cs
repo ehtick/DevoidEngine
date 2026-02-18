@@ -160,7 +160,7 @@ namespace DevoidEngine.Engine.Core
 
         public void Run()
         {
-            windowManager.RunAllSync();
+            windowManager.RunAll();
         }
 
         public void AddLayer(Layer layer)
