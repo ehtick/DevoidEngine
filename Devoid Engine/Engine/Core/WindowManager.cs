@@ -20,6 +20,74 @@ namespace DevoidEngine.Engine.Core
             windows.Add(new WindowRunState { window = window });
         }
 
+        public void RunAllSync()
+        {
+            const double updateHz = 165;
+            const double renderHz = 165;
+
+            double updateStep = 1.0 / updateHz;
+            double renderStep = 1.0 / renderHz;
+
+            foreach (var wrs in windows)
+                wrs.window.Load();
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            double nextUpdate = timer.Elapsed.TotalSeconds;
+            double nextRender = timer.Elapsed.TotalSeconds;
+
+            while (_running && windows.Count > 0)
+            {
+                double now = timer.Elapsed.TotalSeconds;
+
+                // -------- UPDATE --------
+                if (now >= nextUpdate)
+                {
+                    for (int i = 0; i < windows.Count; i++)
+                    {
+                        var wrs = windows[i];
+
+                        wrs.window.Update(updateStep);
+
+                        wrs.fixedAccumulator += updateStep;
+                        while (wrs.fixedAccumulator >= updateStep)
+                        {
+                            wrs.window.FixedUpdate(updateStep);
+                            wrs.fixedAccumulator -= updateStep;
+                        }
+                    }
+
+                    nextUpdate += updateStep;
+                }
+
+                // -------- RENDER --------
+                if (now >= nextRender)
+                {
+                    for (int i = windows.Count - 1; i >= 0; i--)
+                    {
+                        var wrs = windows[i];
+
+                        wrs.window.ProcessEvents();
+
+                        if (wrs.window.IsExiting)
+                        {
+                            wrs.window.Close();
+                            windows.RemoveAt(i);
+                            continue;
+                        }
+
+                        wrs.window.Render(renderStep);
+                    }
+
+                    nextRender += renderStep;
+                }
+
+                Thread.Sleep(0); // yield
+                _running = windows.Count > 0;
+            }
+        }
+
+
         public void RunAll()
         {
             const double updateHz = 165;

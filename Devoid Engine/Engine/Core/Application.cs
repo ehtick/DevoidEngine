@@ -180,6 +180,7 @@ namespace DevoidEngine.Engine.Core
             graphicsDevice.MainSurface.Bind();
             graphicsDevice.MainSurface.Present();
 
+            InputManager.Publish();
 
             RenderThreadDispatcher.ExecutePending();
         }

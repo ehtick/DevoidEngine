@@ -8,7 +8,7 @@ namespace DevoidEngine.Engine.Core
 
     public class CameraRenderContext
     {
-        public Camera camera;
+        public CameraData cameraData;
 
         public List<RenderItem> renderItems3D = new();
         public List<RenderItem> renderItems2D = new();
@@ -27,7 +27,7 @@ namespace DevoidEngine.Engine.Core
 
     public static class FramePipeline
     {
-        static Pool<CameraRenderContext> CameraContextPool = new Pool<CameraRenderContext>();
+        //static Pool<CameraRenderContext> CameraContextPool = new Pool<CameraRenderContext>();
 
         static AsyncDoubleBuffer<List<CameraRenderContext>> SwapBuffer;
 
@@ -38,26 +38,31 @@ namespace DevoidEngine.Engine.Core
 
         public static void ExecuteUpdateThread(float deltaTime)
         {
-            if (!SceneManager.IsSceneLoaded()) { return; }
+            if (!SceneManager.IsSceneLoaded()) return;
 
             var backList = SwapBuffer.Back;
-            backList.Clear();
-
             Scene scene = SceneManager.MainScene;
+            var cameras = scene.GetComponentsOfType<CameraComponent3D>();
 
-            foreach (var cameraComponent in scene.GetComponentsOfType<CameraComponent3D>())
+            // 2. Ensure the Back buffer has enough pre-allocated contexts
+            while (backList.Count < cameras.Count)
             {
+                backList.Add(new CameraRenderContext());
+            }
 
-                CameraRenderContext ctx = CameraContextPool.Get();
+            for (int i = 0; i < cameras.Count; i++)
+            {
+                var cameraComponent = cameras[i];
+
+                // 3. Reuse the existing context inside the back buffer
+                CameraRenderContext ctx = backList[i];
                 ctx.Clear();
-                ctx.camera = cameraComponent.Camera;
+                ctx.cameraData = cameraComponent.Camera.GetCameraData();
 
                 foreach (var renderable in scene.Renderables)
                 {
                     renderable.Collect(cameraComponent, ctx);
                 }
-
-                backList.Add(ctx);
             }
 
             SwapBuffer.Publish();
@@ -74,15 +79,6 @@ namespace DevoidEngine.Engine.Core
                 CameraRenderContext ctx = cameraContextList[i];
                 RenderBase.Render(ctx);
             }
-
-            for (int i = 0; i < cameraContextList.Count; i++)
-            {
-                var ctx = cameraContextList[i];
-                ctx.Clear();
-                CameraContextPool.Return(ref ctx);
-            }
-
-            cameraContextList.Clear();
 
         }
 

@@ -2,60 +2,26 @@
 
 namespace DevoidEngine.Engine.Core
 {
+    /// <summary>
+    /// Game-facing input API.
+    /// This class is updated ONLY by InputManager on the update thread.
+    /// Game code reads from here.
+    /// </summary>
     public static class Input
     {
         // ===============================
-        // Mouse State
+        // Mouse State (Read-Only to Game)
         // ===============================
 
-        public static Vector2 MousePosition { get; private set; } = Vector2.Zero;
-        public static Vector2 MouseDelta { get; private set; } = Vector2.Zero;
-        public static Vector2 MouseScrollDelta { get; private set; } = Vector2.Zero;
+        public static Vector2 MousePosition { get; internal set; } = Vector2.Zero;
+        public static Vector2 MouseDelta { get; internal set; } = Vector2.Zero;
+        public static Vector2 MouseScrollDelta { get; internal set; } = Vector2.Zero;
 
-        private static HashSet<MouseButton> mouseDown = new();
-        private static HashSet<MouseButton> mousePressedThisFrame = new();
-        private static HashSet<MouseButton> mouseReleasedThisFrame = new();
+        private static readonly HashSet<MouseButton> mouseDown = new();
+        private static readonly HashSet<MouseButton> mousePressedThisFrame = new();
+        private static readonly HashSet<MouseButton> mouseReleasedThisFrame = new();
 
-        public static bool IsDragging { get; private set; }
-
-        // ===============================
-        // Mouse Events
-        // ===============================
-
-        public static void OnMouseInput(MouseButtonEvent e)
-        {
-            if (e.IsPressed)
-            {
-                if (!mouseDown.Contains(e.Button))
-                {
-                    mouseDown.Add(e.Button);
-                    mousePressedThisFrame.Add(e.Button);
-                }
-            }
-            else
-            {
-                if (mouseDown.Contains(e.Button))
-                {
-                    mouseDown.Remove(e.Button);
-                    mouseReleasedThisFrame.Add(e.Button);
-                }
-            }
-        }
-
-        public static void OnMouseMove(MouseMoveEvent e)
-        {
-            MousePosition = e.position;
-
-            // Accumulate delta for the frame
-            MouseDelta += e.delta;
-
-            IsDragging = mouseDown.Count > 0;
-        }
-
-        public static void OnMouseWheel(MouseWheelEvent e)
-        {
-            MouseScrollDelta += e.Offset;
-        }
+        public static bool IsDragging => mouseDown.Count > 0;
 
         // ===============================
         // Mouse Queries
@@ -71,30 +37,12 @@ namespace DevoidEngine.Engine.Core
             => mouseReleasedThisFrame.Contains(btn);
 
         // ===============================
-        // Keyboard State
+        // Keyboard State (Read-Only to Game)
         // ===============================
 
-        private static HashSet<Keys> keysDown = new();
-        private static HashSet<Keys> keysPressedThisFrame = new();
-        private static HashSet<Keys> keysReleasedThisFrame = new();
-
-        public static void OnKeyDown(Keys key)
-        {
-            if (!keysDown.Contains(key))
-            {
-                keysDown.Add(key);
-                keysPressedThisFrame.Add(key);
-            }
-        }
-
-        public static void OnKeyUp(Keys key)
-        {
-            if (keysDown.Contains(key))
-            {
-                keysDown.Remove(key);
-                keysReleasedThisFrame.Add(key);
-            }
-        }
+        private static readonly HashSet<Keys> keysDown = new();
+        private static readonly HashSet<Keys> keysPressedThisFrame = new();
+        private static readonly HashSet<Keys> keysReleasedThisFrame = new();
 
         // ===============================
         // Keyboard Queries
@@ -110,7 +58,7 @@ namespace DevoidEngine.Engine.Core
             => keysReleasedThisFrame.Contains(key);
 
         // ===============================
-        // FPS Convenience Abstractions
+        // FPS Convenience
         // ===============================
 
         public static Vector2 MoveAxis
@@ -135,11 +83,52 @@ namespace DevoidEngine.Engine.Core
             GetKeyDown(Keys.Space);
 
         // ===============================
-        // Frame Reset
+        // Called by InputManager ONLY
+        // ===============================
+
+        internal static void SetKeys(
+            HashSet<Keys> down,
+            HashSet<Keys> pressed,
+            HashSet<Keys> released)
+        {
+            keysDown.Clear();
+            foreach (var k in down)
+                keysDown.Add(k);
+
+            keysPressedThisFrame.Clear();
+            foreach (var k in pressed)
+                keysPressedThisFrame.Add(k);
+
+            keysReleasedThisFrame.Clear();
+            foreach (var k in released)
+                keysReleasedThisFrame.Add(k);
+        }
+
+        internal static void SetMouseButtons(
+            HashSet<MouseButton> down,
+            HashSet<MouseButton> pressed,
+            HashSet<MouseButton> released)
+        {
+            mouseDown.Clear();
+            foreach (var b in down)
+                mouseDown.Add(b);
+
+            mousePressedThisFrame.Clear();
+            foreach (var b in pressed)
+                mousePressedThisFrame.Add(b);
+
+            mouseReleasedThisFrame.Clear();
+            foreach (var b in released)
+                mouseReleasedThisFrame.Add(b);
+        }
+
+        // ===============================
+        // Frame Reset (Update Thread)
         // ===============================
 
         /// <summary>
-        /// Call once at the START of every frame.
+        /// Call once at the END of update frame.
+        /// Clears per-frame transient input only.
         /// </summary>
         public static void Update()
         {

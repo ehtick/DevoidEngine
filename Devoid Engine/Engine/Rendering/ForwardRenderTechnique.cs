@@ -66,7 +66,7 @@ namespace DevoidEngine.Engine.Rendering
             UploadLights(ctx);
             UploadSceneData(ctx);
 
-            RenderBase.SetupCamera(ctx.camera.GetCameraData());
+            RenderBase.SetupCamera(ctx.cameraData);
             RenderBase.Execute(ctx.renderItems3D, RenderState.DefaultRenderState);
 
             //RenderBase.SetupCamera(UIRenderer.ScreenData);

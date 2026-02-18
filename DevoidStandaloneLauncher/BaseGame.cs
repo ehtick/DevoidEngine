@@ -20,6 +20,7 @@ namespace DevoidStandaloneLauncher
 
         public override void OnUpdate(float deltaTime)
         {
+            InputManager.CommitToInput();
             gamePrototype.OnUpdate(deltaTime); // FPSController runs here
             MainScene.OnUpdate(deltaTime);
             Input.Update(); // MUST happen AFTER the controller processes the movement [cite: 856]
@@ -49,28 +50,28 @@ namespace DevoidStandaloneLauncher
 
         public override void OnMouseMove(MouseMoveEvent e)
         {
-            Input.OnMouseMove(e);
+            InputManager.OnMouseMove(e);
         }
 
         public override void OnMouseButton(MouseButtonEvent e)
         {
-            Input.OnMouseInput(e);
+            InputManager.OnMouseButton(e);
         }
 
         public override void OnMouseWheel(MouseWheelEvent e)
         {
-            Input.OnMouseWheel(e);
+            InputManager.OnMouseWheel(e);
         }
 
         public override void OnKeyDown(KeyboardEvent e)
         {
             Console.WriteLine(e.Key.ToString());
-            Input.OnKeyDown(e.Key);
+            InputManager.OnKeyDown(e.Key);
         }
 
         public override void OnKeyUp(KeyboardEvent e)
         {
-            Input.OnKeyUp(e.Key);
+            InputManager.OnKeyUp(e.Key);
         }
 
     }
