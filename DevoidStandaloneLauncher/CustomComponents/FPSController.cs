@@ -44,11 +44,7 @@ namespace DevoidEngine.Engine.Components
         // VARIABLE RATE (INPUT SAMPLING ONLY)
         public override void OnUpdate(float dt)
         {
-            Vector2 mouseDelta = Input.MouseDelta;
-            if (mouseDelta.Y != 0)
-            {
-                Console.WriteLine($"[Input] DeltaX: {mouseDelta.X}");
-            }
+            Console.WriteLine(Input.MouseDelta.Y * MouseSensitivity);
 
             if (rb == null) return;
 
@@ -56,6 +52,8 @@ namespace DevoidEngine.Engine.Components
 
             // 🔥 ACCUMULATE instead of overwrite
             storedMouseDelta += Input.MouseDelta;
+
+            ApplyRotation();     // 🔥 rotation now fixed-timestep
 
             if (Input.JumpPressed)
                 jumpRequested = true;
@@ -66,8 +64,6 @@ namespace DevoidEngine.Engine.Components
         public override void OnFixedUpdate(float fixedDt)
         {
             if (rb == null) return;
-
-            ApplyRotation();     // 🔥 rotation now fixed-timestep
             ApplyMovement();     // physics-safe movement
 
             jumpRequested = false;
