@@ -188,7 +188,6 @@ namespace DevoidEngine.Engine.Core
         private void OnUpdateFrame(double deltaTime)
         {
             ImGuiRenderer.UpdateInput();
-            //Input.Update();
 
             LayerHandler.UpdateLayers((float)deltaTime);
 
@@ -197,12 +196,6 @@ namespace DevoidEngine.Engine.Core
             FramePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();
-
-            //Input.Update();
-            //RenderThreadDispatcher.QueueLatest("Input_Update", () =>
-            //{
-            //    InternalInputState.UpdateFrame();
-            //});
         }
     }
 }
