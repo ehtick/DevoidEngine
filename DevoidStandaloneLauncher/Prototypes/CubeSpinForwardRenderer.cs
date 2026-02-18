@@ -14,6 +14,9 @@ namespace DevoidStandaloneLauncher.Prototypes
         public override void OnInit(Scene main)
         {
             this.scene = main;
+            Mesh mesh = new Mesh();
+            mesh.SetVertices(Primitives.GetCubeVertex());
+
 
             // ===============================
             // PLAYER ROOT (Capsule Physics)
@@ -46,7 +49,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             // ===============================
 
             var fps = player.AddComponent<FPSController>();
-            fps.MoveSpeed = 6f;
+            fps.MoveSpeed = 20f;
             fps.JumpForce = 100f;
             fps.MouseSensitivity = 0.15f;
 
@@ -54,18 +57,19 @@ namespace DevoidStandaloneLauncher.Prototypes
             // CAMERA PIVOT (Pitch Only)
             // ===============================
 
-            GameObject cameraPivot = scene.addGameObject("CameraPivot");
-            cameraPivot.SetParent(player, false);
+            //GameObject cameraPivot = scene.addGameObject("CameraPivot");
+            //cameraPivot.AddComponent<MeshRenderer>().AddMesh(mesh);
+            //cameraPivot.SetParent(player, false);
 
-            cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
+            //cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
 
             // ===============================
             // CAMERA
             // ===============================
 
             camera = scene.addGameObject("Camera");
-            camera.SetParent(cameraPivot, false);
-            camera.transform.LocalPosition = Vector3.Zero;
+            camera.SetParent(player, false);
+            //camera.transform.LocalPosition = new Vector3(0, 2, -20);
 
             var camComponent = camera.AddComponent<CameraComponent3D>();
             camComponent.IsDefault = true;
@@ -84,12 +88,9 @@ namespace DevoidStandaloneLauncher.Prototypes
             // GROUND
             // ===============================
 
-            Mesh mesh = new Mesh();
-            mesh.SetVertices(Primitives.GetCubeVertex());
-
             GameObject ground = scene.addGameObject("Ground");
             ground.transform.Position = new Vector3(0, 0, 0);
-            ground.transform.Scale = new Vector3(20, 1, 20);
+            ground.transform.Scale = new Vector3(100, 1, 100);
 
             var groundRenderer = ground.AddComponent<MeshRenderer>();
             groundRenderer.AddMesh(mesh);
@@ -98,7 +99,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             groundCollider.Shape = new PhysicsShapeDescription()
             {
                 Type = PhysicsShapeType.Box,
-                Size = new Vector3(20, 1, 20)
+                Size = new Vector3(100, 1, 100)
             };
 
             groundCollider.Material = new PhysicsMaterial()

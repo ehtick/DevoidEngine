@@ -1,8 +1,8 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.Utilities;
-using System.Numerics;
 using System;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
 {
@@ -32,6 +32,7 @@ namespace DevoidEngine.Engine.Components
             rb = gameObject.GetComponent<RigidBodyComponent>();
             if (rb == null) return;
 
+            // Physics should NOT rotate the body
             rb.FreezeRotationX = true;
             rb.FreezeRotationY = true;
             rb.FreezeRotationZ = true;
@@ -40,57 +41,48 @@ namespace DevoidEngine.Engine.Components
                 cameraPivot = gameObject.children[0].transform;
         }
 
+        // VARIABLE RATE (INPUT SAMPLING ONLY)
         public override void OnUpdate(float dt)
         {
             if (rb == null) return;
 
-            // 1. Handle Input
+            // Sample input only
             storedMoveInput = Input.MoveAxis;
-            if (Input.JumpPressed) jumpRequested = true;
+            storedMouseDelta = Input.MouseDelta;
 
-            // 2. Apply Camera/Player Rotation immediately for smoothness
-            float mouseX = Input.MouseDelta.X * MouseSensitivity;
-            float mouseY = Input.MouseDelta.Y * MouseSensitivity;
-
-            yaw += mouseX;
-            pitch -= mouseY;
-            pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
-
-            // Update Player orientation (Horizontal)
-            // We update the transform directly here; it will sync with physics 
-            // or be overridden by physics in LateUpdate.
-            rb.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.DegToRad(yaw));
-
-            // Update Camera Pivot (Vertical)
-            if (cameraPivot != null)
-            {
-                cameraPivot.LocalRotation = Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathHelper.DegToRad(pitch));
-            }
+            if (Input.JumpPressed)
+                jumpRequested = true;
         }
 
-        // FIXED RATE (PHYSICS SAFE)
+        // FIXED RATE (ALL TRANSFORM + PHYSICS)
         public override void OnFixedUpdate(float fixedDt)
         {
             if (rb == null) return;
 
-            ApplyMovement(); // Keep physics-based movement here [cite: 892]
+            ApplyRotation();     // 🔥 rotation now fixed-timestep
+            ApplyMovement();     // physics-safe movement
 
-            // Reset jump request after the physics step has seen it
             jumpRequested = false;
         }
 
         private void ApplyRotation()
         {
+            // Apply accumulated mouse delta
             yaw += storedMouseDelta.X * MouseSensitivity;
             pitch -= storedMouseDelta.Y * MouseSensitivity;
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
-            rb.Rotation = Quaternion.CreateFromAxisAngle(
-                Vector3.UnitY,
-                MathHelper.DegToRad(yaw)
-            );
+            // Apply horizontal rotation to player body
+            Quaternion bodyRotation =
+                Quaternion.CreateFromAxisAngle(
+                    Vector3.UnitY,
+                    MathHelper.DegToRad(yaw)
+                );
 
+            rb.Rotation = bodyRotation;
+
+            // Apply vertical rotation to camera pivot
             if (cameraPivot != null)
             {
                 cameraPivot.LocalRotation =
@@ -99,19 +91,21 @@ namespace DevoidEngine.Engine.Components
                         MathHelper.DegToRad(pitch)
                     );
             }
+
+            // IMPORTANT:
+            // Consume mouse delta so it is not applied twice
+            storedMouseDelta = Vector2.Zero;
         }
 
         private void ApplyMovement()
         {
             Quaternion rotation = rb.Rotation;
 
-            Vector3 forward = Vector3.Normalize(
-                Vector3.Transform(Vector3.UnitZ, rotation)
-            );
+            Vector3 forward =
+                Vector3.Normalize(Vector3.Transform(Vector3.UnitZ, rotation));
 
-            Vector3 right = Vector3.Normalize(
-                Vector3.Cross(forward, Vector3.UnitY)
-            );
+            Vector3 right =
+                Vector3.Normalize(Vector3.Cross(forward, Vector3.UnitY));
 
             forward.Y = 0;
             right.Y = 0;

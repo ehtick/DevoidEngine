@@ -6,8 +6,8 @@ namespace DevoidStandaloneLauncher
 {
     internal class BaseGame : Layer
     {
-        Scene MainScene = new Scene();
-        Prototype gamePrototype = new CubeSpinForwardRenderer();
+        private readonly Scene MainScene = new Scene();
+        private readonly Prototype gamePrototype = new CubeSpinForwardRenderer();
 
         public override void OnAttach()
         {
@@ -20,21 +20,23 @@ namespace DevoidStandaloneLauncher
 
         public override void OnUpdate(float deltaTime)
         {
-            //InputManager.CommitToInput();
-            gamePrototype.OnUpdate(deltaTime); // FPSController runs here
+            // 🔥 Pull accumulated input FIRST (update thread)
+            Input.Update();
+
+            // Game logic uses stable snapshot
+            gamePrototype.OnUpdate(deltaTime);
             MainScene.OnUpdate(deltaTime);
         }
 
         public override void OnRender(float deltaTime)
         {
             gamePrototype.OnRender(deltaTime);
+            MainScene.OnRender(deltaTime);
         }
 
         public override void OnLateRender()
         {
-            //if (SceneManager.MainScene.GetMainCamera() == null) return;
-            Texture2D renderOutput = RenderBase.Output;//SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0);
-
+            Texture2D renderOutput = RenderBase.Output;
             RenderAPI.RenderToScreen(renderOutput);
         }
 
@@ -44,34 +46,37 @@ namespace DevoidStandaloneLauncher
 
             Screen.Size = new System.Numerics.Vector2(width, height);
             Renderer.graphicsDevice.SetViewport(0, 0, width, height);
+
             MainScene.OnResize(width, height);
         }
 
+        // ===============================
+        // RENDER THREAD INPUT EVENTS
+        // ===============================
+
         public override void OnMouseMove(MouseMoveEvent e)
         {
-            InputManager.OnMouseMove(e);
+            Input.OnMouseMove(e);
         }
 
         public override void OnMouseButton(MouseButtonEvent e)
         {
-            InputManager.OnMouseButton(e);
+            Input.OnMouseButton(e);
         }
 
         public override void OnMouseWheel(MouseWheelEvent e)
         {
-            InputManager.OnMouseWheel(e);
+            Input.OnMouseWheel(e);
         }
 
         public override void OnKeyDown(KeyboardEvent e)
         {
-            Console.WriteLine(e.Key.ToString());
-            InputManager.OnKeyDown(e.Key);
+            Input.OnKeyDown(e.Key);
         }
 
         public override void OnKeyUp(KeyboardEvent e)
         {
-            InputManager.OnKeyUp(e.Key);
+            Input.OnKeyUp(e.Key);
         }
-
     }
 }
