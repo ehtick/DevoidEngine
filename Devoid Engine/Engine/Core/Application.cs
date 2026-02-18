@@ -180,13 +180,14 @@ namespace DevoidEngine.Engine.Core
             graphicsDevice.MainSurface.Bind();
             graphicsDevice.MainSurface.Present();
 
-            InputManager.Publish();
-
             RenderThreadDispatcher.ExecutePending();
         }
 
         private void OnUpdateFrame(double deltaTime)
         {
+            InputManager.Publish();       // ← MOVE HERE
+            InputManager.CommitToInput(); // ← THEN THIS
+
             ImGuiRenderer.UpdateInput();
 
             LayerHandler.UpdateLayers((float)deltaTime);
@@ -197,5 +198,6 @@ namespace DevoidEngine.Engine.Core
 
             UpdateThreadDispatcher.ExecutePending();
         }
+
     }
 }
