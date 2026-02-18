@@ -7,95 +7,239 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(Transform);
 
-        private Vector3 position = Vector3.Zero;
-        private Quaternion rotation = Quaternion.Identity;
-        private Vector3 scale = Vector3.One;
+        // ===============================
+        // Hierarchy
+        // ===============================
 
-        private Vector3 globalPosition = Vector3.Zero;
-        private Vector3 globalRotation = Vector3.Zero;
-        private Vector3 globalScale = Vector3.One;
+        private Transform parent;
+        private readonly List<Transform> children = new();
 
-        private Matrix4x4 localMatrix = Matrix4x4.Identity;
+        public Transform Parent => parent;
+        public IReadOnlyList<Transform> Children => children;
+
+        // ===============================
+        // Local Transform
+        // ===============================
+
+        private Vector3 localPosition = Vector3.Zero;
+        private Quaternion localRotation = Quaternion.Identity;
+        private Vector3 localScale = Vector3.One;
+
+        // ===============================
+        // Cached World
+        // ===============================
+
         private Matrix4x4 worldMatrix = Matrix4x4.Identity;
-
-        private Vector3 prev_position = Vector3.Zero;
-        private Vector3 prev_rotation = Vector3.Zero;
-        private Vector3 prev_scale = Vector3.One;
+        private bool dirty = true;
 
         public bool hasMoved = false;
 
-        public Vector3 Position
+        // ===============================
+        // Local Properties
+        // ===============================
+
+        public Vector3 LocalPosition
         {
-            get => position;
+            get => localPosition;
             set
             {
-                if (position != value)
+                if (localPosition != value)
                 {
-                    position = value;
-                    hasMoved = true;
+                    localPosition = value;
+                    MarkDirty();
                 }
+            }
+        }
+
+        public Quaternion LocalRotation
+        {
+            get => localRotation;
+            set
+            {
+                if (localRotation != value)
+                {
+                    localRotation = value;
+                    MarkDirty();
+                }
+            }
+        }
+
+        public Vector3 LocalScale
+        {
+            get => localScale;
+            set
+            {
+                if (localScale != value)
+                {
+                    localScale = value;
+                    MarkDirty();
+                }
+            }
+        }
+
+        // ===============================
+        // World Matrix
+        // ===============================
+
+        public Matrix4x4 LocalMatrix =>
+            Matrix4x4.CreateScale(localScale) *
+            Matrix4x4.CreateFromQuaternion(localRotation) *
+            Matrix4x4.CreateTranslation(localPosition);
+
+        public Matrix4x4 WorldMatrix
+        {
+            get
+            {
+                if (dirty)
+                    RecalculateWorldMatrix();
+
+                return worldMatrix;
+            }
+        }
+
+        private void RecalculateWorldMatrix()
+        {
+            if (parent != null)
+                worldMatrix = LocalMatrix * parent.WorldMatrix;
+            else
+                worldMatrix = LocalMatrix;
+
+            dirty = false;
+        }
+
+        private void MarkDirty()
+        {
+            dirty = true;
+            hasMoved = true;
+
+            foreach (var child in children)
+                child.MarkDirty();
+        }
+
+        // ===============================
+        // World Space Properties
+        // ===============================
+
+        public Vector3 Position
+        {
+            get => WorldMatrix.Translation;
+            set
+            {
+                if (parent != null)
+                {
+                    Matrix4x4.Invert(parent.WorldMatrix, out var invParent);
+                    Vector3 local = Vector3.Transform(value, invParent);
+                    localPosition = local;
+                }
+                else
+                {
+                    localPosition = value;
+                }
+
+                MarkDirty();
             }
         }
 
         public Quaternion Rotation
         {
-            get => rotation;
+            get
+            {
+                if (parent == null)
+                    return localRotation;
+
+                return parent.Rotation * localRotation;
+            }
             set
             {
-                rotation = value;
-                hasMoved = true;
+                if (parent != null)
+                {
+                    Quaternion invParent = Quaternion.Inverse(parent.Rotation);
+                    localRotation = invParent * value;
+                }
+                else
+                {
+                    localRotation = value;
+                }
+
+                MarkDirty();
+            }
+        }
+
+        public Vector3 Scale
+        {
+            get
+            {
+                if (parent == null)
+                    return localScale;
+
+                return parent.Scale * localScale;
+            }
+            set
+            {
+                if (parent != null)
+                    localScale = value / parent.Scale;
+                else
+                    localScale = value;
+
+                MarkDirty();
             }
         }
 
         public Vector3 EulerAngles
         {
-            get => TransformMath.QuaternionToEuler(rotation);
-            set => rotation = TransformMath.EulerToQuaternion(value);
+            get => TransformMath.QuaternionToEuler(Rotation);
+            set => Rotation = TransformMath.EulerToQuaternion(value);
         }
 
-        public Vector3 Scale
+        // ===============================
+        // Parenting
+        // ===============================
+
+        public void SetParent(Transform newParent, bool keepWorld = true)
         {
-            get => scale;
-            set
+            if (parent == newParent)
+                return;
+
+            Matrix4x4 oldWorld = WorldMatrix;
+
+            parent?.children.Remove(this);
+
+            parent = newParent;
+            parent?.children.Add(this);
+
+            if (keepWorld)
             {
-                if (scale != value)
+                if (parent != null)
                 {
-                    scale = value;
-                    hasMoved = true;
+                    Matrix4x4.Invert(parent.WorldMatrix, out var invParent);
+                    Matrix4x4 local = oldWorld * invParent;
+                    Decompose(local);
+                }
+                else
+                {
+                    Decompose(oldWorld);
                 }
             }
+
+            MarkDirty();
         }
 
+        // ===============================
+        // Decomposition Helper
+        // ===============================
 
-
-
-        public override void OnStart()
+        private void Decompose(Matrix4x4 matrix)
         {
+            Matrix4x4.Decompose(
+                matrix,
+                out Vector3 scale,
+                out Quaternion rotation,
+                out Vector3 translation
+            );
 
-            //prev_position = position;
-            //prev_rotation = rotation;
-            //prev_scale = scale;
-        }
-
-        public override void OnUpdate(float dt)
-        {
-            return;
-            //if (
-            //    prev_position != position ||
-            //    prev_rotation != rotation ||
-            //    prev_scale != scale
-            //)
-            //{
-            //    prev_position = position;
-            //    prev_rotation = rotation;
-            //    prev_scale = scale;
-            //    hasMoved = true;
-            //}
-            //else
-            //{
-            //    hasMoved = false;
-            //}
-
+            localPosition = translation;
+            localRotation = rotation;
+            localScale = scale;
         }
     }
 }

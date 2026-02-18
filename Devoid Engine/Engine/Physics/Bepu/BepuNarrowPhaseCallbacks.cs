@@ -40,7 +40,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
             float restitution = (matA.Restitution + matB.Restitution) * 0.5f;
 
             float frequency = 30f;
-            float dampingRatio = 2f;
+            float dampingRatio = 1f;
 
             float angularFrequency = 2f * MathF.PI * frequency;
             float twiceDampingRatio = 2f * dampingRatio;
@@ -51,7 +51,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
             pairMaterial = new PairMaterialProperties
             {
                 FrictionCoefficient = friction,
-                MaximumRecoveryVelocity = 3f,
+                MaximumRecoveryVelocity = 2f,
                 SpringSettings = spring
             };
 
@@ -64,6 +64,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
                     restitution * 10f
                 );
             }
+
 
 
 

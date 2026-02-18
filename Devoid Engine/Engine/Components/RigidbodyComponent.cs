@@ -9,16 +9,12 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(RigidBodyComponent);
 
-        // ===============================
-        // Basic Settings
-        // ===============================
-
         public float Mass = 10f;
         public bool StartKinematic = false;
 
-        // ===============================
-        // Shape Definition
-        // ===============================
+        public bool FreezeRotationX = false;
+        public bool FreezeRotationY = false;
+        public bool FreezeRotationZ = false;
 
         public PhysicsShapeDescription Shape = new PhysicsShapeDescription
         {
@@ -26,21 +22,9 @@ namespace DevoidEngine.Engine.Components
             Size = new Vector3(1, 1, 1)
         };
 
-        // ===============================
-        // Physics Material (Per Object)
-        // ===============================
-
         public PhysicsMaterial Material = PhysicsMaterial.Default;
 
-        // ===============================
-        // Internal
-        // ===============================
-
         internal IPhysicsBody InternalBody;
-
-        // ===============================
-        // Lifecycle
-        // ===============================
 
         public override void OnStart()
         {
@@ -86,9 +70,18 @@ namespace DevoidEngine.Engine.Components
             if (!InternalBody.IsKinematic)
             {
                 gameObject.transform.Position = InternalBody.Position;
+
+                Vector3 angVel = InternalBody.AngularVelocity;
+
+                if (FreezeRotationX) angVel.X = 0f;
+                if (FreezeRotationY) angVel.Y = 0f;
+                if (FreezeRotationZ) angVel.Z = 0f;
+
+                InternalBody.AngularVelocity = angVel;
+
                 gameObject.transform.Rotation = InternalBody.Rotation;
-                    
             }
+
         }
 
         public override void OnDestroy()

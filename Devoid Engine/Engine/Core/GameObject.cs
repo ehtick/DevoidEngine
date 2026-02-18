@@ -146,16 +146,41 @@ namespace DevoidEngine.Engine.Core
         }
 
 
-        public void AddChild(GameObject gameObject)
+        public void AddChild(GameObject child, bool keepWorld = true)
         {
-            gameObject.SetParent(this);
-            this.children.Add(gameObject);
+            if (child == null || child == this)
+                return;
+
+            child.SetParent(this, keepWorld);
         }
 
-        public void SetParent(GameObject gameObject)
+        public void SetParent(GameObject newParent, bool keepWorld = true)
         {
-            this.parentObject = gameObject;
+            if (parentObject == newParent)
+                return;
+
+            // Remove from old parent list
+            if (parentObject != null)
+                parentObject.children.Remove(this);
+
+            GameObject current = newParent;
+            while (current != null)
+            {
+                if (current == this)
+                    return; // prevent circular parenting
+                current = current.parentObject;
+            }
+
+            parentObject = newParent;
+
+            if (newParent != null)
+            {
+                if (!newParent.children.Contains(this))
+                    newParent.children.Add(this);
+            }
+            transform.SetParent(newParent?.transform, keepWorld);
         }
+
 
         public void OnStart()
         {

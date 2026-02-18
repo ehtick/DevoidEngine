@@ -64,23 +64,23 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnUpdate(float dt)
         {
-            //Pull transform data into camera
-            var pos = gameObject.transform.Position;
+            var transform = gameObject.transform;
 
-            // Convert Euler rotation → forward vector
-            float pitch = MathHelper.DegToRad(gameObject.transform.Rotation.X);
-            float yaw = -MathHelper.DegToRad(gameObject.transform.Rotation.Y);
+            Vector3 position = transform.Position;
 
-            Vector3 front = new Vector3(
-                MathF.Cos(pitch) * MathF.Cos(yaw),
-                MathF.Sin(pitch),
-                MathF.Cos(pitch) * MathF.Sin(yaw)
+            // 🔥 Compute forward from quaternion
+            Vector3 forward = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitZ, transform.Rotation)
             );
 
-            Vector3 up = Vector3.UnitY;
+            // 🔥 Compute up from quaternion
+            Vector3 up = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitY, transform.Rotation)
+            );
 
-            Camera.UpdateView(pos, front, up);
+            Camera.UpdateView(position, forward, up);
         }
+
 
         public override void OnDestroy()
         {

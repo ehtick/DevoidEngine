@@ -28,6 +28,11 @@ namespace DevoidEngine.Engine.Physics
             }
         }
 
+        public bool Raycast(Ray ray, float maxDistance, out RaycastHit hit)
+        {
+            return backend.Raycast(ray, maxDistance, out hit);
+        }
+
         public IPhysicsBody CreateBody(PhysicsBodyDescription desc, GameObject owner)
         {
             return backend.CreateBody(desc, owner);
