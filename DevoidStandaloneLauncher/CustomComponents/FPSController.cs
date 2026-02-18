@@ -40,16 +40,32 @@ namespace DevoidEngine.Engine.Components
                 cameraPivot = gameObject.children[0].transform;
         }
 
-        // VARIABLE RATE (INPUT ONLY)
         public override void OnUpdate(float dt)
         {
             if (rb == null) return;
 
-            storedMouseDelta += Input.MouseDelta;
+            // 1. Handle Input
             storedMoveInput = Input.MoveAxis;
+            if (Input.JumpPressed) jumpRequested = true;
 
-            if (Input.JumpPressed)
-                jumpRequested = true;
+            // 2. Apply Camera/Player Rotation immediately for smoothness
+            float mouseX = Input.MouseDelta.X * MouseSensitivity;
+            float mouseY = Input.MouseDelta.Y * MouseSensitivity;
+
+            yaw += mouseX;
+            pitch -= mouseY;
+            pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
+
+            // Update Player orientation (Horizontal)
+            // We update the transform directly here; it will sync with physics 
+            // or be overridden by physics in LateUpdate.
+            rb.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.DegToRad(yaw));
+
+            // Update Camera Pivot (Vertical)
+            if (cameraPivot != null)
+            {
+                cameraPivot.LocalRotation = Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathHelper.DegToRad(pitch));
+            }
         }
 
         // FIXED RATE (PHYSICS SAFE)
@@ -57,10 +73,9 @@ namespace DevoidEngine.Engine.Components
         {
             if (rb == null) return;
 
-            ApplyRotation();
-            ApplyMovement();
+            ApplyMovement(); // Keep physics-based movement here [cite: 892]
 
-            storedMouseDelta = Vector2.Zero;
+            // Reset jump request after the physics step has seen it
             jumpRequested = false;
         }
 

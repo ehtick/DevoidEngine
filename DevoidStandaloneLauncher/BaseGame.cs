@@ -20,9 +20,9 @@ namespace DevoidStandaloneLauncher
 
         public override void OnUpdate(float deltaTime)
         {
-            gamePrototype.OnUpdate(deltaTime);
+            gamePrototype.OnUpdate(deltaTime); // FPSController runs here
             MainScene.OnUpdate(deltaTime);
-            Input.Update();
+            Input.Update(); // MUST happen AFTER the controller processes the movement [cite: 856]
         }
 
         public override void OnRender(float deltaTime)
