@@ -23,6 +23,7 @@ namespace DevoidEngine.Engine.Components
         private float yaw = 0f;
         private float pitch = 0f;
 
+        private Vector2 storedMouseDelta = Vector2.Zero;
         private Vector2 storedMoveInput = Vector2.Zero;
         private bool jumpRequested = false;
 
@@ -43,45 +44,30 @@ namespace DevoidEngine.Engine.Components
         // VARIABLE RATE (INPUT SAMPLING ONLY)
         public override void OnUpdate(float dt)
         {
-            if (rb == null) return;
-
-            // Pull move input snapshot
-            storedMoveInput = Input.MoveAxis;
-
-            // Integrate mouse delta here (Update thread) so it's not lost by fixed-step timing
             Vector2 mouseDelta = Input.MouseDelta;
             if (mouseDelta.Y != 0)
             {
                 Console.WriteLine($"[Input] DeltaX: {mouseDelta.X}");
             }
 
-            yaw += mouseDelta.X * MouseSensitivity;
-            pitch -= mouseDelta.Y * MouseSensitivity;
-            pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
+            if (rb == null) return;
+
+            storedMoveInput = Input.MoveAxis;
+
+            // 🔥 ACCUMULATE instead of overwrite
+            storedMouseDelta += Input.MouseDelta;
 
             if (Input.JumpPressed)
                 jumpRequested = true;
         }
 
-        // Update-thread visual update so camera pivot is smooth every frame
-        public override void OnLateUpdate(float dt)
-        {
-            if (cameraPivot != null)
-            {
-                cameraPivot.LocalRotation =
-                    Quaternion.CreateFromAxisAngle(
-                        Vector3.UnitX,
-                        MathHelper.DegToRad(pitch)
-                    );
-            }
-        }
 
         // FIXED RATE (ALL TRANSFORM + PHYSICS)
         public override void OnFixedUpdate(float fixedDt)
         {
             if (rb == null) return;
 
-            ApplyRotation();     // apply yaw to physics body (keeps physics deterministic)
+            ApplyRotation();     // 🔥 rotation now fixed-timestep
             ApplyMovement();     // physics-safe movement
 
             jumpRequested = false;
@@ -89,7 +75,13 @@ namespace DevoidEngine.Engine.Components
 
         private void ApplyRotation()
         {
-            // Horizontal rotation (yaw) applied to physics body
+            // Apply accumulated mouse delta
+            yaw += storedMouseDelta.X * MouseSensitivity;
+            pitch -= storedMouseDelta.Y * MouseSensitivity;
+
+            pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
+
+            // Apply horizontal rotation to player body
             Quaternion bodyRotation =
                 Quaternion.CreateFromAxisAngle(
                     Vector3.UnitY,
@@ -98,8 +90,19 @@ namespace DevoidEngine.Engine.Components
 
             rb.Rotation = bodyRotation;
 
-            // NOTE: cameraPivot.LocalRotation is intentionally updated in OnLateUpdate (update thread)
-            // so visuals are updated every frame and don't wait for the fixed/physics tick.
+            // Apply vertical rotation to camera pivot
+            if (cameraPivot != null)
+            {
+                cameraPivot.LocalRotation =
+                    Quaternion.CreateFromAxisAngle(
+                        Vector3.UnitX,
+                        MathHelper.DegToRad(pitch)
+                    );
+            }
+
+            // IMPORTANT:
+            // Consume mouse delta so it is not applied twice
+            storedMouseDelta = Vector2.Zero;
         }
 
         private void ApplyMovement()

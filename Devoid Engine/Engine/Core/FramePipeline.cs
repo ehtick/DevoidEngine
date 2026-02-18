@@ -9,8 +9,6 @@ namespace DevoidEngine.Engine.Core
     public class CameraRenderContext
     {
         public CameraData cameraData;
-        // hold reference to the camera component so render thread can request interpolation
-        public CameraComponent3D cameraComponent;
 
         public List<RenderItem> renderItems3D = new();
         public List<RenderItem> renderItems2D = new();
@@ -24,7 +22,6 @@ namespace DevoidEngine.Engine.Core
         {
             renderItems3D.Clear(); renderItems2D.Clear(); renderItemsUI.Clear(); pointLights.Clear();
             spotLights.Clear(); directionalLights.Clear();
-            cameraComponent = null;
         }
     }
 
@@ -60,9 +57,7 @@ namespace DevoidEngine.Engine.Core
                 // 3. Reuse the existing context inside the back buffer
                 CameraRenderContext ctx = backList[i];
                 ctx.Clear();
-
-                // store reference for render-time interpolation
-                ctx.cameraComponent = cameraComponent;
+                ctx.cameraData = cameraComponent.Camera.GetCameraData();
 
                 foreach (var renderable in scene.Renderables)
                 {
@@ -77,26 +72,11 @@ namespace DevoidEngine.Engine.Core
         {
             List<CameraRenderContext> cameraContextList = SwapBuffer.Front;
 
-            // compute interpolation alpha from scene accumulator
-            float alpha = 0f;
-            if (SceneManager.IsSceneLoaded())
-            {
-                var scene = SceneManager.MainScene;
-                alpha = scene.GetInterpolationAlpha();
-            }
-
             // Frame level shader bindings go here
 
             for (int i = 0; i < cameraContextList.Count; i++)
             {
                 CameraRenderContext ctx = cameraContextList[i];
-
-                // compute interpolated cameraData on render thread
-                if (ctx.cameraComponent != null)
-                {
-                    ctx.cameraData = ctx.cameraComponent.Camera.GetInterpolatedCameraData(alpha);
-                }
-
                 RenderBase.Render(ctx);
             }
 

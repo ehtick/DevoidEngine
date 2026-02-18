@@ -33,13 +33,6 @@ namespace DevoidEngine.Engine.Core
             GameObjects = new List<GameObject>();
         }
 
-        // expose interpolation alpha [0,1] for render interpolation
-        public float GetInterpolationAlpha()
-        {
-            if (fixedDeltaTime <= 0f) return 0f;
-            return Math.Clamp(accumulator / fixedDeltaTime, 0f, 1f);
-        }
-
         public void Initialize()
         {
             Physics = new PhysicsSystem(new BepuPhysicsBackend());
