@@ -181,11 +181,12 @@ namespace DevoidEngine.Engine.Core
             graphicsDevice.MainSurface.Present();
 
             RenderThreadDispatcher.ExecutePending();
+
+            InputManager.Publish();       // ← MOVE HERE
         }
 
         private void OnUpdateFrame(double deltaTime)
         {
-            InputManager.Publish();       // ← MOVE HERE
             InputManager.CommitToInput(); // ← THEN THIS
 
             ImGuiRenderer.UpdateInput();
@@ -197,6 +198,8 @@ namespace DevoidEngine.Engine.Core
             FramePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();
+
+            Input.Update(); // MUST happen AFTER the controller processes the movement [cite: 856]
         }
 
     }
