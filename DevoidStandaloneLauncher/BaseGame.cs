@@ -21,12 +21,13 @@ namespace DevoidStandaloneLauncher
         public override void OnUpdate(float deltaTime)
         {
             gamePrototype.OnUpdate(deltaTime);
+            MainScene.OnUpdate(deltaTime);
+            Input.Update();
         }
 
         public override void OnRender(float deltaTime)
         {
             gamePrototype.OnRender(deltaTime);
-            MainScene.OnUpdate(deltaTime);
         }
 
         public override void OnLateRender()

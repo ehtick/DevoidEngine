@@ -11,6 +11,7 @@ namespace DevoidStandaloneLauncher
             Height = 200,
             Width = 200,
             graphicsDevice = new DX11GraphicsDevice(),
+            forceVsync = false,
 
             Name = "Test Instance - Devoid"
         };

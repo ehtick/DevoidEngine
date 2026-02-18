@@ -47,7 +47,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             var fps = player.AddComponent<FPSController>();
             fps.MoveSpeed = 6f;
-            fps.JumpForce = 6f;
+            fps.JumpForce = 100f;
             fps.MouseSensitivity = 0.15f;
 
             // ===============================

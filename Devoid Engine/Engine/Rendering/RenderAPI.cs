@@ -94,6 +94,7 @@ namespace DevoidEngine.Engine.Rendering
         // This method should only be called at the end of the render stage
         public static void RenderToScreen(Texture2D texture)
         {
+            if (texture == null) return;
             Renderer.graphicsDevice.MainSurface.Bind();
 
             Renderer.graphicsDevice.SetRasterizerState(CullMode.None);

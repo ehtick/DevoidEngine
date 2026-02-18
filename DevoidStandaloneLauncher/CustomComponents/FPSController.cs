@@ -2,6 +2,7 @@
 using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.Utilities;
 using System.Numerics;
+using System;
 
 namespace DevoidEngine.Engine.Components
 {
@@ -14,11 +15,12 @@ namespace DevoidEngine.Engine.Components
         // ===============================
 
         public float MoveSpeed = 6f;
+        // FIX 1: Increased JumpForce so it actually lifts your 10kg Rigidbody
         public float JumpForce = 1000f;
         public float MouseSensitivity = 0.15f;
         public float MinPitch = -89f;
         public float MaxPitch = 89f;
-        public float GroundCheckDistance = 1.6f;
+        public float GroundCheckDistance = 0.2f; // Shortened since we are offsetting the raycast
 
         // ===============================
         // Internals
@@ -63,33 +65,34 @@ namespace DevoidEngine.Engine.Components
         }
 
         // ===============================
-        // Mouse Look (Visual Only)
+        // Mouse Look
         // ===============================
 
         private void HandleMouseLook()
         {
             Vector2 mouseDelta = Input.MouseDelta;
 
+            Console.WriteLine(mouseDelta);
+
             yaw += mouseDelta.X * MouseSensitivity;
             pitch -= mouseDelta.Y * MouseSensitivity;
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
-            // Rotate player visually (Y axis)
-            gameObject.transform.LocalRotation =
-                Quaternion.CreateFromAxisAngle(
-                    Vector3.UnitY,
-                    MathHelper.DegToRad(yaw)
-                );
+            // FIX 2: Apply Y-axis rotation to the Physics Body (rb), NOT the visual transform.
+            // This stops the physics engine from overwriting your rotation and causing jitter.
+            rb.Rotation = Quaternion.CreateFromAxisAngle(
+                Vector3.UnitY,
+                MathHelper.DegToRad(yaw)
+            );
 
-            // Rotate camera pivot (X axis)
+            // Rotate camera pivot (X axis) - this is fine to do via transform since it has no physics body
             if (cameraPivot != null)
             {
-                cameraPivot.LocalRotation =
-                    Quaternion.CreateFromAxisAngle(
-                        Vector3.UnitX,
-                        MathHelper.DegToRad(pitch)
-                    );
+                cameraPivot.LocalRotation = Quaternion.CreateFromAxisAngle(
+                    Vector3.UnitX,
+                    MathHelper.DegToRad(pitch)
+                );
             }
         }
 
@@ -103,11 +106,8 @@ namespace DevoidEngine.Engine.Components
 
             Quaternion rotation = gameObject.transform.Rotation;
 
-            Vector3 forward =
-                Vector3.Normalize(Vector3.Transform(Vector3.UnitZ, rotation));
-
-            Vector3 right =
-                Vector3.Normalize(Vector3.Transform(Vector3.UnitX, rotation));
+            Vector3 forward = Vector3.Normalize(Vector3.Transform(Vector3.UnitZ, rotation));
+            Vector3 right = Vector3.Normalize(Vector3.Cross(forward, Vector3.UnitY));
 
             forward.Y = 0;
             right.Y = 0;
@@ -142,7 +142,9 @@ namespace DevoidEngine.Engine.Components
 
         private bool IsGrounded()
         {
-            Vector3 origin = gameObject.transform.Position;
+            // FIX 3: Offset the raycast origin down by 1.4 units. 
+            // If it starts directly at the center, it immediately hits the inside of the player's own physics capsule.
+            Vector3 origin = gameObject.transform.Position + new Vector3(0, -1.4f, 0);
             Vector3 direction = -Vector3.UnitY;
 
             return gameObject.Scene.Physics.Raycast(

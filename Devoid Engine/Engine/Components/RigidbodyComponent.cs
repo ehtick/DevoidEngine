@@ -43,7 +43,10 @@ namespace DevoidEngine.Engine.Components
             set
             {
                 if (internalBody != null)
+                {
+                    internalBody.WakeUp();
                     internalBody.LinearVelocity = value;
+                }
             }
         }
 
@@ -53,7 +56,10 @@ namespace DevoidEngine.Engine.Components
             set
             {
                 if (internalBody != null)
+                {
+                    internalBody.WakeUp();
                     internalBody.AngularVelocity = value;
+                }
             }
         }
 
