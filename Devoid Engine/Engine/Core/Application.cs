@@ -150,11 +150,12 @@ namespace DevoidEngine.Engine.Core
 
         private void OnKeyDown(OpenTK.Windowing.Common.KeyboardKeyEventArgs obj)
         {
-
+            LayerHandler.KeyDownInput((Keys)obj.Key, obj.ScanCode, obj.Modifiers.ToString(), false);
         }
 
         private void OnKeyUp(OpenTK.Windowing.Common.KeyboardKeyEventArgs obj)
         {
+            LayerHandler.KeyUpInput((Keys)obj.Key, obj.ScanCode, obj.Modifiers.ToString(), false);
         }
 
         public void Run()
@@ -186,6 +187,7 @@ namespace DevoidEngine.Engine.Core
         private void OnUpdateFrame(double deltaTime)
         {
             ImGuiRenderer.UpdateInput();
+            Input.Update();
 
             LayerHandler.UpdateLayers((float)deltaTime);
 

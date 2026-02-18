@@ -45,5 +45,32 @@ namespace DevoidStandaloneLauncher
             Renderer.graphicsDevice.SetViewport(0, 0, width, height);
             MainScene.OnResize(width, height);
         }
+
+        public override void OnMouseMove(MouseMoveEvent e)
+        {
+            Input.OnMouseMove(e);
+        }
+
+        public override void OnMouseButton(MouseButtonEvent e)
+        {
+            Input.OnMouseInput(e);
+        }
+
+        public override void OnMouseWheel(MouseWheelEvent e)
+        {
+            Input.OnMouseWheel(e);
+        }
+
+        public override void OnKeyDown(KeyboardEvent e)
+        {
+            Console.WriteLine(e.Key.ToString());
+            Input.OnKeyDown(e.Key);
+        }
+
+        public override void OnKeyUp(KeyboardEvent e)
+        {
+            Input.OnKeyUp(e.Key);
+        }
+
     }
 }

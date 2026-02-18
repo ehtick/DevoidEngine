@@ -195,7 +195,7 @@ namespace DevoidEngine.Engine.Components
         // Parenting
         // ===============================
 
-        public void SetParent(Transform newParent, bool keepWorld = true)
+        public void SetParent(Transform newParent, bool keepWorld = false)
         {
             if (parent == newParent)
                 return;

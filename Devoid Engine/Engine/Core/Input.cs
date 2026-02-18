@@ -2,79 +2,78 @@
 
 namespace DevoidEngine.Engine.Core
 {
-    public class Input
+    public static class Input
     {
+        // ===============================
+        // Mouse State
+        // ===============================
 
-        public static Vector2 mousePosition = Vector2.Zero;
-        public static Vector2 mouseDelta = Vector2.Zero;
-        public static Vector2 mouseScrollDelta = Vector2.Zero;
-        public static MouseButtonEvent mouseBtnEvent;
-        public static MouseMoveEvent mouseMoveEvent;
+        public static Vector2 MousePosition { get; private set; } = Vector2.Zero;
+        public static Vector2 MouseDelta { get; private set; } = Vector2.Zero;
+        public static Vector2 MouseScrollDelta { get; private set; } = Vector2.Zero;
 
-        public static MouseButtonEvent previousBtnEvent;
+        private static HashSet<MouseButton> mouseDown = new();
+        private static HashSet<MouseButton> mousePressedThisFrame = new();
+        private static HashSet<MouseButton> mouseReleasedThisFrame = new();
 
-        public static bool isDragging;
+        public static bool IsDragging { get; private set; }
+
+        // ===============================
+        // Mouse Events
+        // ===============================
 
         public static void OnMouseInput(MouseButtonEvent e)
         {
-            mouseBtnEvent = e;
+            if (e.IsPressed)
+            {
+                if (!mouseDown.Contains(e.Button))
+                {
+                    mouseDown.Add(e.Button);
+                    mousePressedThisFrame.Add(e.Button);
+                }
+            }
+            else
+            {
+                if (mouseDown.Contains(e.Button))
+                {
+                    mouseDown.Remove(e.Button);
+                    mouseReleasedThisFrame.Add(e.Button);
+                }
+            }
         }
 
         public static void OnMouseMove(MouseMoveEvent e)
         {
+            MousePosition = e.position;
 
-            mouseMoveEvent = e;
-            mousePosition = e.position;
-            mouseDelta = e.delta;
+            // Accumulate delta for the frame
+            MouseDelta += e.delta;
 
-
-            if (mouseBtnEvent.IsPressed)
-            {
-                isDragging = true;
-            }
-            else
-            {
-                isDragging = false;
-            }
-
+            IsDragging = mouseDown.Count > 0;
         }
 
         public static void OnMouseWheel(MouseWheelEvent e)
         {
-            mouseScrollDelta = e.Offset;
+            MouseScrollDelta += e.Offset;
         }
 
-        public static bool IsPressed(MouseButton btn)
-        {
-            if (btn == mouseBtnEvent.Button)
-            {
-                if (mouseBtnEvent.IsPressed)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        // ===============================
+        // Mouse Queries
+        // ===============================
+
+        public static bool GetMouse(MouseButton btn)
+            => mouseDown.Contains(btn);
 
         public static bool GetMouseDown(MouseButton btn)
-        {
-            if (btn == mouseBtnEvent.Button)
-            {
-                if (previousBtnEvent.Button == mouseBtnEvent.Button)
-                {
-                    if (mouseBtnEvent.Action != InputAction.Release && previousBtnEvent.Action == InputAction.Press)
-                    {
-                        return false;
-                    }
-                }
+            => mousePressedThisFrame.Contains(btn);
 
-                previousBtnEvent = mouseBtnEvent;
-                return mouseBtnEvent.IsPressed;
-            }
-            return false;
-        }
+        public static bool GetMouseUp(MouseButton btn)
+            => mouseReleasedThisFrame.Contains(btn);
 
-        // --- KEYBOARD ---
+        // ===============================
+        // Keyboard State
+        // ===============================
+
         private static HashSet<Keys> keysDown = new();
         private static HashSet<Keys> keysPressedThisFrame = new();
         private static HashSet<Keys> keysReleasedThisFrame = new();
@@ -97,32 +96,61 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
+        // ===============================
+        // Keyboard Queries
+        // ===============================
+
         public static bool GetKey(Keys key)
-        {
-            return keysDown.Contains(key);
-        }
+            => keysDown.Contains(key);
 
         public static bool GetKeyDown(Keys key)
-        {
-            return keysPressedThisFrame.Contains(key);
-        }
+            => keysPressedThisFrame.Contains(key);
 
         public static bool GetKeyUp(Keys key)
+            => keysReleasedThisFrame.Contains(key);
+
+        // ===============================
+        // FPS Convenience Abstractions
+        // ===============================
+
+        public static Vector2 MoveAxis
         {
-            return keysReleasedThisFrame.Contains(key);
+            get
+            {
+                Vector2 axis = Vector2.Zero;
+
+                if (GetKey(Keys.W)) axis.Y += 1;
+                if (GetKey(Keys.S)) axis.Y -= 1;
+                if (GetKey(Keys.D)) axis.X += 1;
+                if (GetKey(Keys.A)) axis.X -= 1;
+
+                if (axis.LengthSquared() > 1f)
+                    axis = Vector2.Normalize(axis);
+
+                return axis;
+            }
         }
 
+        public static bool JumpPressed =>
+            GetKeyDown(Keys.Space);
+
+        // ===============================
+        // Frame Reset
+        // ===============================
+
         /// <summary>
-        /// Call this at the start of every frame to reset per-frame key states.
+        /// Call once at the START of every frame.
         /// </summary>
         public static void Update()
         {
-            mouseDelta = new Vector2(0);
-            mouseScrollDelta = Vector2.Zero;
+            MouseDelta = Vector2.Zero;
+            MouseScrollDelta = Vector2.Zero;
+
             keysPressedThisFrame.Clear();
             keysReleasedThisFrame.Clear();
+
+            mousePressedThisFrame.Clear();
+            mouseReleasedThisFrame.Clear();
         }
-
-
     }
 }

@@ -9,24 +9,24 @@ namespace DevoidStandaloneLauncher.Prototypes
     internal class CubeSpinForwardRenderer : Prototype
     {
         Scene scene;
-        GameObject cube;
-        GameObject cube2;
-        GameObject cube3;
         GameObject camera;
-        GameObject light;
 
         public override void OnInit(Scene main)
         {
             this.scene = main;
 
             // ===============================
-            // PLAYER ROOT (Physics Body)
+            // PLAYER ROOT (Capsule Physics)
             // ===============================
 
             GameObject player = scene.addGameObject("Player");
-            player.transform.Position = new Vector3(0, 5, 0);
 
-            RigidBodyComponent playerBody = player.AddComponent<RigidBodyComponent>();
+            // Ground top = 0.5 (height 1 centered at 0)
+            // Capsule half total height = 1.5
+            // So center should be 2.0
+            player.transform.Position = new Vector3(0, 2.0f, 0);
+
+            var playerBody = player.AddComponent<RigidBodyComponent>();
             playerBody.Shape = new PhysicsShapeDescription()
             {
                 Type = PhysicsShapeType.Capsule,
@@ -34,7 +34,6 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Radius = 0.5f
             };
 
-            // Lock tipping
             playerBody.Material = new PhysicsMaterial()
             {
                 Friction = 0.8f,
@@ -43,88 +42,75 @@ namespace DevoidStandaloneLauncher.Prototypes
             };
 
             // ===============================
+            // FPS CONTROLLER
+            // ===============================
+
+            var fps = player.AddComponent<FPSController>();
+            fps.MoveSpeed = 6f;
+            fps.JumpForce = 6f;
+            fps.MouseSensitivity = 0.15f;
+
+            // ===============================
             // CAMERA PIVOT (Pitch Only)
             // ===============================
 
             GameObject cameraPivot = scene.addGameObject("CameraPivot");
-            cameraPivot.transform.LocalPosition = new Vector3(0, 2f, 0);
-            cameraPivot.SetParent(player);
+            cameraPivot.SetParent(player, false);
+
+            cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
 
             // ===============================
-            // CAMERA (Actual Camera)
+            // CAMERA
             // ===============================
 
             camera = scene.addGameObject("Camera");
-            camera.SetParent(cameraPivot);
+            camera.SetParent(cameraPivot, false);
+            camera.transform.LocalPosition = Vector3.Zero;
 
-            CameraComponent3D cameraComponent =
-                camera.AddComponent<CameraComponent3D>();
-
-            cameraComponent.IsDefault = true;
+            var camComponent = camera.AddComponent<CameraComponent3D>();
+            camComponent.IsDefault = true;
 
             // ===============================
             // LIGHT
             // ===============================
 
-            light = scene.addGameObject("Light");
-            LightComponent lightComponent = light.AddComponent<LightComponent>();
+            GameObject light = scene.addGameObject("Light");
+            var lightComponent = light.AddComponent<LightComponent>();
             lightComponent.Intensity = 100;
             lightComponent.Color = new Vector4(1, 1, 1, 1);
             light.transform.Position = new Vector3(0, 5, 0);
 
             // ===============================
-            // MESH SETUP
+            // GROUND
             // ===============================
 
             Mesh mesh = new Mesh();
             mesh.SetVertices(Primitives.GetCubeVertex());
 
-            // ===============================
-            // BOUNCY CUBE
-            // ===============================
+            GameObject ground = scene.addGameObject("Ground");
+            ground.transform.Position = new Vector3(0, 0, 0);
+            ground.transform.Scale = new Vector3(20, 1, 20);
 
-            cube = scene.addGameObject("Bouncy Cube");
-            cube.transform.Position = new Vector3(0, 1, 20);
+            var groundRenderer = ground.AddComponent<MeshRenderer>();
+            groundRenderer.AddMesh(mesh);
 
-            MeshRenderer renderer = cube.AddComponent<MeshRenderer>();
-            renderer.AddMesh(mesh);
-
-            RigidBodyComponent rigidbody = cube.AddComponent<RigidBodyComponent>();
-
-            // ===============================
-            // GROUND
-            // ===============================
-
-            cube2 = scene.addGameObject("Ground");
-            cube2.transform.Position = new Vector3(0, -2, 0);
-            cube2.transform.Scale = new Vector3(20, 1, 20);
-
-            MeshRenderer renderer1 = cube2.AddComponent<MeshRenderer>();
-            renderer1.AddMesh(mesh);
-
-            StaticCollider rigidbody1 = cube2.AddComponent<StaticCollider>();
-            rigidbody1.Shape = new PhysicsShapeDescription()
+            var groundCollider = ground.AddComponent<StaticCollider>();
+            groundCollider.Shape = new PhysicsShapeDescription()
             {
                 Type = PhysicsShapeType.Box,
                 Size = new Vector3(20, 1, 20)
             };
 
-            rigidbody1.Material = new PhysicsMaterial()
+            groundCollider.Material = new PhysicsMaterial()
             {
-                Friction = 1.0f
+                Friction = 1f
             };
         }
 
-
         public override void OnUpdate(float delta)
         {
-            scene.Physics.Raycast(new Ray(Vector3.Zero, new Vector3(10, 0, 0)), 100, out RaycastHit hit);
-
-            if (hit.HitObject != null)
-            {
-                Console.WriteLine(hit.HitObject.Name);
-            }
+            // Nothing needed here now.
+            // FPSController handles input + movement.
         }
-
     }
 }

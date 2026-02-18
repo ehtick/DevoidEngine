@@ -1,6 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Physics;
-using DevoidEngine.Engine.Utilities;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
@@ -8,6 +7,10 @@ namespace DevoidEngine.Engine.Components
     public class RigidBodyComponent : Component
     {
         public override string Type => nameof(RigidBodyComponent);
+
+        // ===============================
+        // Settings
+        // ===============================
 
         public float Mass = 10f;
         public bool StartKinematic = false;
@@ -24,11 +27,65 @@ namespace DevoidEngine.Engine.Components
 
         public PhysicsMaterial Material = PhysicsMaterial.Default;
 
-        internal IPhysicsBody InternalBody;
+        // ===============================
+        // Internal Physics Handle
+        // ===============================
+
+        private IPhysicsBody internalBody;
+
+        // ===============================
+        // Public Physics API
+        // ===============================
+
+        public Vector3 LinearVelocity
+        {
+            get => internalBody != null ? internalBody.LinearVelocity : Vector3.Zero;
+            set
+            {
+                if (internalBody != null)
+                    internalBody.LinearVelocity = value;
+            }
+        }
+
+        public Vector3 AngularVelocity
+        {
+            get => internalBody != null ? internalBody.AngularVelocity : Vector3.Zero;
+            set
+            {
+                if (internalBody != null)
+                    internalBody.AngularVelocity = value;
+            }
+        }
+
+        public Vector3 Position
+        {
+            get => internalBody != null ? internalBody.Position : gameObject.transform.Position;
+            set
+            {
+                if (internalBody != null)
+                    internalBody.Position = value;
+            }
+        }
+
+        public Quaternion Rotation
+        {
+            get => internalBody != null ? internalBody.Rotation : gameObject.transform.Rotation;
+            set
+            {
+                if (internalBody != null)
+                    internalBody.Rotation = value;
+            }
+        }
+
+        public bool IsKinematic =>
+            internalBody != null && internalBody.IsKinematic;
+
+        // ===============================
+        // Lifecycle
+        // ===============================
 
         public override void OnStart()
         {
-            // Safety fallback if user forgot to define shape properly
             if (Shape.Type == PhysicsShapeType.Box &&
                 Shape.Size == Vector3.Zero)
             {
@@ -45,80 +102,76 @@ namespace DevoidEngine.Engine.Components
                 Material = Material
             };
 
-            InternalBody = gameObject.Scene.Physics.CreateBody(desc, gameObject);
+            internalBody = gameObject.Scene.Physics.CreateBody(desc, gameObject);
         }
 
         public override void OnUpdate(float dt)
         {
-            if (InternalBody == null)
+            if (internalBody == null)
                 return;
 
-            // If kinematic, push transform → physics
-            if (InternalBody.IsKinematic)
+            if (internalBody.IsKinematic)
             {
-                InternalBody.Position = gameObject.transform.Position;
-                InternalBody.Rotation = gameObject.transform.Rotation;
+                internalBody.Position = gameObject.transform.Position;
+                internalBody.Rotation = gameObject.transform.Rotation;
             }
         }
 
         public override void OnLateUpdate(float dt)
         {
-            if (InternalBody == null)
+            if (internalBody == null)
                 return;
 
-            // If dynamic, pull physics → transform
-            if (!InternalBody.IsKinematic)
+            if (!internalBody.IsKinematic)
             {
-                gameObject.transform.Position = InternalBody.Position;
-
-                Vector3 angVel = InternalBody.AngularVelocity;
+                // Freeze rotations by zeroing angular velocity
+                Vector3 angVel = internalBody.AngularVelocity;
 
                 if (FreezeRotationX) angVel.X = 0f;
                 if (FreezeRotationY) angVel.Y = 0f;
                 if (FreezeRotationZ) angVel.Z = 0f;
 
-                InternalBody.AngularVelocity = angVel;
+                internalBody.AngularVelocity = angVel;
 
-                gameObject.transform.Rotation = InternalBody.Rotation;
+                gameObject.transform.Position = internalBody.Position;
+                gameObject.transform.Rotation = internalBody.Rotation;
             }
-
         }
 
         public override void OnDestroy()
         {
-            InternalBody?.Remove();
-            InternalBody = null;
+            internalBody?.Remove();
+            internalBody = null;
         }
 
         // ===============================
-        // Physics API
+        // Force API
         // ===============================
 
         public void AddImpulse(Vector3 impulse)
         {
-            InternalBody?.AddImpulse(impulse);
+            internalBody?.AddImpulse(impulse);
         }
 
         public void AddForce(Vector3 force)
         {
-            InternalBody?.AddForce(force, gameObject.Scene.Physics.FixedDeltaTime);
+            if (internalBody != null)
+                internalBody.AddForce(force, gameObject.Scene.Physics.FixedDeltaTime);
         }
 
         public void AddTorque(Vector3 torque)
         {
-            InternalBody?.AddTorque(torque);
+            internalBody?.AddTorque(torque);
         }
 
         public void SetLinearVelocity(Vector3 velocity)
         {
-            if (InternalBody != null)
-                InternalBody.LinearVelocity = velocity;
+            LinearVelocity = velocity;
         }
 
         public void SetAngularVelocity(Vector3 velocity)
         {
-            if (InternalBody != null)
-                InternalBody.AngularVelocity = velocity;
+            AngularVelocity = velocity;
         }
     }
 }

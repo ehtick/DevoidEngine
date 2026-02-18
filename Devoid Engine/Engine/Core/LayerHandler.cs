@@ -78,7 +78,7 @@ namespace DevoidEngine.Engine.Core
                 layers[i].OnMouseMove(mouseMoveEvent);
             }
 
-            Input.OnMouseMove(mouseMoveEvent);
+            //Input.OnMouseMove(mouseMoveEvent);
         }
 
         public void OnMouseWheelEvent(OpenTK.Windowing.Common.MouseWheelEventArgs obj)
@@ -110,7 +110,7 @@ namespace DevoidEngine.Engine.Core
 
 
             // These events must be passed by the game runtime itself
-            Input.OnMouseInput(mouseBtnEvent);
+            //Input.OnMouseInput(mouseBtnEvent);
         }
 
         public void ResizeLayers(int width, int height)

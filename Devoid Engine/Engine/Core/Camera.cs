@@ -59,16 +59,23 @@ namespace DevoidEngine.Engine.Core
             Frustum = Frustum.FromMatrix(_viewMatrix * _projectionMatrix);
         }
 
-        public void UpdateView(Vector3 position, Vector3 front, Vector3 up)
+        public void UpdateView(Vector3 position, Vector3 forward, Vector3 up)
         {
             Position = position;
-            Front = Vector3.Normalize(front);
-            Right = Vector3.Normalize(Vector3.Cross(Front, Vector3.UnitY));
-            Up = Vector3.Normalize(up);
 
+            Front = Vector3.Normalize(forward);
+
+            // Right = Forward × Up  (for +Z forward world)
+            Right = Vector3.Normalize(Vector3.Cross(Front, up));
+
+            // Recompute Up to ensure orthonormal basis
+            Up = Vector3.Normalize(Vector3.Cross(Right, Front));
+
+            // IMPORTANT: negate Front when building view matrix
             _viewMatrix = Matrix4x4.CreateLookAt(Position, Position + Front, Up);
 
             Frustum = Frustum.FromMatrix(_viewMatrix * _projectionMatrix);
         }
+
     }
 }

@@ -68,12 +68,10 @@ namespace DevoidEngine.Engine.Components
 
             Vector3 position = transform.Position;
 
-            // 🔥 Compute forward from quaternion
             Vector3 forward = Vector3.Normalize(
                 Vector3.Transform(Vector3.UnitZ, transform.Rotation)
             );
 
-            // 🔥 Compute up from quaternion
             Vector3 up = Vector3.Normalize(
                 Vector3.Transform(Vector3.UnitY, transform.Rotation)
             );
