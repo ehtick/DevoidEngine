@@ -31,7 +31,7 @@ namespace DevoidEngine.Engine.Components
             var desc = new PhysicsStaticDescription
             {
                 Position = gameObject.transform.Position,
-                Rotation = TransformMath.EulerToQuaternion(gameObject.transform.Rotation),
+                Rotation = gameObject.transform.Rotation,
                 Shape = Shape,
                 Material = Material
             };

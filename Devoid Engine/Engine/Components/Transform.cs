@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using DevoidEngine.Engine.Utilities;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
 {
@@ -7,7 +8,7 @@ namespace DevoidEngine.Engine.Components
         public override string Type => nameof(Transform);
 
         private Vector3 position = Vector3.Zero;
-        private Vector3 rotation = Vector3.Zero;
+        private Quaternion rotation = Quaternion.Identity;
         private Vector3 scale = Vector3.One;
 
         private Vector3 globalPosition = Vector3.Zero;
@@ -36,17 +37,20 @@ namespace DevoidEngine.Engine.Components
             }
         }
 
-        public Vector3 Rotation
+        public Quaternion Rotation
         {
             get => rotation;
             set
             {
-                if (rotation != value)
-                {
-                    rotation = value;
-                    hasMoved = true;
-                }
+                rotation = value;
+                hasMoved = true;
             }
+        }
+
+        public Vector3 EulerAngles
+        {
+            get => TransformMath.QuaternionToEuler(rotation);
+            set => rotation = TransformMath.EulerToQuaternion(value);
         }
 
         public Vector3 Scale
@@ -68,29 +72,29 @@ namespace DevoidEngine.Engine.Components
         public override void OnStart()
         {
 
-            prev_position = position;
-            prev_rotation = rotation;
-            prev_scale = scale;
+            //prev_position = position;
+            //prev_rotation = rotation;
+            //prev_scale = scale;
         }
 
         public override void OnUpdate(float dt)
         {
             return;
-            if (
-                prev_position != position ||
-                prev_rotation != rotation ||
-                prev_scale != scale
-            )
-            {
-                prev_position = position;
-                prev_rotation = rotation;
-                prev_scale = scale;
-                hasMoved = true;
-            }
-            else
-            {
-                hasMoved = false;
-            }
+            //if (
+            //    prev_position != position ||
+            //    prev_rotation != rotation ||
+            //    prev_scale != scale
+            //)
+            //{
+            //    prev_position = position;
+            //    prev_rotation = rotation;
+            //    prev_scale = scale;
+            //    hasMoved = true;
+            //}
+            //else
+            //{
+            //    hasMoved = false;
+            //}
 
         }
     }

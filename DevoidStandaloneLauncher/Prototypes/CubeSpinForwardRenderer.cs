@@ -35,7 +35,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             mesh.SetVertices(Primitives.GetCubeVertex());
 
             cube = scene.addGameObject("Cube");
-            cube.transform.Position = new System.Numerics.Vector3(10, 0, 0);
+            cube.transform.Position = new System.Numerics.Vector3(10, 4, 0);
             MeshRenderer renderer = cube.AddComponent<MeshRenderer>();
             RigidBodyComponent rigidbody = cube.AddComponent<RigidBodyComponent>();
 
@@ -43,7 +43,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             renderer.AddMesh(mesh);
 
             cube2 = scene.addGameObject("Cube");
-            cube2.transform.Position = new System.Numerics.Vector3(10, -2, 0.6f);
+            cube2.transform.Position = new System.Numerics.Vector3(10, -2, 0f);
             MeshRenderer renderer1 = cube2.AddComponent<MeshRenderer>();
             StaticCollider rigidbody1 = cube2.AddComponent<StaticCollider>();
             renderer1.AddMesh(mesh);

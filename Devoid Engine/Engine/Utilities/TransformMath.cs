@@ -9,6 +9,11 @@ namespace DevoidEngine.Engine.Utilities
 {
     public static class TransformMath
     {
+        public static Vector3 DegToRad(Vector3 deg)
+        {
+            return new Vector3(MathHelper.DegToRad(deg.X), MathHelper.DegToRad(deg.Y), MathHelper.DegToRad(deg.Z));
+        }
+
         public static Quaternion EulerToQuaternion(Vector3 eulerDegrees)
         {
             Vector3 radians = eulerDegrees * (MathF.PI / 180f);

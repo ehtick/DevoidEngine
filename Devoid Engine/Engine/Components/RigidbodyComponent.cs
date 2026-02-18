@@ -54,7 +54,7 @@ namespace DevoidEngine.Engine.Components
             var desc = new PhysicsBodyDescription
             {
                 Position = gameObject.transform.Position,
-                Rotation = TransformMath.EulerToQuaternion(gameObject.transform.Rotation),
+                Rotation = gameObject.transform.Rotation,
                 Mass = Mass,
                 IsKinematic = StartKinematic,
                 Shape = Shape,
@@ -73,8 +73,7 @@ namespace DevoidEngine.Engine.Components
             if (InternalBody.IsKinematic)
             {
                 InternalBody.Position = gameObject.transform.Position;
-                InternalBody.Rotation =
-                    TransformMath.EulerToQuaternion(gameObject.transform.Rotation);
+                InternalBody.Rotation = gameObject.transform.Rotation;
             }
         }
 
@@ -87,8 +86,8 @@ namespace DevoidEngine.Engine.Components
             if (!InternalBody.IsKinematic)
             {
                 gameObject.transform.Position = InternalBody.Position;
-                gameObject.transform.Rotation =
-                    TransformMath.QuaternionToEuler(InternalBody.Rotation);
+                gameObject.transform.Rotation = InternalBody.Rotation;
+                    
             }
         }
 

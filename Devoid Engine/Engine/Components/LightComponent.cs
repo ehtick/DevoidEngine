@@ -108,8 +108,13 @@ namespace DevoidEngine.Engine.Components
         private void RebuildGPUData()
         {
             var transform = gameObject.transform;
+
             Vector3 position = transform.Position;
-            Vector3 forward = Vector3.Normalize(transform.Rotation);
+
+            // Compute forward direction from quaternion
+            Vector3 forward = Vector3.Normalize(
+                Vector3.Transform(-Vector3.UnitZ, transform.Rotation)
+            );
 
             switch (lightType)
             {
@@ -139,6 +144,7 @@ namespace DevoidEngine.Engine.Components
 
             dirty = false;
         }
+
 
         // Called during render collection phase
         public void Collect(CameraComponent3D camera, CameraRenderContext ctx)

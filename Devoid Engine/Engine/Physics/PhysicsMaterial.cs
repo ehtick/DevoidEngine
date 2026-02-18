@@ -16,9 +16,9 @@ namespace DevoidEngine.Engine.Physics
         public static PhysicsMaterial Default => new PhysicsMaterial
         {
             Friction = 0.5f,
-            Restitution = 0.1f,
-            LinearDamping = 1f,
-            AngularDamping = 3f
+            Restitution = 1f,
+            LinearDamping = 0.01f,
+            AngularDamping = 0.01f
         };
     }
 

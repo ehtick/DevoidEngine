@@ -162,12 +162,10 @@ namespace DevoidEngine.Engine.Rendering
             _meshRenderDataBuffer.SetData(_meshRenderData);
         }
 
-        public static Matrix4x4 BuildModel(Vector3 pos, Vector3 scale, Vector3 rot)
+        public static Matrix4x4 BuildModel(Vector3 pos, Vector3 scale, Quaternion rot)
         {
             return
-                Matrix4x4.CreateRotationX(rot.X) *
-                Matrix4x4.CreateRotationY(rot.Y) *
-                Matrix4x4.CreateRotationZ(rot.Z) *
+                Matrix4x4.CreateFromQuaternion(rot) *
                 Matrix4x4.CreateScale(scale) *
                 Matrix4x4.CreateTranslation(pos);
         }

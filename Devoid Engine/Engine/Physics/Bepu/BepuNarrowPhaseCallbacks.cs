@@ -4,6 +4,7 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
 using BepuUtilities;
 using System.Numerics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DevoidEngine.Engine.Physics.Bepu
 {
@@ -35,14 +36,35 @@ namespace DevoidEngine.Engine.Physics.Bepu
             var matA = MaterialLookup(pair.A);
             var matB = MaterialLookup(pair.B);
 
+            float friction = (matA.Friction + matB.Friction) * 0.5f;
             float restitution = (matA.Restitution + matB.Restitution) * 0.5f;
+
+            float frequency = 30f;
+            float dampingRatio = 2f;
+
+            float angularFrequency = 2f * MathF.PI * frequency;
+            float twiceDampingRatio = 2f * dampingRatio;
+
+            var spring = new SpringSettings(angularFrequency, twiceDampingRatio);
+
 
             pairMaterial = new PairMaterialProperties
             {
-                FrictionCoefficient = (matA.Friction + matB.Friction) * 0.5f,
-                MaximumRecoveryVelocity = 0.9f,
-                SpringSettings = new SpringSettings(30, 1)
+                FrictionCoefficient = friction,
+                MaximumRecoveryVelocity = 3f,
+                SpringSettings = spring
             };
+
+            // Enable restitution
+            if (restitution > 0f)
+            {
+                pairMaterial.SpringSettings = spring;
+                pairMaterial.MaximumRecoveryVelocity = MathF.Max(
+                    pairMaterial.MaximumRecoveryVelocity,
+                    restitution * 10f
+                );
+            }
+
 
 
             return true;
