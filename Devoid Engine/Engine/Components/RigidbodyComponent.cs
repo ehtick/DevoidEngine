@@ -162,7 +162,7 @@ namespace DevoidEngine.Engine.Components
         public void AddForce(Vector3 force)
         {
             if (internalBody != null)
-                internalBody.AddForce(force, gameObject.Scene.Physics.FixedDeltaTime);
+                internalBody.AddForce(force, gameObject.Scene.fixedDeltaTime);
         }
 
         public void AddTorque(Vector3 torque)

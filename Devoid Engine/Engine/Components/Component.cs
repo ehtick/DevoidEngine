@@ -12,6 +12,7 @@ namespace DevoidEngine.Engine.Components
         public virtual void OnStart() { }
         public virtual void OnUpdate(float dt) { }
         public virtual void OnLateUpdate(float dt) { }
+        public virtual void OnFixedUpdate(float dt) { }
         public virtual void OnRender(float dt) { }
 
         public virtual void OnDestroy() { }

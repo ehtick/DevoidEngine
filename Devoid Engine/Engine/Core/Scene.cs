@@ -11,6 +11,7 @@ namespace DevoidEngine.Engine.Core
         public string Name = "Base Scene";
         public Guid Id = Guid.NewGuid();
 
+
         public List<GameObject> GameObjects { get; set; }
 
         public List<CameraComponent3D> Cameras;
@@ -22,6 +23,10 @@ namespace DevoidEngine.Engine.Core
 
         public event Action<Component>? OnComponentAdded;
         public event Action<Component>? OnComponentRemoved;
+
+
+        public  float fixedDeltaTime = 1f / 165f;
+        private float accumulator = 0f;
 
         public Scene()
         {
@@ -196,12 +201,29 @@ namespace DevoidEngine.Engine.Core
                 GameObjects[i].OnUpdate(dt);
             }
 
-            Physics.Step(dt);
+            DoFixedUpdate(dt);
 
 
             for (int i = 0; i < GameObjects.Count; i++)
             {
                 GameObjects[i].OnLateUpdate(dt);
+            }
+        }
+
+        public void DoFixedUpdate(float dt)
+        {
+            accumulator += dt;
+
+            while (accumulator >= fixedDeltaTime)
+            {
+                for (int i = 0; i < GameObjects.Count; i++)
+                {
+                    GameObjects[i].OnFixedUpdate(fixedDeltaTime);
+                }
+
+                Physics.Step(fixedDeltaTime);
+
+                accumulator -= fixedDeltaTime;
             }
         }
 

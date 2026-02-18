@@ -7,10 +7,6 @@ namespace DevoidEngine.Engine.Physics
     {
         private readonly IPhysicsBackend backend;
 
-        private float accumulator = 0f;
-
-        public float FixedDeltaTime { get; } = 1f / 60f;
-
         public PhysicsSystem(IPhysicsBackend backend)
         {
             this.backend = backend;
@@ -19,13 +15,7 @@ namespace DevoidEngine.Engine.Physics
 
         public void Step(float frameDelta)
         {
-            accumulator += frameDelta;
-
-            while (accumulator >= FixedDeltaTime)
-            {
-                backend.Step(FixedDeltaTime);
-                accumulator -= FixedDeltaTime;
-            }
+            backend.Step(frameDelta);
         }
 
         public bool Raycast(Ray ray, float maxDistance, out RaycastHit hit)
