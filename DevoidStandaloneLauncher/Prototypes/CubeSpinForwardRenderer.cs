@@ -48,10 +48,10 @@ namespace DevoidStandaloneLauncher.Prototypes
             // FPS CONTROLLER
             // ===============================
 
-            var fps = player.AddComponent<FPSController>();
-            fps.MoveSpeed = 20f;
-            fps.JumpForce = 100f;
-            fps.MouseSensitivity = 0.15f;
+            //var fps = player.AddComponent<FPSController>();
+            //fps.MoveSpeed = 20f;
+            //fps.JumpForce = 100f;
+            //fps.MouseSensitivity = 0.15f;
 
             // ===============================
             // CAMERA PIVOT (Pitch Only)
@@ -67,12 +67,12 @@ namespace DevoidStandaloneLauncher.Prototypes
             // CAMERA
             // ===============================
 
-            camera = scene.addGameObject("Camera");
-            camera.SetParent(player, false);
-            //camera.transform.LocalPosition = new Vector3(0, 2, -20);
+            //camera = scene.addGameObject("Camera");
+            //camera.SetParent(player, false);
+            ////camera.transform.LocalPosition = new Vector3(0, 2, -20);
 
-            var camComponent = camera.AddComponent<CameraComponent3D>();
-            camComponent.IsDefault = true;
+            //var camComponent = camera.AddComponent<CameraComponent3D>();
+            //camComponent.IsDefault = true;
 
             // ===============================
             // LIGHT
@@ -106,6 +106,14 @@ namespace DevoidStandaloneLauncher.Prototypes
             {
                 Friction = 1f
             };
+
+            GameObject camera = scene.addGameObject("Camera");
+            camera.transform.LocalPosition = new Vector3(0, 10, -20);
+            var camComponent = camera.AddComponent<CameraComponent3D>();
+            camComponent.IsDefault = true;
+
+            camera.AddComponent<FreeCameraComponent>();
+
         }
 
         public override void OnUpdate(float delta)

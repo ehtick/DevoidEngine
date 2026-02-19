@@ -58,7 +58,7 @@ namespace DevoidEngine.Engine.Core
             {
                 BackBufferWidth = appSpec.Width,
                 BackBufferHeight = appSpec.Height,
-                RefreshRate = 60,
+                RefreshRate = 165,
                 VSync = appSpec.forceVsync,
                 BufferCount = 2,
                 ColorFormat = TextureFormat.RGBA8_UNorm,
@@ -105,14 +105,11 @@ namespace DevoidEngine.Engine.Core
         private void OnMouseMove(OpenTK.Windowing.Common.MouseMoveEventArgs obj)
         {
             LayerHandler.OnMouseMoveEvent(obj);
-            InternalInputState.SetMousePosition(TypeHelper.ToNumerics2(obj.Position));
-            InternalInputState.SetMouseDelta(TypeHelper.ToNumerics2(obj.Delta));
         }
 
         private void OnMouseWheel(OpenTK.Windowing.Common.MouseWheelEventArgs obj)
         {
             LayerHandler.OnMouseWheelEvent(obj);
-            InternalInputState.SetMouseScroll(TypeHelper.ToNumerics2(obj.Offset));
         }
 
         private void OnMouseLeave()
@@ -128,7 +125,6 @@ namespace DevoidEngine.Engine.Core
         private void OnMouseInput(OpenTK.Windowing.Common.MouseButtonEventArgs obj)
         {
             LayerHandler.OnMouseButtonEvent(obj);
-            InternalInputState.SetMouseButton((int)(obj.Button), obj.IsPressed);
         }
 
         private void OnTextInput(OpenTK.Windowing.Common.TextInputEventArgs obj)

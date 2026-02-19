@@ -111,6 +111,8 @@ namespace DevoidEngine.Engine.Core
         /// </summary>
         public static void Update()
         {
+
+
             // Pull atomic deltas
             float dx = Interlocked.Exchange(ref _rawMouseDeltaX, 0f);
             float dy = Interlocked.Exchange(ref _rawMouseDeltaY, 0f);

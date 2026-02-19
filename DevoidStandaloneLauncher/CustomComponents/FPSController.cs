@@ -44,11 +44,6 @@ namespace DevoidEngine.Engine.Components
         // VARIABLE RATE (INPUT SAMPLING ONLY)
         public override void OnUpdate(float dt)
         {
-            Vector2 mouseDelta = Input.MouseDelta;
-            if (mouseDelta.Y != 0)
-            {
-                Console.WriteLine($"[Input] DeltaX: {mouseDelta.X}");
-            }
 
             if (rb == null) return;
 
