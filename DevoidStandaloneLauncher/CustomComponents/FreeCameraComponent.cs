@@ -28,7 +28,7 @@ namespace DevoidEngine.Engine.Components
             pitch = euler.X;
         }
 
-        public override void OnUpdate(float dt)
+        public override void OnRender(float dt)
         {
             HandleMouseLook(dt);
             HandleMovement(dt);

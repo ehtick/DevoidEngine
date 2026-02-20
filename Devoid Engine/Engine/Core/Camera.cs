@@ -63,8 +63,8 @@ namespace DevoidEngine.Engine.Core
         {
             Position = position;
             Front = Vector3.Normalize(front);
-            Right = Vector3.Normalize(Vector3.Cross(Front, Vector3.UnitY));
             Up = Vector3.Normalize(up);
+            Right = Vector3.Normalize(Vector3.Cross(Front, Up));
 
             _viewMatrix = Matrix4x4.CreateLookAt(Position, Position + Front, Up);
 
