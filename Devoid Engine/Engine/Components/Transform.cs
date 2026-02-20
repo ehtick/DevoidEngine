@@ -111,6 +111,7 @@ namespace DevoidEngine.Engine.Components
         {
             dirty = true;
             hasMoved = true;
+            RecalculateWorldMatrix();
 
             foreach (var child in children)
                 child.MarkDirty();

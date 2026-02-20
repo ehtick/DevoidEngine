@@ -90,11 +90,12 @@ namespace DevoidEngine.Engine.Core
 
         public void RunAll()
         {
-            const double updateHz = 60.0;
+            const double updateHz = 144.0;
             const double renderHz = 60.0;
 
             double updateStep = 1.0 / updateHz;
             double renderStep = 1.0 / renderHz;
+            double fixedUpdateStep = 1.0 / updateHz;
 
             foreach (var wrs in windows)
                 wrs.window.Load();
@@ -108,35 +109,34 @@ namespace DevoidEngine.Engine.Core
             // ---------------- UPDATE THREAD ----------------
             Thread updateThread = new Thread(() =>
             {
+                double lastTime = globalTimer.Elapsed.TotalSeconds;
+                double fixedAccumulator = 0.0;
+
                 while (_running)
                 {
                     double now = globalTimer.Elapsed.TotalSeconds;
-                    double frameTime = now - lastUpdateTime;
-                    lastUpdateTime = now;
+                    double dt = now - lastTime;
+                    lastTime = now;
 
-                    updateAccumulator += frameTime;
+                    // ---- VARIABLE UPDATE ----
+                    for (int i = 0; i < windows.Count; i++)
+                    {
+                        windows[i].window.Update(dt);
+                    }
 
-                    // Proper catch-up loop
-                    while (updateAccumulator >= updateStep)
+                    // ---- FIXED UPDATE ----
+                    fixedAccumulator += dt;
+
+                    while (fixedAccumulator >= fixedUpdateStep)
                     {
                         for (int i = 0; i < windows.Count; i++)
                         {
-                            var wrs = windows[i];
-
-                            wrs.window.Update(updateStep);
-
-                            wrs.fixedAccumulator += updateStep;
-                            while (wrs.fixedAccumulator >= updateStep)
-                            {
-                                wrs.window.FixedUpdate(updateStep);
-                                wrs.fixedAccumulator -= updateStep;
-                            }
+                            windows[i].window.FixedUpdate(fixedUpdateStep);
                         }
 
-                        updateAccumulator -= updateStep;
+                        fixedAccumulator -= fixedUpdateStep;
                     }
 
-                    // Light yield to avoid 100% CPU
                     Thread.Sleep(0);
                 }
             })
@@ -149,45 +149,35 @@ namespace DevoidEngine.Engine.Core
 
             // ---------------- RENDER / EVENT THREAD ----------------
             double lastRenderTime = globalTimer.Elapsed.TotalSeconds;
-            double nextRenderTime = lastRenderTime;
 
             while (_running && windows.Count > 0)
             {
-                double now = globalTimer.Elapsed.TotalSeconds;
+                double frameStart = globalTimer.Elapsed.TotalSeconds;
+                double dt = frameStart - lastRenderTime;
+                lastRenderTime = frameStart;
 
-                if (now >= nextRenderTime)
+                for (int i = windows.Count - 1; i >= 0; i--)
                 {
-                    double delta = now - lastRenderTime;
-                    lastRenderTime = now;
+                    var wrs = windows[i];
 
-                    for (int i = windows.Count - 1; i >= 0; i--)
+                    wrs.window.ProcessEvents();
+
+                    if (wrs.window.IsExiting)
                     {
-                        var wrs = windows[i];
-
-                        wrs.window.ProcessEvents();
-
-                        if (wrs.window.IsExiting)
-                        {
-                            wrs.window.Close();
-                            windows.RemoveAt(i);
-                            continue;
-                        }
-
-                        wrs.window.Render(delta);
+                        wrs.window.Close();
+                        windows.RemoveAt(i);
+                        continue;
                     }
 
-                    nextRenderTime += renderStep;
+                    wrs.window.Render(dt);
                 }
-                else
-                {
-                    double sleepTime = nextRenderTime - now;
 
-                    // Hybrid sleep for precision
-                    if (sleepTime > 0.002)
-                        Thread.Sleep(1);
-                    else
-                        Thread.SpinWait(50);
-                }
+                double frameEnd = globalTimer.Elapsed.TotalSeconds;
+                double frameDuration = frameEnd - frameStart;
+                double sleepTime = renderStep - frameDuration;
+
+                if (sleepTime > 0)
+                    Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
 
                 _running = windows.Count > 0;
             }

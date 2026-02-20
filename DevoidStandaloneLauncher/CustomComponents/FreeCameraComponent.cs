@@ -12,7 +12,7 @@ namespace DevoidEngine.Engine.Components
         // ===== SETTINGS =====
         public float MoveSpeed = 8f;
         public float BoostMultiplier = 3f;
-        public float MouseSensitivity = 0.05f;
+        public float MouseSensitivity = 4f;
         public float MinPitch = -89f;
         public float MaxPitch = 89f;
 
@@ -32,20 +32,26 @@ namespace DevoidEngine.Engine.Components
         {
             HandleMouseLook(dt);
             HandleMovement(dt);
+            Console.WriteLine(dt);
         }
 
+
+        float time = 0;
         // =========================================
         // Mouse Look
         // =========================================
         private void HandleMouseLook(float dt)
         {
-            yaw += Input.MouseDelta.X; // or just dt from OnUpdate
-            pitch += Input.MouseDelta.Y;
+            time += dt;
+            yaw += MathF.Sin((float)time * 20f) * 0.5f;
+            //yaw -= Input.MouseDelta.X * dt * MouseSensitivity;
+            pitch = 0;
+            //pitch = MathF.Sin((float)time * 20f) * 0.5f;
 
             Quaternion rotation =
                 Quaternion.CreateFromYawPitchRoll(
-                    MathHelper.DegToRad(0),
                     MathHelper.DegToRad(yaw),
+                    MathHelper.DegToRad(pitch),
                     0f);
 
             gameObject.transform.Rotation = rotation;
