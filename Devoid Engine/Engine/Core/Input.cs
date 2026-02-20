@@ -5,6 +5,9 @@ namespace DevoidEngine.Engine.Core
 {
     public static class Input
     {
+private static InputSnapshot _snapshotFront = new();
+private static InputSnapshot _snapshotBack = new();
+
         // ===============================
         // RAW THREAD-SAFE ACCUMULATORS
         // (Written by Render Thread)
@@ -111,61 +114,39 @@ namespace DevoidEngine.Engine.Core
         /// </summary>
         public static void Update()
         {
+            var snap = _snapshotFront;
 
+            MouseDelta = snap.MouseDelta;
+            MouseScrollDelta = snap.MouseScroll;
 
-            // Pull atomic deltas
-            float dx = Interlocked.Exchange(ref _rawMouseDeltaX, 0f);
-            float dy = Interlocked.Exchange(ref _rawMouseDeltaY, 0f);
-            MouseDelta = new Vector2(dx, dy);
+            keysDown.Clear();
+            foreach (var k in snap.Keys)
+                keysDown.Add(k);
 
-            float sx = Interlocked.Exchange(ref _rawScrollX, 0f);
-            float sy = Interlocked.Exchange(ref _rawScrollY, 0f);
-            MouseScrollDelta = new Vector2(sx, sy);
+            mouseDown.Clear();
+            foreach (var m in snap.Mouse)
+                mouseDown.Add(m);
+        }
 
-            // Update key states
+        public static void Publish()
+        {
+            _snapshotBack.MouseDelta = new Vector2(
+                Interlocked.Exchange(ref _rawMouseDeltaX, 0f),
+                Interlocked.Exchange(ref _rawMouseDeltaY, 0f));
+
+            _snapshotBack.MouseScroll = new Vector2(
+                Interlocked.Exchange(ref _rawScrollX, 0f),
+                Interlocked.Exchange(ref _rawScrollY, 0f));
+
             lock (_lock)
             {
-                keysPressedThisFrame.Clear();
-                keysReleasedThisFrame.Clear();
-
-                // Check newly pressed
-                foreach (var key in _rawKeysDown)
-                {
-                    if (!keysDown.Contains(key))
-                        keysPressedThisFrame.Add(key);
-                }
-
-                // Check released
-                foreach (var key in keysDown)
-                {
-                    if (!_rawKeysDown.Contains(key))
-                        keysReleasedThisFrame.Add(key);
-                }
-
-                keysDown.Clear();
-                foreach (var key in _rawKeysDown)
-                    keysDown.Add(key);
-
-                // Same for mouse
-                mousePressedThisFrame.Clear();
-                mouseReleasedThisFrame.Clear();
-
-                foreach (var btn in _rawMouseDown)
-                {
-                    if (!mouseDown.Contains(btn))
-                        mousePressedThisFrame.Add(btn);
-                }
-
-                foreach (var btn in mouseDown)
-                {
-                    if (!_rawMouseDown.Contains(btn))
-                        mouseReleasedThisFrame.Add(btn);
-                }
-
-                mouseDown.Clear();
-                foreach (var btn in _rawMouseDown)
-                    mouseDown.Add(btn);
+                _snapshotBack.Keys = new HashSet<Keys>(_rawKeysDown);
+                _snapshotBack.Mouse = new HashSet<MouseButton>(_rawMouseDown);
             }
+
+            var temp = _snapshotFront;
+            _snapshotFront = _snapshotBack;
+            _snapshotBack = temp;
         }
 
         // ===============================

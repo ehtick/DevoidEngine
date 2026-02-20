@@ -20,8 +20,6 @@ namespace DevoidStandaloneLauncher
 
         public override void OnUpdate(float deltaTime)
         {
-            // 🔥 Pull accumulated input FIRST (update thread)
-            Input.Update();
 
             // Game logic uses stable snapshot
             gamePrototype.OnUpdate(deltaTime);

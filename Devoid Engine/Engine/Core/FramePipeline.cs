@@ -44,25 +44,22 @@ namespace DevoidEngine.Engine.Core
             Scene scene = SceneManager.MainScene;
             var cameras = scene.GetComponentsOfType<CameraComponent3D>();
 
-            // 2. Ensure the Back buffer has enough pre-allocated contexts
-            while (backList.Count < cameras.Count)
-            {
-                backList.Add(new CameraRenderContext());
-            }
+            // CRITICAL FIX
+            backList.Clear();
 
             for (int i = 0; i < cameras.Count; i++)
             {
                 var cameraComponent = cameras[i];
 
-                // 3. Reuse the existing context inside the back buffer
-                CameraRenderContext ctx = backList[i];
-                ctx.Clear();
+                CameraRenderContext ctx = new CameraRenderContext();
                 ctx.cameraData = cameraComponent.Camera.GetCameraData();
 
                 foreach (var renderable in scene.Renderables)
                 {
                     renderable.Collect(cameraComponent, ctx);
                 }
+
+                backList.Add(ctx);
             }
 
             SwapBuffer.Publish();

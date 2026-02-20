@@ -177,11 +177,12 @@ namespace DevoidEngine.Engine.Core
             graphicsDevice.MainSurface.Present();
 
             RenderThreadDispatcher.ExecutePending();
+
+            Console.WriteLine($"RENDER dt: {deltaTime}");
         }
 
         private void OnUpdateFrame(double deltaTime)
         {
-
             ImGuiRenderer.UpdateInput();
 
             LayerHandler.UpdateLayers((float)deltaTime);
@@ -192,6 +193,7 @@ namespace DevoidEngine.Engine.Core
 
             UpdateThreadDispatcher.ExecutePending();
 
+            Console.WriteLine($"UPDATE dt: {deltaTime}");
         }
 
     }
