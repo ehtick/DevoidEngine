@@ -12,6 +12,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
     internal struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     {
         public Func<CollidableReference, PhysicsMaterial> MaterialLookup;
+        public BepuPhysicsBackend Backend;
 
         public void Initialize(Simulation simulation)
         {
@@ -79,6 +80,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
             int childIndexB,
             ref ConvexContactManifold manifold)
         {
+            Console.WriteLine("Hey");
+            Backend.ReportCollision(pair.A, pair.B);
             return true;
         }
     }

@@ -19,5 +19,7 @@ namespace DevoidEngine.Engine.Physics
         void RemoveBody(IPhysicsBody body);
 
         bool Raycast(Ray ray, float maxDistance, out RaycastHit hit);
+
+        event Action<IPhysicsBody, IPhysicsBody> CollisionDetected;
     }
 }

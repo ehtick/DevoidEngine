@@ -16,6 +16,7 @@ namespace DevoidEngine.Engine.Core
         private volatile bool _running = true;
 
         public static WindowManager Instance { get; } = new WindowManager();
+        public bool useVsyncLimiter = false;
 
         public void RegisterWindow(Window window)
         {
@@ -154,40 +155,71 @@ namespace DevoidEngine.Engine.Core
 
             int frameCounter = 0;
             double fpsTimer = 0;
-
-            while (_running && windows.Count > 0)
+            while (_running)
             {
-                double now = globalTimer.Elapsed.TotalSeconds;
-                double dt = now - lastRenderTime;
-                lastRenderTime = now;
+                if (windows.Count == 0)
+                    break;
+
+                double frameStart = globalTimer.Elapsed.TotalSeconds;
+
+                double dt = frameStart - lastRenderTime;
+                lastRenderTime = frameStart;
+
+                if (dt > 0.25)
+                    dt = 0.25;
 
                 frameCounter++;
                 fpsTimer += dt;
 
                 if (fpsTimer >= 1.0)
                 {
-                    //Console.WriteLine($"FPS: {frameCounter}");
+                    // Console.WriteLine($"FPS: {frameCounter}");
                     frameCounter = 0;
-                    fpsTimer = 0;
+                    fpsTimer -= 1.0;
                 }
 
                 for (int i = windows.Count - 1; i >= 0; i--)
                 {
                     var wrs = windows[i];
+                    var window = wrs.window;
 
-                    wrs.window.ProcessEvents();
+                    window.ProcessEvents();
 
-                    if (wrs.window.IsExiting)
+                    if (window.IsExiting)
                     {
-                        wrs.window.Close();
+                        window.Close();
                         windows.RemoveAt(i);
                         continue;
                     }
 
-                    wrs.window.Render(dt); // Present(1) happens inside this
+                    window.Render(dt); // Present(1) or Present(0)
                 }
 
                 _running = windows.Count > 0;
+
+                // --------- MANUAL FRAME CAP (ONLY IF VSYNC OFF) ---------
+                if (!useVsyncLimiter)
+                {
+                    double frameEnd = globalTimer.Elapsed.TotalSeconds;
+                    double elapsed = frameEnd - frameStart;
+
+                    double remaining = renderStep - elapsed;
+
+                    if (remaining > 0)
+                    {
+                        // Sleep most of it
+                        if (remaining > 0.002) // 2ms threshold
+                        {
+                            Thread.Sleep((int)((remaining - 0.001) * 1000));
+                        }
+
+                        // Spin-wait the last ~1ms for precision
+                        while (globalTimer.Elapsed.TotalSeconds - frameStart < renderStep)
+                        {
+                            Thread.SpinWait(10);
+                        }
+                    }
+                }
             }
             _running = false; 
             updateThread.Join();

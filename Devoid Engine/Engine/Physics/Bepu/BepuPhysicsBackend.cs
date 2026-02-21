@@ -20,6 +20,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
         private Dictionary<BodyHandle, PhysicsMaterial> bodyMaterials = new Dictionary<BodyHandle, PhysicsMaterial>();
         private Dictionary<StaticHandle, PhysicsMaterial> staticMaterials = new Dictionary<StaticHandle, PhysicsMaterial>();
 
+        public event Action<IPhysicsBody, IPhysicsBody> CollisionDetected;
 
         public void Initialize()
         {
@@ -27,7 +28,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
             var callbacks = new BepuNarrowPhaseCallbacks
             {
-                MaterialLookup = LookupMaterial
+                MaterialLookup = LookupMaterial,
+                Backend = this
             };
 
             simulation = Simulation.Create(
@@ -37,6 +39,25 @@ namespace DevoidEngine.Engine.Physics.Bepu
                 new SolveDescription(8, 10),
                 new DefaultTimestepper()
             );
+        }
+
+        internal void ReportCollision(CollidableReference a, CollidableReference b)
+        {
+            if (a.Mobility == CollidableMobility.Dynamic &&
+                b.Mobility == CollidableMobility.Dynamic)
+            {
+                if (bodyToGameObject.TryGetValue(a.BodyHandle, out var goA) &&
+                    bodyToGameObject.TryGetValue(b.BodyHandle, out var goB))
+                {
+                    var bodyA = simulation.Bodies.GetBodyReference(a.BodyHandle);
+                    var bodyB = simulation.Bodies.GetBodyReference(b.BodyHandle);
+
+                    var wrapperA = new BepuPhysicsBody(a.BodyHandle, simulation, bodyMaterials[a.BodyHandle], this);
+                    var wrapperB = new BepuPhysicsBody(b.BodyHandle, simulation, bodyMaterials[b.BodyHandle], this);
+
+                    CollisionDetected?.Invoke(wrapperA, wrapperB);
+                }
+            }
         }
 
         public void Step(float deltaTime)

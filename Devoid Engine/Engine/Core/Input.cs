@@ -133,9 +133,42 @@ namespace DevoidEngine.Engine.Core
             foreach (var k in snap.Keys)
                 keysDown.Add(k);
 
+            // BEFORE clearing pressed/released
+            keysPressedThisFrame.Clear();
+            keysReleasedThisFrame.Clear();
+
+            // Detect transitions
+            foreach (var key in keysDown)
+            {
+                if (!_snapshotBack.Keys.Contains(key))
+                    keysPressedThisFrame.Add(key);
+            }
+
+            foreach (var key in _snapshotBack.Keys)
+            {
+                if (!keysDown.Contains(key))
+                    keysReleasedThisFrame.Add(key);
+            }
+
+            mousePressedThisFrame.Clear();
+            mouseReleasedThisFrame.Clear();
+
             mouseDown.Clear();
             foreach (var m in snap.Mouse)
                 mouseDown.Add(m);
+
+            // Detect mouse transitions
+            foreach (var m in mouseDown)
+            {
+                if (!_snapshotBack.Mouse.Contains(m))
+                    mousePressedThisFrame.Add(m);
+            }
+
+            foreach (var m in _snapshotBack.Mouse)
+            {
+                if (!mouseDown.Contains(m))
+                    mouseReleasedThisFrame.Add(m);
+            }
         }
 
         public static void Publish()

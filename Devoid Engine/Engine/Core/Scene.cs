@@ -57,6 +57,18 @@ namespace DevoidEngine.Engine.Core
             GameObjects.Add(gameObject);
         }
 
+        public GameObject GetGameObject(string name)
+        {
+            for (int i = 0; i < GameObjects.Count; i++)
+            {
+                if (GameObjects[i].Name == name)
+                {
+                    return GameObjects[i];
+                }
+            }
+            return null;
+        }
+
         public T GetComponent<T>() where T : Component, new()
         {
             for (int i = 0; i < GameObjects.Count; i++)
@@ -254,7 +266,6 @@ namespace DevoidEngine.Engine.Core
             if (component is IRenderComponent)
             {
                 Renderables.Add((IRenderComponent)component);
-                Console.WriteLine("[Scene]: Added " + component.Type + " as Renderable.");
             }
 
             if (IsPlaying)

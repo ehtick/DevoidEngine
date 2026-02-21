@@ -10,139 +10,272 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(FPSController);
 
+        // ===============================
+        // Inspector Fields (Unity-style)
+        // ===============================
+
         public float MoveSpeed = 6f;
-        public float JumpForce = 1000f;
-        public float MouseSensitivity = 0.15f;
+        public float Acceleration = 20f;
+        public float AirControl = 0.3f;
+        public float JumpForce = 10f;
+        public float MouseSensitivity = 0.12f;
         public float MinPitch = -89f;
         public float MaxPitch = 89f;
-        public float GroundCheckDistance = 0.2f;
+        public float GroundCheckDistance = 5f;
+
+        // ===============================
+        // Shooting
+        // ===============================
+
+        public float FireRate = 0.05f;
+        public float ProjectileSpeed = 40f;
+        public float ProjectileMass = 0.2f;
+        public Vector3 ProjectileScale = new Vector3(0.2f);
+
+        private float fireTimer = 0f;
+        private Mesh projectileMesh;
+
+        // ===============================
+        // Internal
+        // ===============================
 
         private RigidBodyComponent rb;
         private Transform cameraPivot;
 
-        private float yaw = 0f;
-        private float pitch = 0f;
+        private float yaw;
+        private float pitch;
 
-        private Vector2 storedMouseDelta = Vector2.Zero;
-        private Vector2 storedMoveInput = Vector2.Zero;
-        private bool jumpRequested = false;
+        private Vector2 moveInput;
+        private Vector2 mouseDelta;
+        private bool jumpRequested;
+
+        // ===============================
+        // Setup
+        // ===============================
 
         public override void OnStart()
         {
-            rb = gameObject.GetComponent<RigidBodyComponent>();
-            if (rb == null) return;
+            projectileMesh = new Mesh();
+            projectileMesh.SetVertices(Primitives.GetCubeVertex());
 
-            // Physics should NOT rotate the body
+            rb = gameObject.GetComponent<RigidBodyComponent>();
+            if (rb == null)
+                return;
+
+            // Freeze physics rotation (we rotate manually)
             rb.FreezeRotationX = true;
             rb.FreezeRotationY = true;
             rb.FreezeRotationZ = true;
 
+            // First child = camera pivot (Unity-style hierarchy)
             if (gameObject.children.Count > 0)
                 cameraPivot = gameObject.children[0].transform;
+
+            // Initialize yaw from current rotation
+            yaw = MathHelper.RadToDeg(
+                MathF.Atan2(
+                    gameObject.transform.Forward.X,
+                    gameObject.transform.Forward.Z
+                )
+            );
         }
 
-        // VARIABLE RATE (INPUT SAMPLING ONLY)
+        // ===============================
+        // Variable Update (INPUT ONLY)
+        // ===============================
+
         public override void OnUpdate(float dt)
         {
-
             if (rb == null) return;
 
-            storedMoveInput = Input.MoveAxis;
-
-            // 🔥 ACCUMULATE instead of overwrite
-            storedMouseDelta += Input.MouseDelta;
+            moveInput = Input.MoveAxis;
+            mouseDelta += Input.MouseDelta;
 
             if (Input.JumpPressed)
+            {
                 jumpRequested = true;
+            }
+
+            fireTimer -= dt;
+
+            if (Input.GetMouseDown(MouseButton.Left))
+            {
+                TryShoot();
+            }
+        }
+        private void TryShoot()
+        {
+            if (fireTimer > 0f)
+                return;
+
+            fireTimer = FireRate;
+
+            // Spawn position = camera world position
+            Vector3 spawnPosition = cameraPivot != null
+                ? cameraPivot.Position
+                : gameObject.transform.Position;
+
+            // Direction = camera forward
+            Quaternion rotation = cameraPivot != null
+                ? cameraPivot.Rotation
+                : rb.Rotation;
+
+            Vector3 forward = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitZ, rotation)
+            );
+
+            // Create projectile object
+            GameObject bullet = gameObject.Scene.addGameObject("Projectile");
+
+            bullet.transform.Position = spawnPosition + forward * 0.6f;
+            bullet.transform.Scale = ProjectileScale;
+
+            // Render
+            var renderer = bullet.AddComponent<MeshRenderer>();
+            renderer.AddMesh(projectileMesh);
+
+            // Physics
+            var body = bullet.AddComponent<RigidBodyComponent>();
+            body.Shape = new PhysicsShapeDescription()
+            {
+                Type = PhysicsShapeType.Sphere,
+                Radius = ProjectileScale.Z,
+                
+                Size = ProjectileScale
+            };
+
+            body.Mass = ProjectileMass;
+            body.Material = new PhysicsMaterial()
+            {
+                Friction = 2f,
+                Restitution = 0.1f
+            };
+
+            // Shoot impulse
+            body.LinearVelocity = forward * ProjectileSpeed;
         }
 
+        // ===============================
+        // Fixed Update (Physics + Rotation)
+        // ===============================
 
-        // FIXED RATE (ALL TRANSFORM + PHYSICS)
         public override void OnFixedUpdate(float fixedDt)
         {
             if (rb == null) return;
 
-            ApplyRotation();     // 🔥 rotation now fixed-timestep
-            ApplyMovement();     // physics-safe movement
+            HandleRotation();
+            HandleMovement(fixedDt);
 
             jumpRequested = false;
         }
 
-        private void ApplyRotation()
+        // ===============================
+        // Mouse Look (Unity Style)
+        // ===============================
+
+        private void HandleRotation()
         {
-            // Apply accumulated mouse delta
-            yaw += storedMouseDelta.X * MouseSensitivity;
-            pitch -= storedMouseDelta.Y * MouseSensitivity;
+            yaw += mouseDelta.X * MouseSensitivity;
+            pitch -= mouseDelta.Y * MouseSensitivity;
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
-            // Apply horizontal rotation to player body
+            // Rotate body on Y axis
             Quaternion bodyRotation =
                 Quaternion.CreateFromAxisAngle(
-                    Vector3.UnitY,
+                    -Vector3.UnitY,
                     MathHelper.DegToRad(yaw)
                 );
 
             rb.Rotation = bodyRotation;
 
-            // Apply vertical rotation to camera pivot
+            // Rotate camera on X axis
             if (cameraPivot != null)
             {
                 cameraPivot.LocalRotation =
                     Quaternion.CreateFromAxisAngle(
-                        Vector3.UnitX,
+                        -Vector3.UnitX,
                         MathHelper.DegToRad(pitch)
                     );
             }
 
-            // IMPORTANT:
-            // Consume mouse delta so it is not applied twice
-            storedMouseDelta = Vector2.Zero;
+            mouseDelta = Vector2.Zero;
         }
 
-        private void ApplyMovement()
+        // ===============================
+        // Movement (CharacterBody Style)
+        // ===============================
+
+        private void HandleMovement(float fixedDt)
         {
-            Quaternion rotation = rb.Rotation;
+            Vector3 forward = Vector3.Transform(Vector3.UnitZ, rb.Rotation);
+            Vector3 right = Vector3.Transform(-Vector3.UnitX, rb.Rotation);
 
-            Vector3 forward =
-                Vector3.Normalize(Vector3.Transform(Vector3.UnitZ, rotation));
-
-            Vector3 right =
-                Vector3.Normalize(Vector3.Cross(forward, Vector3.UnitY));
-
+            // Flatten to ground plane
             forward.Y = 0;
             right.Y = 0;
 
-            Vector3 moveDir = forward * storedMoveInput.Y + right * storedMoveInput.X;
+            forward = Vector3.Normalize(forward);
+            right = Vector3.Normalize(right);
 
-            if (moveDir.LengthSquared() > 0)
-                moveDir = Vector3.Normalize(moveDir);
+            Vector3 desiredMove =
+                forward * moveInput.Y +
+                right * moveInput.X;
 
-            Vector3 velocity = rb.LinearVelocity;
+            if (desiredMove.LengthSquared() > 1f)
+                desiredMove = Vector3.Normalize(desiredMove);
 
-            float verticalVelocity = velocity.Y;
+            Vector3 currentVelocity = rb.LinearVelocity;
 
-            velocity = moveDir * MoveSpeed;
-            velocity.Y = verticalVelocity;
+            Vector3 horizontalVelocity =
+                new Vector3(currentVelocity.X, 0, currentVelocity.Z);
 
-            rb.LinearVelocity = velocity;
+            Vector3 targetVelocity =
+                desiredMove * MoveSpeed;
 
-            if (jumpRequested && IsGrounded())
+            bool grounded = IsGrounded();
+
+            float control = grounded ? 1f : AirControl;
+
+            horizontalVelocity = Vector3.Lerp(
+                horizontalVelocity,
+                targetVelocity,
+                Acceleration * control * fixedDt
+            );
+
+            rb.LinearVelocity = new Vector3(
+                horizontalVelocity.X,
+                currentVelocity.Y,
+                horizontalVelocity.Z
+            );
+
+            // Jump
+            if (jumpRequested && grounded)
             {
-                rb.AddImpulse(Vector3.UnitY * JumpForce);
+                rb.LinearVelocity = new Vector3(
+                    rb.LinearVelocity.X,
+                    JumpForce,
+                    rb.LinearVelocity.Z
+                );
             }
         }
 
+        // ===============================
+        // Ground Check
+        // ===============================
+
         private bool IsGrounded()
         {
-            Vector3 origin = gameObject.transform.Position + new Vector3(0, -1.4f, 0);
+            Vector3 origin = gameObject.transform.Position;
             Vector3 direction = -Vector3.UnitY;
 
-            return gameObject.Scene.Physics.Raycast(
+            bool val = gameObject.Scene.Physics.Raycast(
                 new Ray(origin, direction),
                 GroundCheckDistance,
                 out RaycastHit hit
             );
+
+            return val;
         }
     }
 }

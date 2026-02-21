@@ -69,6 +69,7 @@ namespace DevoidEngine.Engine.Core
 
 
             windowManager = new WindowManager();
+            windowManager.useVsyncLimiter = AppSpec.forceVsync;
             MainWindow = new Window(windowSpecification);
 
             Screen.Size = new System.Numerics.Vector2(appSpec.Width, appSpec.Height);

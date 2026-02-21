@@ -50,7 +50,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             var fps = player.AddComponent<FPSController>();
             fps.MoveSpeed = 20f;
-            fps.JumpForce = 100f;
+            fps.JumpForce = 5;
             fps.MouseSensitivity = 0.15f;
 
             // ===============================
@@ -82,7 +82,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             var lightComponent = light.AddComponent<LightComponent>();
             lightComponent.Intensity = 100;
             lightComponent.Color = new Vector4(1, 1, 1, 1);
-            light.transform.Position = new Vector3(0, 5, 0);
+            light.transform.Position = new Vector3(0, 10, 0);
 
             // ===============================
             // GROUND
@@ -114,6 +114,21 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             //camera.AddComponent<FreeCameraComponent>();
 
+
+            GameObject enemy = scene.addGameObject("Enemy");
+            enemy.transform.Position = new Vector3(0, 1, 10);
+
+            enemy.AddComponent<MeshRenderer>().AddMesh(mesh);
+
+            enemy.AddComponent<RigidBodyComponent>().Shape =
+                new PhysicsShapeDescription()
+                {
+                    Type = PhysicsShapeType.Capsule,
+                    Height = 2f,
+                    Radius = 0.5f
+                };
+
+            enemy.AddComponent<Enemy>();
         }
 
         public override void OnUpdate(float delta)

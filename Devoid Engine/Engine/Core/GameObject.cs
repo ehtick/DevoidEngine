@@ -1,4 +1,5 @@
 ﻿using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Physics;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -257,6 +258,33 @@ namespace DevoidEngine.Engine.Core
                 {
                     children[i].OnRender(dt);
                 }
+            }
+        }
+
+        internal void InvokeCollisionEnter(GameObject other)
+        {
+            foreach (var comp in Components)
+            {
+                if (comp is ICollisionListener listener)
+                    listener.OnCollisionEnter(other);
+            }
+        }
+
+        internal void InvokeCollisionStay(GameObject other)
+        {
+            foreach (var comp in Components)
+            {
+                if (comp is ICollisionListener listener)
+                    listener.OnCollisionStay(other);
+            }
+        }
+
+        internal void InvokeCollisionExit(GameObject other)
+        {
+            foreach (var comp in Components)
+            {
+                if (comp is ICollisionListener listener)
+                    listener.OnCollisionExit(other);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using DevoidEngine.Engine.Utilities;
 using System.Numerics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DevoidEngine.Engine.Components
 {
@@ -190,6 +191,27 @@ namespace DevoidEngine.Engine.Components
         {
             get => TransformMath.QuaternionToEuler(Rotation);
             set => Rotation = TransformMath.EulerToQuaternion(value);
+        }
+
+        public Vector3 Forward
+        {
+            get => Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitZ, Rotation)
+            );
+        }
+
+        public Vector3 Right
+        {
+            get => Vector3.Normalize(
+                Vector3.Normalize(Vector3.Cross(Forward, Up))
+            );
+        }
+
+        public Vector3 Up
+        {
+            get => Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitY, Rotation)
+            );
         }
 
         // ===============================
