@@ -52,7 +52,7 @@ namespace DevoidEngine.Engine.Components
 
         public void OnCollisionEnter(GameObject other)
         {
-            Console.WriteLine(other.Name);
+            Console.WriteLine("Name: " + other.Name);
             if (other.Name == "Projectile")
             {
                 TakeDamage(100);

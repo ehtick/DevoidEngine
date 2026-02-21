@@ -46,9 +46,11 @@ namespace DevoidEngine.Engine.Physics.Bepu
             if (a.Mobility == CollidableMobility.Dynamic &&
                 b.Mobility == CollidableMobility.Dynamic)
             {
+
                 if (bodyToGameObject.TryGetValue(a.BodyHandle, out var goA) &&
                     bodyToGameObject.TryGetValue(b.BodyHandle, out var goB))
                 {
+
                     var bodyA = simulation.Bodies.GetBodyReference(a.BodyHandle);
                     var bodyB = simulation.Bodies.GetBodyReference(b.BodyHandle);
 

@@ -66,8 +66,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
                 );
             }
 
-
-
+            Backend.ReportCollision(pair.A, pair.B);
 
             return true;
         }
@@ -80,8 +79,6 @@ namespace DevoidEngine.Engine.Physics.Bepu
             int childIndexB,
             ref ConvexContactManifold manifold)
         {
-            Console.WriteLine("Hey");
-            Backend.ReportCollision(pair.A, pair.B);
             return true;
         }
     }

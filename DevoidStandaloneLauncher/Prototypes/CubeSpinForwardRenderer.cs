@@ -116,17 +116,25 @@ namespace DevoidStandaloneLauncher.Prototypes
 
 
             GameObject enemy = scene.addGameObject("Enemy");
-            enemy.transform.Position = new Vector3(0, 1, 10);
+            enemy.transform.Position = new Vector3(0, 2, 10);
 
             enemy.AddComponent<MeshRenderer>().AddMesh(mesh);
 
-            enemy.AddComponent<RigidBodyComponent>().Shape =
+            RigidBodyComponent rb = enemy.AddComponent<RigidBodyComponent>();
+            rb.Shape =
                 new PhysicsShapeDescription()
                 {
                     Type = PhysicsShapeType.Capsule,
                     Height = 2f,
-                    Radius = 0.5f
+                    Radius = 0.5f,
                 };
+
+            rb.Mass = 100;
+            rb.Material = new PhysicsMaterial()
+            {
+                Friction = 2f,
+                Restitution = 0.1f
+            };
 
             enemy.AddComponent<Enemy>();
         }
