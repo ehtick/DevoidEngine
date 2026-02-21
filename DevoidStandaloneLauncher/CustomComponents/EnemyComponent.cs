@@ -31,18 +31,25 @@ namespace DevoidEngine.Engine.Components
                 player = playerObject.transform;
         }
 
-        public override void OnUpdate(float dt)
+        public override void OnFixedUpdate(float fixedDt)
         {
             if (player == null) return;
 
-            // Simple chase movement
-            Vector3 direction = player.Position - gameObject.transform.Position;
-            direction.Y = 0f;
+            var rb = gameObject.GetComponent<RigidBodyComponent>();
+            if (rb == null) return;
 
-            if (direction.LengthSquared() > 0.01f)
+            Vector3 direction = player.Position - gameObject.transform.Position;
+            direction.Y = 0;
+
+            if (direction.LengthSquared() > 0.1f)
             {
                 direction = Vector3.Normalize(direction);
-                gameObject.transform.Position += direction * MoveSpeed * dt;
+
+                Vector3 velocity = rb.LinearVelocity;
+                velocity.X = direction.X * MoveSpeed;
+                velocity.Z = direction.Z * MoveSpeed;
+
+                rb.LinearVelocity = velocity;
             }
         }
 

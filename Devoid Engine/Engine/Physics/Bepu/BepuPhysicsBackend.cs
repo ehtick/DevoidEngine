@@ -20,6 +20,9 @@ namespace DevoidEngine.Engine.Physics.Bepu
         private Dictionary<BodyHandle, PhysicsMaterial> bodyMaterials = new Dictionary<BodyHandle, PhysicsMaterial>();
         private Dictionary<StaticHandle, PhysicsMaterial> staticMaterials = new Dictionary<StaticHandle, PhysicsMaterial>();
 
+        private Dictionary<BodyHandle, IPhysicsBody> bodyWrappers = new();
+
+
         public event Action<IPhysicsBody, IPhysicsBody> CollisionDetected;
 
         public void Initialize()
@@ -54,10 +57,11 @@ namespace DevoidEngine.Engine.Physics.Bepu
                     var bodyA = simulation.Bodies.GetBodyReference(a.BodyHandle);
                     var bodyB = simulation.Bodies.GetBodyReference(b.BodyHandle);
 
-                    var wrapperA = new BepuPhysicsBody(a.BodyHandle, simulation, bodyMaterials[a.BodyHandle], this);
-                    var wrapperB = new BepuPhysicsBody(b.BodyHandle, simulation, bodyMaterials[b.BodyHandle], this);
-
-                    CollisionDetected?.Invoke(wrapperA, wrapperB);
+                    if (bodyWrappers.TryGetValue(a.BodyHandle, out var wrapperA) &&
+                        bodyWrappers.TryGetValue(b.BodyHandle, out var wrapperB))
+                    {
+                        CollisionDetected?.Invoke(wrapperA, wrapperB);
+                    }
                 }
             }
         }
@@ -136,7 +140,11 @@ namespace DevoidEngine.Engine.Physics.Bepu
             bodyToGameObject[handle] = owner;
             bodyMaterials[handle] = desc.Material;
 
-            return new BepuPhysicsBody(handle, simulation, desc.Material, this);
+            var wrapper = new BepuPhysicsBody(handle, simulation, desc.Material, this);
+
+            bodyWrappers[handle] = wrapper;
+
+            return wrapper;
         }
 
 
