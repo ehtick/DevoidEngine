@@ -28,11 +28,10 @@ namespace DevoidEngine.Engine.Components
             pitch = euler.X;
         }
 
-        public override void OnRender(float dt)
+        public override void OnUpdate(float dt)
         {
             HandleMouseLook(dt);
             HandleMovement(dt);
-            Console.WriteLine(dt);
         }
 
 
@@ -43,9 +42,10 @@ namespace DevoidEngine.Engine.Components
         private void HandleMouseLook(float dt)
         {
             time += dt;
-            yaw += MathF.Sin((float)time * 20f) * 0.5f;
-            //yaw -= Input.MouseDelta.X * dt * MouseSensitivity;
-            pitch = 0;
+            //yaw += MathF.Sin((float)time * 20f) * 0.5f;
+            yaw -= Input.MouseDelta.X * dt * MouseSensitivity;
+            pitch += Input.MouseDelta.Y * dt * MouseSensitivity;
+            //pitch = 0;
             //pitch = MathF.Sin((float)time * 20f) * 0.5f;
 
             Quaternion rotation =

@@ -5,8 +5,8 @@ namespace DevoidEngine.Engine.Core
 {
     public static class Input
     {
-private static InputSnapshot _snapshotFront = new();
-private static InputSnapshot _snapshotBack = new();
+        private static InputSnapshot _snapshotFront = new();
+        private static InputSnapshot _snapshotBack = new();
 
         // ===============================
         // RAW THREAD-SAFE ACCUMULATORS
@@ -40,6 +40,16 @@ private static InputSnapshot _snapshotBack = new();
         private static readonly HashSet<MouseButton> mouseDown = new();
         private static readonly HashSet<MouseButton> mousePressedThisFrame = new();
         private static readonly HashSet<MouseButton> mouseReleasedThisFrame = new();
+
+
+        static Input()
+        {
+            _snapshotFront.Keys = new HashSet<Keys>();
+            _snapshotFront.Mouse = new HashSet<MouseButton>();
+
+            _snapshotBack.Keys = new HashSet<Keys>();
+            _snapshotBack.Mouse = new HashSet<MouseButton>();
+        }
 
         // ===============================
         // RENDER THREAD CALLS THESE
@@ -130,23 +140,30 @@ private static InputSnapshot _snapshotBack = new();
 
         public static void Publish()
         {
-            _snapshotBack.MouseDelta = new Vector2(
-                Interlocked.Exchange(ref _rawMouseDeltaX, 0f),
-                Interlocked.Exchange(ref _rawMouseDeltaY, 0f));
+            var newSnapshot = new InputSnapshot
+            {
+                MouseDelta = new Vector2(
+                    Interlocked.Exchange(ref _rawMouseDeltaX, 0f),
+                    Interlocked.Exchange(ref _rawMouseDeltaY, 0f)),
 
-            _snapshotBack.MouseScroll = new Vector2(
-                Interlocked.Exchange(ref _rawScrollX, 0f),
-                Interlocked.Exchange(ref _rawScrollY, 0f));
+                MouseScroll = new Vector2(
+                    Interlocked.Exchange(ref _rawScrollX, 0f),
+                    Interlocked.Exchange(ref _rawScrollY, 0f)),
+
+                Keys = new HashSet<Keys>(),
+                Mouse = new HashSet<MouseButton>()
+            };
 
             lock (_lock)
             {
-                _snapshotBack.Keys = new HashSet<Keys>(_rawKeysDown);
-                _snapshotBack.Mouse = new HashSet<MouseButton>(_rawMouseDown);
+                foreach (var k in _rawKeysDown)
+                    newSnapshot.Keys.Add(k);
+
+                foreach (var m in _rawMouseDown)
+                    newSnapshot.Mouse.Add(m);
             }
 
-            var temp = _snapshotFront;
-            _snapshotFront = _snapshotBack;
-            _snapshotBack = temp;
+            Interlocked.Exchange(ref _snapshotFront, newSnapshot);
         }
 
         // ===============================

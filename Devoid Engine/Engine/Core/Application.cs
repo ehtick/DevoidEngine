@@ -58,7 +58,7 @@ namespace DevoidEngine.Engine.Core
             {
                 BackBufferWidth = appSpec.Width,
                 BackBufferHeight = appSpec.Height,
-                RefreshRate = 165,
+                RefreshRate = 144,
                 VSync = appSpec.forceVsync,
                 BufferCount = 2,
                 ColorFormat = TextureFormat.RGBA8_UNorm,
@@ -177,12 +177,13 @@ namespace DevoidEngine.Engine.Core
             graphicsDevice.MainSurface.Present();
 
             RenderThreadDispatcher.ExecutePending();
-
-            Console.WriteLine($"RENDER dt: {deltaTime}");
+            Input.Publish();
         }
 
         private void OnUpdateFrame(double deltaTime)
         {
+            Input.Update();
+
             ImGuiRenderer.UpdateInput();
 
             LayerHandler.UpdateLayers((float)deltaTime);
@@ -192,8 +193,6 @@ namespace DevoidEngine.Engine.Core
             FramePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();
-
-            Console.WriteLine($"UPDATE dt: {deltaTime}");
         }
 
     }

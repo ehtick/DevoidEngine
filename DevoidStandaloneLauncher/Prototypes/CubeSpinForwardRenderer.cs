@@ -48,31 +48,31 @@ namespace DevoidStandaloneLauncher.Prototypes
             // FPS CONTROLLER
             // ===============================
 
-            //var fps = player.AddComponent<FPSController>();
-            //fps.MoveSpeed = 20f;
-            //fps.JumpForce = 100f;
-            //fps.MouseSensitivity = 0.15f;
+            var fps = player.AddComponent<FPSController>();
+            fps.MoveSpeed = 20f;
+            fps.JumpForce = 100f;
+            fps.MouseSensitivity = 0.15f;
 
             // ===============================
             // CAMERA PIVOT (Pitch Only)
             // ===============================
 
-            //GameObject cameraPivot = scene.addGameObject("CameraPivot");
-            //cameraPivot.AddComponent<MeshRenderer>().AddMesh(mesh);
-            //cameraPivot.SetParent(player, false);
+            GameObject cameraPivot = scene.addGameObject("CameraPivot");
+            cameraPivot.AddComponent<MeshRenderer>().AddMesh(mesh);
+            cameraPivot.SetParent(player, false);
 
-            //cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
+            cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
 
             // ===============================
             // CAMERA
             // ===============================
 
-            //camera = scene.addGameObject("Camera");
-            //camera.SetParent(player, false);
-            ////camera.transform.LocalPosition = new Vector3(0, 2, -20);
+            camera = scene.addGameObject("Camera");
+            camera.SetParent(cameraPivot, false);
+            //camera.transform.LocalPosition = new Vector3(0, 2, -20);
 
-            //var camComponent = camera.AddComponent<CameraComponent3D>();
-            //camComponent.IsDefault = true;
+            var camComponent = camera.AddComponent<CameraComponent3D>();
+            camComponent.IsDefault = true;
 
             // ===============================
             // LIGHT
@@ -107,12 +107,12 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Friction = 1f
             };
 
-            GameObject camera = scene.addGameObject("Camera");
-            camera.transform.LocalPosition = new Vector3(0, 10, -20);
-            var camComponent = camera.AddComponent<CameraComponent3D>();
-            camComponent.IsDefault = true;
+            //GameObject camera = scene.addGameObject("Camera");
+            //camera.transform.LocalPosition = new Vector3(0, 10, -20);
+            //var camComponent = camera.AddComponent<CameraComponent3D>();
+            //camComponent.IsDefault = true;
 
-            camera.AddComponent<FreeCameraComponent>();
+            //camera.AddComponent<FreeCameraComponent>();
 
         }
 

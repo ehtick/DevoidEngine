@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Core
 {
-    public struct InputSnapshot
+    public class InputSnapshot
     {
         public Vector2 MouseDelta;
         public Vector2 MouseScroll;

@@ -54,6 +54,8 @@ namespace DevoidGPU.DX11
                 MainSurface = new DX11PresentSurface(device, deviceContext, swapChain, rtv);
             }
 
+            MainSurface.VSync = parameters.VSync;
+
             BufferFactory = new DX11BufferFactory(device, deviceContext);
             ShaderFactory = new DX11ShaderFactory(device, deviceContext);
             TextureFactory = new DX11TextureFactory(device, deviceContext);
