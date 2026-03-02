@@ -331,7 +331,16 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Importer.ApplyTransform(go, assimpNode);
 
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                go.AddComponent<MeshRenderer>().AddMesh(mesh);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+
+                RenderThread.Enqueue(() =>
+                {
+
+
+                    Texture2D compCubeTex = Helper.loadImageAsTex("D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/companion_cube.png", DevoidGPU.TextureFilter.Linear);
+                    mr.material.SetTexture("MAT_AlbedoMap", compCubeTex);
+                });
 
                 var rb = go.AddComponent<RigidBodyComponent>();
                 rb.Mass = 10f;
@@ -378,7 +387,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                     1f);
 
                 lightComponent.Radius = 200f;
-                lightComponent.Intensity = 20f; // your scale
+                lightComponent.Intensity = 200f; // your scale
             });
         }
     }

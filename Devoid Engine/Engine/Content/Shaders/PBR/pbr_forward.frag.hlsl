@@ -2,10 +2,9 @@ struct PSInput
 {
     float4 Position : SV_POSITION;
     float3 Normal : NORMAL;
-    float4 Tangent : TANGENT; // xyz = tangent, w = handedness
+    float4 Tangent : TANGENT; // xyz + handedness
     float2 UV0 : TEXCOORD0;
     float2 UV1 : TEXCOORD1;
-    float3 FragmentPosition : TEXCOORD2;
     float3 WorldspacePosition : TEXCOORD3;
 };
 
@@ -37,19 +36,29 @@ SamplerState MAT_SpecularSampler : register(s5);
 
 #include "./pbr_methods.hlsl"
 
+//float3 GetNormalFromMap(PSInput input)
+//{
+//    float3 N = normalize(input.Normal);
+
+//    float3 T = normalize(input.Tangent.xyz - N * dot(input.Tangent.xyz, N));
+//    float3 B = cross(N, T);
+
+//    // CRITICAL: re-orthogonalize
+//    //T = normalize(T - N * dot(N, T));
+
+//    //float3 B = normalize(cross(N, T) * input.Tangent.w);
+
+//    float3 normalTex = MAT_NormalMap.Sample(MAT_NormalSampler, input.UV0).xyz;
+//    normalTex = normalTex * 2.0 - 1.0;
+
+//    float3x3 TBN = float3x3(T, B, N);
+
+//    return normalize(mul(normalTex, TBN));
+//}
+
 float3 GetNormalFromMap(PSInput input)
 {
-    float3 N = normalize(input.Normal);
-
-    float3 T = normalize(input.Tangent.xyz);
-    float3 B = normalize(cross(N, T) * input.Tangent.w);
-
-    float3 normalTex = MAT_NormalMap.Sample(MAT_NormalSampler, input.UV0).xyz;
-    normalTex = normalTex * 2.0 - 1.0;
-
-    float3x3 TBN = float3x3(T, B, N);
-
-    return normalize(mul(normalTex, TBN));
+    return normalize(input.Normal);
 }
 
 float4 PSMain(PSInput input) : SV_TARGET
@@ -115,9 +124,9 @@ float4 PSMain(PSInput input) : SV_TARGET
 
     float3 color = ambient + Lo;
 
-    return float4(input.Tangent.xyz * 0.5 + 0.5, 1);
+    //return float4(input.Tangent.xyz * 0.5 + 0.5, 1);
     //return float4(N, 1.0);
-    
+    return float4(color, 1.0);
     //return float4(normalize(input.Normal) * 0.5 + 0.5, 1);
-    //return float4(color, 1.0);
+    //return float4(input.UV0.x, input.UV0.y, 1.0, 1.0);
 }

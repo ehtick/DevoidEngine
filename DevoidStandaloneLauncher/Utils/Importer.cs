@@ -14,9 +14,8 @@ namespace DevoidStandaloneLauncher.Utils
 
             PostProcessSteps importFlags =
                 PostProcessSteps.Triangulate |
-                PostProcessSteps.CalculateTangentSpace |
                 PostProcessSteps.GenerateNormals |
-                PostProcessSteps.GenerateUVCoords |
+                PostProcessSteps.CalculateTangentSpace |
                 PostProcessSteps.FlipWindingOrder;
 
 
