@@ -4,7 +4,13 @@ using DevoidEngine.Engine.Utilities;
 
 namespace DevoidEngine.Engine.Core
 {
-
+    enum RenderResourceType
+    {
+        Screen,
+        SceneDepth,
+        GBufferNormal,
+        GBufferPosition,
+    }
 
     public class CameraRenderContext
     {

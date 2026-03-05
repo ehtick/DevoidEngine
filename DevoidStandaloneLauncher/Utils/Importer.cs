@@ -15,6 +15,7 @@ namespace DevoidStandaloneLauncher.Utils
             PostProcessSteps importFlags =
                 PostProcessSteps.Triangulate |
                 PostProcessSteps.GenerateNormals |
+                PostProcessSteps.GenerateSmoothNormals |
                 PostProcessSteps.CalculateTangentSpace |
                 PostProcessSteps.FlipWindingOrder;
 
@@ -29,9 +30,6 @@ namespace DevoidStandaloneLauncher.Utils
                 Console.WriteLine(ex.Message);
                 return;
             }
-
-            Console.WriteLine("Processing nodes");
-            Console.WriteLine($"Scene has {scene.MeshCount} Meshes");
 
             var lightLookup = scene.Lights.ToDictionary(l => l.Name, l => l);
             ProcessNode(scene.RootNode, scene, lightLookup);
@@ -64,10 +62,6 @@ namespace DevoidStandaloneLauncher.Utils
             List<Vector3> normals = new();
             List<Vector2> uvs = new();
             List<uint> indices = new();
-
-            Console.WriteLine(mesh.HasNormals);
-            Console.WriteLine(mesh.VertexCount);
-            Console.WriteLine(mesh.FaceCount);
 
             for (int i = 0; i < mesh.VertexCount; i++)
             {

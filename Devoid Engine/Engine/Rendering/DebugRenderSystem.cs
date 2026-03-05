@@ -42,8 +42,8 @@ namespace DevoidEngine.Engine.Rendering
             debugRenderState = new RenderState()
             {
                 CullMode = CullMode.None,
-                DepthTest = DepthTest.Disabled,
-                DepthWrite = false,
+                DepthTest = DepthTest.LessEqual,
+                DepthWrite = true,
                 FillMode = FillMode.Solid,
                 PrimitiveType = PrimitiveType.Lines,
                 BlendMode = BlendMode.Opaque

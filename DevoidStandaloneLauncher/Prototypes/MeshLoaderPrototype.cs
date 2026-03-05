@@ -5,6 +5,7 @@ using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
+using DevoidGPU;
 using DevoidStandaloneLauncher.Utils;
 using System.Numerics;
 
@@ -13,10 +14,14 @@ namespace DevoidStandaloneLauncher.Prototypes
     internal class MeshLoaderPrototype : Prototype
     {
         Scene scene;
+
+        MaterialInstance celMaterial = new MaterialInstance(new Material(new Shader("LauncherContents/Shaders/celtoon")));
+        
         FileReloader reloader;
         string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/platform_test.fbx";
         public override void OnInit()
         {
+            LoadOutlinePass();
             LoadDCC();
 
             Mesh mesh = new Mesh();
@@ -41,7 +46,6 @@ namespace DevoidStandaloneLauncher.Prototypes
             Importer.LoadModel(levelPath);
             scene.Play();
         }
-
 
         int mode = 0;
         int mode1 = DebugRenderSystem.AllowDebugDraw ? 1 : 0;
@@ -103,7 +107,12 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Importer.ApplyTransform(go, assimpNode);
 
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                go.AddComponent<MeshRenderer>().AddMesh(mesh);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    mr.material = celMaterial;
+                });
             });
 
             LevelSpawnRegistry.Register("Collideable_Static", (assimpNode, assimpScene) =>
@@ -113,7 +122,12 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Importer.ApplyTransform(go, assimpNode);
 
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                go.AddComponent<MeshRenderer>().AddMesh(mesh);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    mr.material = celMaterial;
+                });
 
                 var rb = go.AddComponent<StaticCollider>();
 
@@ -186,7 +200,12 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Importer.ApplyTransform(go, assimpNode);
 
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                go.AddComponent<MeshRenderer>().AddMesh(mesh);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    mr.material = celMaterial;
+                });
 
                 var rb = go.AddComponent<RigidBodyComponent>();
                 rb.Mass = 100;
@@ -244,7 +263,12 @@ namespace DevoidStandaloneLauncher.Prototypes
 
                 // 4️⃣ Mesh on door
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                door.AddComponent<MeshRenderer>().AddMesh(mesh);
+                MeshRenderer mr = door.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    mr.material = celMaterial;
+                });
 
                 // 5️⃣ Rotate hinge only
                 hinge.AddComponent<DoorComponent>();
@@ -257,7 +281,12 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Importer.ApplyTransform(button, assimpNode);
 
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                button.AddComponent<MeshRenderer>().AddMesh(mesh);
+                MeshRenderer mr = button.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    mr.material = celMaterial;
+                });
 
                 var collider = button.AddComponent<StaticCollider>();
                 collider.Shape = new PhysicsShapeDescription()
@@ -293,7 +322,11 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Importer.ApplyTransform(button, assimpNode);
 
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                button.AddComponent<MeshRenderer>().AddMesh(mesh);
+                MeshRenderer mr = button.AddComponent<MeshRenderer>();
+                RenderThread.Enqueue(() =>
+                {
+                    mr.material = celMaterial;
+                });
 
                 var collider = button.AddComponent<RigidBodyComponent>();
                 collider.StartKinematic = true;
@@ -336,11 +369,16 @@ namespace DevoidStandaloneLauncher.Prototypes
 
                 RenderThread.Enqueue(() =>
                 {
-
-
-                    Texture2D compCubeTex = Helper.loadImageAsTex("D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/companion_cube.png", DevoidGPU.TextureFilter.Linear);
-                    mr.material.SetTexture("MAT_AlbedoMap", compCubeTex);
+                    mr.material = celMaterial;
                 });
+
+                //RenderThread.Enqueue(() =>
+                //{
+
+
+                //    Texture2D compCubeTex = Helper.loadImageAsTex("D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/companion_cube.png", DevoidGPU.TextureFilter.Linear);
+                //    mr.material.SetTexture("MAT_AlbedoMap", compCubeTex);
+                //});
 
                 var rb = go.AddComponent<RigidBodyComponent>();
                 rb.Mass = 10f;
@@ -387,8 +425,62 @@ namespace DevoidStandaloneLauncher.Prototypes
                     1f);
 
                 lightComponent.Radius = 200f;
-                lightComponent.Intensity = 200f; // your scale
+                lightComponent.Intensity = 70f; // your scale
             });
         }
+
+
+        Framebuffer tempBuffer;
+        MaterialInstance materialInstance;
+
+        void LoadOutlinePass()
+        {
+            TextureDescription desc = new TextureDescription()
+            {
+                Format = TextureFormat.RGBA16_Float,
+                GenerateMipmaps = false,
+                MipLevels = 1,
+                IsDepthStencil = false,
+                IsRenderTarget = true,
+                Type = TextureType.Texture2D,
+                Width = (int)Screen.Size.X,
+                Height = (int)Screen.Size.Y
+            };
+
+            tempBuffer = new Framebuffer();
+            tempBuffer.AttachRenderTexture(new Texture2D(desc));
+
+            materialInstance = new MaterialInstance(new Material(new Shader("LauncherContents/Shaders/screenToon")));
+            materialInstance.SetVector2("ScreenSize", Screen.Size);
+            materialInstance.SetFloat("DepthMultiplier", 50);
+            materialInstance.SetFloat("NormalMultiplier", 1.0f);
+            materialInstance.SetFloat("OutlineThreshold", 0.002f);
+        }
+
+        public override void OnLateRender()
+        {
+            //if (scene == null) return;
+            //Framebuffer cameraBuffer = scene.GetMainCamera().Camera.RenderTarget;
+
+            //materialInstance.SetTexture("MAT_SceneColor", cameraBuffer.GetRenderTexture(0));
+            //materialInstance.SetTexture("MAT_SceneDepth", cameraBuffer.GetDepthTexture());
+
+            //tempBuffer.Bind();
+            //Renderer.graphicsDevice.SetViewport(0, 0, (int)Screen.Size.X, (int)Screen.Size.Y);
+            //tempBuffer.Clear();
+
+
+            //RenderAPI.RenderToBuffer(materialInstance, tempBuffer);
+
+            //Renderer.graphicsDevice.UnbindAllShaderResources();
+
+            //RenderAPI.RenderToBuffer(tempBuffer.GetRenderTexture(0), cameraBuffer);
+
+        }
+        public override void Resize(int width, int height)
+        {
+            tempBuffer.Resize(width, height);
+        }
+
     }
 }

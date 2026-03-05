@@ -78,7 +78,7 @@ namespace DevoidEngine.Engine.Rendering
                 Console.WriteLine("[Renderer]: Render technique was not set. No Object rendered.");
             Output = ActiveRenderTechnique?.Render(ctx);
             Renderer.graphicsDevice.UnbindAllShaderResources();
-            RenderAPI.RenderToBuffer(Output, ctx.cameraTargetSurface);
+            //RenderAPI.RenderToBuffer(Output, ctx.cameraTargetSurface);
             DebugRenderSystem.Render(ctx.cameraData, ctx.cameraTargetSurface);
         }
 

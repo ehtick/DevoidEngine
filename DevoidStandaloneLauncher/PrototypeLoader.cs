@@ -60,6 +60,10 @@ namespace DevoidStandaloneLauncher
 
         public override void OnLateRender()
         {
+            if (prototypeLoaded)
+            {
+                GamePrototype.OnLateRender();
+            }
             Texture2D renderOutput = CurrentScene?.GetMainCamera()?.Camera?.RenderTarget?.GetRenderTexture(0);
             RenderAPI.RenderToScreen(renderOutput);
         }
@@ -72,6 +76,10 @@ namespace DevoidStandaloneLauncher
             Renderer.graphicsDevice.SetViewport(0, 0, width, height);
 
             CurrentScene?.OnResize(width, height);
+            if (prototypeLoaded)
+            {
+                GamePrototype.Resize(width, height);
+            }
         }
 
         #region INPUT_SETTERS

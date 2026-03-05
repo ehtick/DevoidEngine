@@ -52,8 +52,11 @@ namespace DevoidEngine.Engine.Rendering
                 RenderTextures[i].Resize(width, height);
                 Graphics.ResourceManager.FramebufferManager.AttachRenderTexture(_frameBuffer, RenderTextures[i].GetRendererHandle());
             }
-            DepthTexture.Resize(width, height);
-            Graphics.ResourceManager.FramebufferManager.AttachDepthTexture(_frameBuffer, DepthTexture.GetRendererHandle());
+            if (DepthTexture != null)
+            {
+                DepthTexture.Resize(width, height);
+                Graphics.ResourceManager.FramebufferManager.AttachDepthTexture(_frameBuffer, DepthTexture.GetRendererHandle());
+            }
         }
 
         public void AttachRenderTexture(Texture2D texture)
