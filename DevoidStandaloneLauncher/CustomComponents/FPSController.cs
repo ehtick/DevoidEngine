@@ -29,13 +29,13 @@ namespace DevoidEngine.Engine.Components
         // Shooting / Ammo
         // ===============================
 
-        public float FireRate = 0.05f;
-        public float ProjectileSpeed = 40f;
-        public float ProjectileMass = 0.2f;
+        public float FireRate = 0.5f;
+        public float ProjectileSpeed = 80f;
+        public float ProjectileMass = 2f;
         public Vector3 ProjectileScale = new Vector3(0.2f);
 
-        public int MaxAmmo = 30;
-        public float ReloadTime = 1.5f;
+        public int MaxAmmo = 6;
+        public float ReloadTime = 1f;
 
         public int currentAmmo;
         public bool isReloading = false;
@@ -86,6 +86,26 @@ namespace DevoidEngine.Engine.Components
 
         private PortalCubeComponent heldCube;
 
+
+
+
+        public Transform GunTransform;   // assign from gun object
+
+        public float RecoilAngle = 25f;
+        public float RecoilSpeed = 14f;
+        public float RecoilReturnSpeed = 10f;
+
+        public float ReloadSpinSpeed = 1500f; // degrees per second
+
+        private float recoilCurrent = 0f;
+        private float recoilTarget = 0f;
+        private float reloadSpin = 0f;
+
+        private Quaternion gunBaseRotation;
+
+        public Vector3 PlayerRecoilForce = new Vector3(0f, 0f, 0f);
+
+
         // ===============================
         // Setup
         // ===============================
@@ -99,6 +119,14 @@ namespace DevoidEngine.Engine.Components
         public Vector3 GetLinearVelocity()
         {
             return rb != null ? rb.LinearVelocity : Vector3.Zero;
+        }
+
+        public void SetGunTransform(Transform gun)
+        {
+            GunTransform = gun;
+
+            // store the gun's original orientation
+            gunBaseRotation = gun.LocalRotation;
         }
 
         public override void OnStart()
@@ -181,7 +209,59 @@ namespace DevoidEngine.Engine.Components
 
 
             TryInteract();
-                
+            UpdateGunAnimation(dt);
+
+        }
+
+        private void UpdateGunAnimation(float dt)
+        {
+            if (GunTransform == null)
+                return;
+
+            // Smooth recoil motion
+            recoilCurrent = MathHelper.Lerp(
+                recoilCurrent,
+                recoilTarget,
+                RecoilSpeed * dt
+            );
+
+            recoilTarget = MathHelper.Lerp(
+                recoilTarget,
+                0f,
+                RecoilReturnSpeed * dt
+            );
+
+            // Reload spinning
+            if (isReloading)
+                reloadSpin += ReloadSpinSpeed * dt;
+            else
+                reloadSpin = 0f;
+
+            // Gun local axes from base rotation
+            Vector3 gunRight = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitX, gunBaseRotation)
+            );
+
+            Vector3 gunForward = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitZ, gunBaseRotation)
+            );
+
+            Quaternion recoilRot =
+                Quaternion.CreateFromAxisAngle(
+                    gunForward,
+                    MathHelper.DegToRad(-recoilCurrent)
+                );
+
+            Quaternion reloadRot =
+                Quaternion.CreateFromAxisAngle(
+                    gunForward,
+                    MathHelper.DegToRad(-reloadSpin)
+                );
+
+            GunTransform.LocalRotation =
+                gunBaseRotation *
+                recoilRot *
+                reloadRot;
         }
 
         private void TryInteract()
@@ -241,6 +321,8 @@ namespace DevoidEngine.Engine.Components
             fireTimer = FireRate;
             currentAmmo--;
 
+            recoilTarget += RecoilAngle;
+
             Vector3 spawnPosition = cameraPivot != null
                 ? cameraPivot.Position
                 : gameObject.transform.Position;
@@ -254,6 +336,7 @@ namespace DevoidEngine.Engine.Components
                     Vector3.Transform(Vector3.UnitZ, rotation)
                 );
 
+            // spawn projectile
             BulletComponent.Spawn(
                 gameObject.Scene,
                 projectileMesh,
@@ -263,6 +346,26 @@ namespace DevoidEngine.Engine.Components
                 ProjectileSpeed,
                 ProjectileMass
             );
+
+            // --------------------------
+            // PLAYER RECOIL PUSHBACK
+            // --------------------------
+
+            if (rb != null)
+            {
+                Vector3 recoilImpulse =
+                    Vector3.Transform(PlayerRecoilForce, rotation);
+
+                Vector3 velocity = rb.LinearVelocity;
+
+                velocity.X += recoilImpulse.X;
+                velocity.Z += recoilImpulse.Z;
+
+                // apply vertical recoil but prevent stacking infinitely
+                velocity.Y = MathF.Max(velocity.Y, recoilImpulse.Y);
+
+                rb.LinearVelocity = velocity;
+            }
         }
 
         private void StartReload()

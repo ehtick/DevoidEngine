@@ -72,6 +72,13 @@ namespace DevoidEngine.Engine.Components
                 Size = scale
             };
 
+            body.Material = new PhysicsMaterial()
+            {
+                Restitution = 0f,
+                Friction = 1f,
+                
+            };
+
             body.Mass = mass;
 
             Vector3 forward =

@@ -13,7 +13,18 @@ namespace DevoidEngine.Engine.Components
         // Settings
         // ===============================
 
-        public float Mass = 10f;
+        public float Mass
+        {
+            get => _mass;
+            set
+            {
+                _mass = value;
+
+                if (internalBody != null)
+                    CreateBody();
+            }
+        }
+
         public bool StartKinematic = false;
 
         public bool FreezeRotationX = false;
@@ -108,6 +119,7 @@ namespace DevoidEngine.Engine.Components
             }
         }
 
+        private float _mass;
         public bool IsKinematic =>
             internalBody != null && internalBody.IsKinematic;
 
@@ -158,7 +170,7 @@ namespace DevoidEngine.Engine.Components
             {
                 Position = gameObject.transform.Position,
                 Rotation = gameObject.transform.Rotation,
-                Mass = Mass,
+                Mass = _mass,
                 IsKinematic = StartKinematic,
                 Shape = Shape,
                 Material = Material,

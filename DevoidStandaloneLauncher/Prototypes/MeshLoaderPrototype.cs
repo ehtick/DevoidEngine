@@ -15,13 +15,14 @@ namespace DevoidStandaloneLauncher.Prototypes
     {
         Scene scene;
 
+        GameObject PlayerObject;
+        GameObject CameraObject;
         MaterialInstance celMaterial = new MaterialInstance(new Material(new Shader("LauncherContents/Shaders/celtoon")));
         
         FileReloader reloader;
         string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/platform_test.fbx";
         public override void OnInit()
         {
-            LoadOutlinePass();
             LoadDCC();
 
             Mesh mesh = new Mesh();
@@ -148,15 +149,10 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Player", (assimpNode, assimpScene) =>
             {
+                PlayerObject = scene.addGameObject("Player");
+                PlayerObject.transform.Position = Importer.GetTransform(assimpNode).Item1;
 
-
-                GameObject player = scene.addGameObject("Player");
-                player.transform.Position = Importer.GetTransform(assimpNode).Item1;
-                //Importer.ApplyTransform(player, assimpNode);
-
-                //player.transform.Position = new Vector3(0, 1.5f, -6f);
-
-                var playerBody = player.AddComponent<RigidBodyComponent>();
+                var playerBody = PlayerObject.AddComponent<RigidBodyComponent>();
                 playerBody.Mass = 1000;
                 playerBody.Shape = new PhysicsShapeDescription()
                 {
@@ -170,28 +166,63 @@ namespace DevoidStandaloneLauncher.Prototypes
                     Friction = 0.8f,
                     Restitution = 0f,
                     AngularDamping = 10f,
-                    LinearDamping = 1
                 };
 
-                FPSController playerController = player.AddComponent<FPSController>();
+                FPSController playerController = PlayerObject.AddComponent<FPSController>();
                 playerController.MoveSpeed = 10f;
                 playerController.JumpForce = 7f;
                 playerController.MouseSensitivity = 0.15f;
 
                 Cursor.SetCursorState(CursorState.Grabbed);
 
+                // Camera pivot (for vertical rotation)
                 GameObject cameraPivot = scene.addGameObject("CameraPivot");
-                cameraPivot.SetParent(player, false);
+                cameraPivot.SetParent(PlayerObject, false);
                 playerController.SetCameraPivot(cameraPivot.transform);
 
                 cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
 
-                GameObject camera = scene.addGameObject("Camera");
-                camera.SetParent(cameraPivot, false);
-                var camComponent = camera.AddComponent<CameraComponent3D>();
+                // Camera
+                CameraObject = scene.addGameObject("Camera");
+                CameraObject.SetParent(cameraPivot, false);
+
+                var camComponent = CameraObject.AddComponent<CameraComponent3D>();
                 camComponent.IsDefault = true;
+                
 
             });
+
+
+            LevelSpawnRegistry.Register("Gun", (assimpNode, assimpScene) =>
+            {
+                Console.WriteLine("Loaded gun");
+
+                Console.WriteLine(CameraObject);
+
+                GameObject gun = scene.addGameObject("Gun");
+
+                Importer.ApplyTransform(gun, assimpNode);
+
+                gun.SetParent(CameraObject, false);
+
+                // Position gun to the right side of the camera
+                gun.transform.LocalPosition = new Vector3(-0.6f, -0.5f, 0.8f);
+                //gun.transform.EulerAngles = new Vector3(-90, 90, 0);
+                //gun.transform.LocalScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+
+                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
+                // Add mesh renderer
+                var gunRenderer = gun.AddComponent<MeshRenderer>();
+                gunRenderer.AddMesh(mesh);
+
+                RenderThread.Enqueue(() =>
+                {
+                    gunRenderer.material = celMaterial;
+                });
+                PlayerObject.GetComponent<FPSController>().SetGunTransform(gun.transform);
+            });
+
 
             LevelSpawnRegistry.Register("Collideable_Dynamic", (assimpNode, assimpScene) =>
             {
@@ -222,8 +253,6 @@ namespace DevoidStandaloneLauncher.Prototypes
                 {
                     Friction = 2f
                 };
-
-                Console.WriteLine("Collideable Added");
             });
 
             LevelSpawnRegistry.Register("Door_Hinged", (assimpNode, assimpScene) =>
@@ -427,59 +456,6 @@ namespace DevoidStandaloneLauncher.Prototypes
                 lightComponent.Radius = 200f;
                 lightComponent.Intensity = 70f; // your scale
             });
-        }
-
-
-        Framebuffer tempBuffer;
-        MaterialInstance materialInstance;
-
-        void LoadOutlinePass()
-        {
-            TextureDescription desc = new TextureDescription()
-            {
-                Format = TextureFormat.RGBA16_Float,
-                GenerateMipmaps = false,
-                MipLevels = 1,
-                IsDepthStencil = false,
-                IsRenderTarget = true,
-                Type = TextureType.Texture2D,
-                Width = (int)Screen.Size.X,
-                Height = (int)Screen.Size.Y
-            };
-
-            tempBuffer = new Framebuffer();
-            tempBuffer.AttachRenderTexture(new Texture2D(desc));
-
-            materialInstance = new MaterialInstance(new Material(new Shader("LauncherContents/Shaders/screenToon")));
-            materialInstance.SetVector2("ScreenSize", Screen.Size);
-            materialInstance.SetFloat("DepthMultiplier", 50);
-            materialInstance.SetFloat("NormalMultiplier", 1.0f);
-            materialInstance.SetFloat("OutlineThreshold", 0.002f);
-        }
-
-        public override void OnLateRender()
-        {
-            //if (scene == null) return;
-            //Framebuffer cameraBuffer = scene.GetMainCamera().Camera.RenderTarget;
-
-            //materialInstance.SetTexture("MAT_SceneColor", cameraBuffer.GetRenderTexture(0));
-            //materialInstance.SetTexture("MAT_SceneDepth", cameraBuffer.GetDepthTexture());
-
-            //tempBuffer.Bind();
-            //Renderer.graphicsDevice.SetViewport(0, 0, (int)Screen.Size.X, (int)Screen.Size.Y);
-            //tempBuffer.Clear();
-
-
-            //RenderAPI.RenderToBuffer(materialInstance, tempBuffer);
-
-            //Renderer.graphicsDevice.UnbindAllShaderResources();
-
-            //RenderAPI.RenderToBuffer(tempBuffer.GetRenderTexture(0), cameraBuffer);
-
-        }
-        public override void Resize(int width, int height)
-        {
-            tempBuffer.Resize(width, height);
         }
 
     }
