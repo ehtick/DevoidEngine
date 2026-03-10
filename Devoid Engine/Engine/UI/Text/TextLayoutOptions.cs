@@ -32,7 +32,7 @@ namespace DevoidEngine.Engine.UI.Text
         {
             MaxWidth = float.PositiveInfinity,
             Align = TextAlign.Left,
-            Overflow = TextOverflow.Ellipsis
+            Overflow = TextOverflow.Wrap
         };
     }
 }

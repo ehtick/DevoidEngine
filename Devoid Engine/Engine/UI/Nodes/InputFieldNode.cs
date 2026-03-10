@@ -66,10 +66,15 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
             label.Text = Text;
 
-            Vector2 textSize = label.Measure(availableSize);
+            Vector2 textSize = label.Measure(
+                new Vector2(
+                    availableSize.X - Padding.X * 2,
+                    float.PositiveInfinity
+                )
+            );
 
             return new Vector2(
-                textSize.X + Padding.X * 2,
+                availableSize.X,
                 textSize.Y + Padding.Y * 2
             );
         }
@@ -87,9 +92,14 @@ namespace DevoidEngine.Engine.UI.Nodes
 
             Vector2 contentPos = finalRect.position + Padding;
 
+            Vector2 labelSize = new Vector2(
+                finalRect.size.X - Padding.X * 2,
+                label.DesiredSize.Y
+            );
+
             label.Arrange(new UITransform(
                 contentPos,
-                label.DesiredSize
+                labelSize
             ));
 
             // Measure caret position based on substring
@@ -97,18 +107,27 @@ namespace DevoidEngine.Engine.UI.Nodes
                 ? Text.Substring(0, CaretIndex)
                 : "";
 
+            float textWidth = finalRect.size.X - Padding.X * 2;
+
+            var opts = TextLayoutOptions.Default;
+            opts.MaxWidth = textWidth;
+            opts.Overflow = TextOverflow.Clip;
+
             Vector2 caretOffset =
                 TextMeshGenerator.Measure(
                     font,
                     left,
                     font.GetScaleForFontSize(fontSize),
-                    TextLayoutOptions.Default
+                    opts
                 );
 
             caret.Color = CaretColor;
             caret.Visible = caretVisible;
 
-            caret.Arrange(new UITransform(contentPos + new Vector2(label.DesiredSize.X + 2, 0), caret.Size ?? new Vector2(2, finalRect.size.Y - Padding.Y * 2)));
+            caret.Arrange(new UITransform(
+                contentPos + new Vector2(caretOffset.X, 0),
+                caret.Size ?? new Vector2(2, finalRect.size.Y - Padding.Y * 2)
+            ));
         }
 
         protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
@@ -125,7 +144,6 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
             Text = Text.Insert(CaretIndex, c.ToString());
             CaretIndex++;
-            Console.WriteLine("Text!");
         }
 
         public override void OnKeyDown(Keys key)

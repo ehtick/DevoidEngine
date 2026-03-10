@@ -1,5 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidGPU;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.UI.Text
@@ -184,10 +185,10 @@ namespace DevoidEngine.Engine.UI.Text
 
                     for (int v = start; v < end; v++)
                     {
-                        var vert = vertices[v]; 
-                        var position = vert.Position; 
-                        position.X += offset; 
-                        Vertex newVert = new Vertex(position, vert.Normal, vert.UV1, vert.Tangent, vert.BiTangent); 
+                        var vert = vertices[v];
+                        var position = vert.Position;
+                        position.X += offset;
+                        Vertex newVert = new Vertex(position, vert.Normal, vert.UV1, vert.Tangent, vert.BiTangent);
                         vertices[v] = newVert;
                     }
                 }
@@ -202,75 +203,98 @@ namespace DevoidEngine.Engine.UI.Text
         public static Vector2 Measure(FontInternal font, string text, float scale, TextLayoutOptions options)
         {
             if (string.IsNullOrEmpty(text) || font == null)
-            {
                 return Vector2.Zero;
-            }
+
+            float fontAscender = font.Ascender;
+            if (fontAscender == 0)
+                fontAscender = font.LineHeight * 0.8f;
+
+            float startX = 0;
+            float startY = fontAscender * scale;
 
             float maxWidth = options.MaxWidth;
+
+            Vector2 cursor = new Vector2(startX, startY);
+            bool isFirstCharacterOfLine = true;
 
             float maxLineWidth = 0f;
             float lineHeight = (font.Ascender - font.Descender) * scale;
             float totalHeight = lineHeight;
 
-            float startX = 0;
-
-            float cursorX = startX;
-            bool isFirstCharacterOfLine = true;
-
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];
+                uint charCode = (uint)c;
 
                 if (c == '\n')
                 {
-                    if (cursorX > maxLineWidth)
-                        maxLineWidth = cursorX;
+                    if (cursor.X > maxLineWidth)
+                        maxLineWidth = cursor.X;
 
-                    cursorX = startX;
+                    cursor.X = startX;
+                    cursor.Y += lineHeight;
                     totalHeight += lineHeight;
                     isFirstCharacterOfLine = true;
                     continue;
                 }
 
-                uint charCode = (uint)c;
                 if (!font.Metrics.TryGetValue(charCode, out var metric))
-                {
                     continue;
-                }
 
                 float advance = metric.HorizontalAdvance * scale;
 
-                bool overflow = !float.IsInfinity(maxWidth) && cursorX + advance > maxWidth;
+                bool overflow = !float.IsInfinity(maxWidth) && cursor.X + advance > maxWidth;
 
                 if (overflow)
                 {
                     if (options.Overflow == TextOverflow.Wrap)
                     {
-                        if (cursorX > maxLineWidth)
-                            maxLineWidth = cursorX;
+                        if (cursor.X > maxLineWidth)
+                            maxLineWidth = cursor.X;
 
-                        cursorX = startX;
+                        cursor.X = startX;
+                        cursor.Y += lineHeight;
                         totalHeight += lineHeight;
                         isFirstCharacterOfLine = true;
                     }
-                    else if (options.Overflow == TextOverflow.Clip ||
-                             options.Overflow == TextOverflow.Ellipsis)
+                    else if (options.Overflow == TextOverflow.Clip)
                     {
+                        break;
+                    }
+                    else if (options.Overflow == TextOverflow.Ellipsis)
+                    {
+                        string ellipsis = "...";
+
+                        for (int e = 0; e < ellipsis.Length; e++)
+                        {
+                            uint ec = ellipsis[e];
+
+                            if (!font.Metrics.TryGetValue(ec, out var em))
+                                continue;
+
+                            float eAdvance = em.HorizontalAdvance * scale;
+
+                            if (cursor.X + eAdvance > maxWidth)
+                                break;
+
+                            cursor.X += eAdvance;
+                        }
+
                         break;
                     }
                 }
 
                 if (isFirstCharacterOfLine)
                 {
-                    cursorX -= metric.OriginalBearingX * scale;
+                    cursor.X -= metric.OriginalBearingX * scale;
                     isFirstCharacterOfLine = false;
                 }
 
-                cursorX += advance;
+                cursor.X += advance;
             }
 
-            if (cursorX > maxLineWidth)
-                maxLineWidth = cursorX;
+            if (cursor.X > maxLineWidth)
+                maxLineWidth = cursor.X;
 
             return new Vector2(maxLineWidth, totalHeight);
         }

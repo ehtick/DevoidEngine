@@ -24,9 +24,11 @@ namespace DevoidEngine.Engine.UI.Nodes
                 if (!child.Visible || !child.Interactable)
                     continue;
 
-                Vector2 childAvailableSize = Direction == FlexDirection.Row
-                    ? new Vector2(float.PositiveInfinity, availableSize.Y)
-                    : new Vector2(availableSize.X, float.PositiveInfinity);
+                //Vector2 childAvailableSize = Direction == FlexDirection.Row
+                //    ? new Vector2(float.PositiveInfinity, availableSize.Y)
+                //    : new Vector2(availableSize.X, float.PositiveInfinity);
+
+                Vector2 childAvailableSize = availableSize;
 
                 Vector2 childSize = child.Measure(childAvailableSize);
 

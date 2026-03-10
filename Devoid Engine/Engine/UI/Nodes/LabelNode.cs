@@ -18,31 +18,36 @@ namespace DevoidEngine.Engine.UI.Nodes
             set
             {
                 _text = value;
-
-                UpdateMesh(LayoutOptions.MaxWidth);
-
-                if (string.IsNullOrEmpty(_text))
-                {
-                    Size = new Vector2(
-                        0,
-                        TextMeshGenerator.Measure(
-                            Font,
-                            " ",
-                            Font.GetScaleForFontSize(Scale),
-                            LayoutOptions
-                        ).Y
-                    );
-                }
-                else
-                {
-                    Size = TextMeshGenerator.Measure(
-                        Font,
-                        _text,
-                        Font.GetScaleForFontSize(Scale),
-                        LayoutOptions
-                    );
-                }
+                _meshDirty = true;
             }
+            //set
+            //{
+            //    _text = value;
+
+            //    UpdateMesh(LayoutOptions.MaxWidth);
+
+            //    if (string.IsNullOrEmpty(_text))
+            //    {
+            //        Size = new Vector2(
+            //            0,
+            //            TextMeshGenerator.Measure(
+            //                Font,
+            //                " ",
+            //                Font.GetScaleForFontSize(Scale),
+            //                LayoutOptions
+            //            ).Y
+            //        );
+            //    }
+            //    else
+            //    {
+            //        Size = TextMeshGenerator.Measure(
+            //            Font,
+            //            _text,
+            //            Font.GetScaleForFontSize(Scale),
+            //            LayoutOptions
+            //        );
+            //    }
+            //}
         }
 
         public FontInternal Font;
@@ -51,6 +56,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         private Vector2 _measuredTextSize;
         private Mesh _mesh;
         private string _text;
+        bool _meshDirty = true;
 
         private float _lastWidthConstraint = float.PositiveInfinity;
 
@@ -90,10 +96,17 @@ namespace DevoidEngine.Engine.UI.Nodes
             if (Font == null)
                 return Vector2.Zero;
 
-            var opts = LayoutOptions;
+            float widthConstraint = availableSize.X;
 
-            if (!float.IsInfinity(availableSize.X))
-                opts.MaxWidth = availableSize.X;
+            if ((_meshDirty || _lastWidthConstraint != widthConstraint) && !string.IsNullOrEmpty(_text))
+            {
+                _meshDirty = false;
+                _lastWidthConstraint = widthConstraint;
+                UpdateMesh(widthConstraint);
+            }
+
+            var opts = LayoutOptions;
+            opts.MaxWidth = widthConstraint;
 
             return TextMeshGenerator.Measure(
                 Font,
@@ -110,12 +123,12 @@ namespace DevoidEngine.Engine.UI.Nodes
             if (Font == null || string.IsNullOrEmpty(Text))
                 return;
 
-            float widthConstraint = LayoutOptions.MaxWidth;
+            //float widthConstraint = LayoutOptions.MaxWidth;
 
-            if (float.IsInfinity(widthConstraint))
-                widthConstraint = finalRect.size.X;
-            if (_lastWidthConstraint != widthConstraint)
+            float widthConstraint = finalRect.size.X;
+            if ((_meshDirty || _lastWidthConstraint != widthConstraint) && !string.IsNullOrEmpty(_text))
             {
+                _meshDirty = false;
                 _lastWidthConstraint = widthConstraint;
                 UpdateMesh(widthConstraint);
             }
