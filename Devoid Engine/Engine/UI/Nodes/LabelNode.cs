@@ -7,6 +7,8 @@ namespace DevoidEngine.Engine.UI.Nodes
 {
     public class LabelNode : UINode
     {
+        public TextLayoutOptions LayoutOptions = TextLayoutOptions.Default;
+
         public string Text
         {
             get
@@ -17,16 +19,32 @@ namespace DevoidEngine.Engine.UI.Nodes
             {
                 _text = value;
 
-                var newMesh = TextMeshGenerator.Generate(Font, _text, Font.GetScaleForFontSize(Scale));
-                Size = TextMeshGenerator.Measure(Font, _text, Font.GetScaleForFontSize(Scale));
+                UpdateMesh(LayoutOptions.MaxWidth);
 
-                var oldMesh = _mesh;
-                _mesh = newMesh;
-
-                if (oldMesh != null)
-                    oldMesh.Dispose(); // this internally defers GPU delete
+                if (string.IsNullOrEmpty(_text))
+                {
+                    Size = new Vector2(
+                        0,
+                        TextMeshGenerator.Measure(
+                            Font,
+                            " ",
+                            Font.GetScaleForFontSize(Scale),
+                            LayoutOptions
+                        ).Y
+                    );
+                }
+                else
+                {
+                    Size = TextMeshGenerator.Measure(
+                        Font,
+                        _text,
+                        Font.GetScaleForFontSize(Scale),
+                        LayoutOptions
+                    );
+                }
             }
         }
+
         public FontInternal Font;
         public float Scale = 1f;
 
@@ -34,46 +52,80 @@ namespace DevoidEngine.Engine.UI.Nodes
         private Mesh _mesh;
         private string _text;
 
+        private float _lastWidthConstraint = float.PositiveInfinity;
+
         public LabelNode(string text, FontInternal font, float scale = 1f)
         {
             Font = font;
             Scale = scale;
             Text = text;
 
-            // Text should NOT expand by default
             Layout.FlexGrowMain = 0;
             Layout.FlexGrowCross = 0;
         }
 
+        private void UpdateMesh(float widthConstraint)
+        {
+            var opts = LayoutOptions;
+
+            if (!float.IsInfinity(widthConstraint))
+                opts.MaxWidth = widthConstraint;
+
+            var newMesh = TextMeshGenerator.Generate(
+                Font,
+                _text,
+                Font.GetScaleForFontSize(Scale),
+                opts
+            );
+
+            var oldMesh = _mesh;
+            _mesh = newMesh;
+
+            if (oldMesh != null)
+                oldMesh.Dispose();
+        }
+
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {
-            if (Font == null || string.IsNullOrEmpty(Text))
+            if (Font == null)
                 return Vector2.Zero;
 
-            return Size ?? Vector2.Zero;
+            var opts = LayoutOptions;
+
+            if (!float.IsInfinity(availableSize.X))
+                opts.MaxWidth = availableSize.X;
+
+            return TextMeshGenerator.Measure(
+                Font,
+                _text,
+                Font.GetScaleForFontSize(Scale),
+                opts
+            );
         }
 
         protected override void ArrangeCore(UITransform finalRect)
         {
             Rect = finalRect;
 
-            if (Font == null || string.IsNullOrEmpty(Text) || _mesh == null)
+            if (Font == null || string.IsNullOrEmpty(Text))
                 return;
 
+            float widthConstraint = LayoutOptions.MaxWidth;
 
-            // Render text inside the allocated rect
-            //UIRenderer.DrawText(
-            //    new UITransform(
-            //        finalRect.position,
-            //        finalRect.size
-            //    ),
-            //    _mesh,
-            //    Font.Atlas.GPUTexture
-            //);
+            if (float.IsInfinity(widthConstraint))
+                widthConstraint = finalRect.size.X;
+            if (_lastWidthConstraint != widthConstraint)
+            {
+                _lastWidthConstraint = widthConstraint;
+                UpdateMesh(widthConstraint);
+            }
         }
 
         protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
         {
+            if (Font == null || string.IsNullOrEmpty(Text) || _mesh == null)
+                return;
+
             Matrix4x4 local = UISystem.BuildTranslationModel(Rect);
             Matrix4x4 final = local * canvasModel;
 
@@ -83,15 +135,12 @@ namespace DevoidEngine.Engine.UI.Nodes
                 Material = Material,
                 Model = final
             });
-
-            // Not used — rendering happens in ArrangeCore like BoxNode
         }
 
         protected override void InitializeCore()
         {
             Material = UISystem.TextMaterial;
             Material.SetTexture("MAT_fontSDFAtlas", Font.Atlas.GPUTexture);
-            
         }
     }
 }

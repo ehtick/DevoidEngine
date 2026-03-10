@@ -8,40 +8,133 @@ namespace DevoidEngine.Engine.UI
 {
     public static class UISystem
     {
-        public static List<UINode> Roots;
+        public static List<UINode> Roots = new();
 
-        public static MaterialInstance UIMaterial
-        {
-            get => new MaterialInstance(uiMaterial);
-        }
-        public static MaterialInstance TextMaterial
-        {
-            get => new MaterialInstance(textMaterial);
-        }
+        public static UINode FocusedNode { get; private set; }
 
         private static Material uiMaterial;
         private static Material textMaterial;
 
         public static Mesh QuadMesh;
 
-        static UISystem()
-        {
-            Roots = new List<UINode>();
-        }
+        public static MaterialInstance UIMaterial => new MaterialInstance(uiMaterial);
+        public static MaterialInstance TextMaterial => new MaterialInstance(textMaterial);
 
         public static void Initialize()
         {
             QuadMesh = new Mesh();
             QuadMesh.SetVertices(Primitives.GetQuadVertex());
 
-            uiMaterial = new Material(new Shader("Engine/Content/Shaders/UI/basic"));
+            uiMaterial = new Material(
+                new Shader("Engine/Content/Shaders/UI/basic")
+            );
 
-            textMaterial = new Material(new Shader("Engine/Content/Shaders/UI/basic.vert.hlsl", "Engine/Content/Shaders/UI/sdf_text.frag.hlsl"));
+            textMaterial = new Material(
+                new Shader(
+                    "Engine/Content/Shaders/UI/basic.vert.hlsl",
+                    "Engine/Content/Shaders/UI/sdf_text.frag.hlsl"
+                )
+            );
 
-            for (int i = 0; i < Roots.Count; i++)
+            foreach (var root in Roots)
+                root.Initialize();
+        }
+
+        public static void AddRoot(UINode node)
+        {
+            Roots.Add(node);
+            node.Initialize();
+        }
+
+        public static void RemoveRoot(UINode node)
+        {
+            Roots.Remove(node);
+        }
+
+        public static void SetFocus(UINode node)
+        {
+            if (FocusedNode == node)
+                return;
+
+            FocusedNode?.OnBlur();
+
+            FocusedNode = node;
+
+            FocusedNode?.OnFocus();
+        }
+
+        public static void Update()
+        {
+            Vector2 screen = Screen.Size;
+
+            foreach (var root in Roots)
             {
-                Roots[i].Initialize();
+                root.Measure(screen);
+                root.Arrange(new UITransform(Vector2.Zero, screen));
             }
+        }
+
+        public static void HandleMouseDown(Vector2 mousePosition)
+        {
+            for (int i = Roots.Count - 1; i >= 0; i--)
+            {
+                var node = HitTest(Roots[i], mousePosition);
+
+                if (node != null)
+                {
+                    SetFocus(node);
+                    node.OnMouseDown(mousePosition);
+                    return;
+                }
+            }
+
+            SetFocus(null);
+        }
+
+        public static void HandleTextInput(char c)
+        {
+            FocusedNode?.OnTextInput(c);
+        }
+
+        public static void HandleKeyDown(Keys key)
+        {
+            FocusedNode?.OnKeyDown(key);
+        }
+
+        private static UINode HitTest(UINode node, Vector2 position)
+        {
+            if (!node.Visible)
+                return null;
+
+            for (int i = node._children.Count - 1; i >= 0; i--)
+            {
+                var hit = HitTest(node._children[i], position);
+                if (hit != null)
+                    return hit;
+            }
+
+            if (!node.BlockInput)
+            {
+                return null;
+            }
+
+            var rect = node.Rect;
+
+            Console.WriteLine(node.GetType().Name);
+            Console.WriteLine(rect.position);
+            Console.WriteLine(rect.size);
+            Console.WriteLine(position);
+
+            if (position.X >= rect.position.X &&
+                position.X <= rect.position.X + rect.size.X &&
+                position.Y >= rect.position.Y &&
+                position.Y <= rect.position.Y + rect.size.Y)
+            {
+                Console.WriteLine("HIT!");
+                return node;
+            }
+
+            return null;
         }
 
         public static Matrix4x4 BuildModel(UITransform t)
@@ -53,19 +146,11 @@ namespace DevoidEngine.Engine.UI
 
         public static Matrix4x4 BuildTranslationModel(UITransform t)
         {
-            return Matrix4x4.CreateTranslation(t.position.X, t.position.Y, 0f);
-        }
-
-
-        public static void Update()
-        {
-
-            for (int i = 0; i < Roots.Count; i++)
-            {
-                Roots[i].Measure(Screen.Size);
-                Roots[i].Arrange(new UITransform(Vector2.Zero, Screen.Size));
-            }
-
+            return Matrix4x4.CreateTranslation(
+                t.position.X,
+                t.position.Y,
+                0f
+            );
         }
     }
 }

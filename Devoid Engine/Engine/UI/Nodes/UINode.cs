@@ -15,7 +15,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             DEBUG_NUM_LOCAL = DEBUG_NUM_STATIC++;
         }
 
-
+        public bool BlockInput = false;
         public UITransform Rect { get; protected set; }
         public Vector2 DesiredSize { get; private set; }
         public LayoutOptions Layout { get; set; } = new LayoutOptions();
@@ -24,7 +24,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         public bool Visible = true;
         public bool Interactable = true;
 
-        protected readonly List<UINode> _children = new();
+        internal readonly List<UINode> _children = new();
 
 
 
@@ -88,6 +88,20 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected abstract Vector2 MeasureCore(Vector2 availableSize);
         protected abstract void ArrangeCore(UITransform finalRect);
         protected abstract void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel);
+
+        // Input handling
+
+        public virtual void OnMouseDown(Vector2 position) { }
+
+        public virtual void OnTextInput(char c) { }
+
+        public virtual void OnKeyDown(Keys key) { }
+
+        public virtual void OnFocus() { }
+
+        public virtual void OnBlur() { }
+
+        public IReadOnlyList<UINode> Children => _children;
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Utilities;
+﻿using DevoidEngine.Engine.UI;
+using DevoidEngine.Engine.Utilities;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -31,6 +32,7 @@ namespace DevoidEngine.Engine.Core
             {
                 layers[i].OnTextInput(textInputEvent);
             }
+            UISystem.HandleTextInput((char)unicode);
         }
 
         public void KeyDownInput(Keys key, int scanCode, string modifiers, bool caps)
@@ -47,6 +49,7 @@ namespace DevoidEngine.Engine.Core
             {
                 layers[i].OnKeyDown(keyboardEvent);
             }
+            UISystem.HandleKeyDown(key);
         }
 
         public void KeyUpInput(Keys key, int scanCode, string modifiers, bool caps)
@@ -105,6 +108,7 @@ namespace DevoidEngine.Engine.Core
             {
                 layers[i].OnMouseButton(mouseBtnEvent);
             }
+            UISystem.HandleMouseDown(Input.MousePosition);
         }
 
         public void ResizeLayers(int width, int height)

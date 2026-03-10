@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Core;
+﻿using BepuPhysics.Collidables;
+using DevoidEngine.Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace DevoidEngine.Engine.Physics
         void Initialize();
         void Step(float deltaTime);
 
-
+        bool IsTrigger(CollidableReference c);
         IPhysicsBody CreateBody(PhysicsBodyDescription desc, GameObject owner);
         IPhysicsStatic CreateStatic(PhysicsStaticDescription desc, GameObject owner);
         void RemoveBody(IPhysicsBody body);

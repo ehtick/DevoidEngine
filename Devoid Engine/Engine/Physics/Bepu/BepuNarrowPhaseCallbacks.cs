@@ -36,6 +36,18 @@ namespace DevoidEngine.Engine.Physics.Bepu
             out PairMaterialProperties pairMaterial)
             where TManifold : unmanaged, IContactManifold<TManifold>
         {
+            if (Backend.IsTrigger(pair.A) || Backend.IsTrigger(pair.B))
+            {
+                pairMaterial = new PairMaterialProperties
+                {
+                    FrictionCoefficient = 0f,
+                    MaximumRecoveryVelocity = 0f,
+                    SpringSettings = new SpringSettings(30f, 1f)
+                };
+                Backend.ReportCollision(pair.A, pair.B);
+                return false;
+            }
+
             var matA = MaterialLookup(pair.A);
             var matB = MaterialLookup(pair.B);
 
@@ -54,19 +66,19 @@ namespace DevoidEngine.Engine.Physics.Bepu
             pairMaterial = new PairMaterialProperties
             {
                 FrictionCoefficient = friction,
-                MaximumRecoveryVelocity = 2f,
+                MaximumRecoveryVelocity = restitution > 0f ? restitution * 10f : 0.1f,
                 SpringSettings = spring
             };
 
             // Enable restitution
-            if (restitution > 0f)
-            {
-                pairMaterial.SpringSettings = spring;
-                pairMaterial.MaximumRecoveryVelocity = MathF.Max(
-                    pairMaterial.MaximumRecoveryVelocity,
-                    restitution * 10f
-                );
-            }
+            //if (restitution > 0f)
+            //{
+            //    pairMaterial.SpringSettings = spring;
+            //    pairMaterial.MaximumRecoveryVelocity = MathF.Max(
+            //        pairMaterial.MaximumRecoveryVelocity,
+            //        restitution * 10f
+            //    );
+            //}
 
             if (manifold.Count > 0)
             {
@@ -85,6 +97,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
             int childIndexB,
             ref ConvexContactManifold manifold)
         {
+
+
             return true;
         }
     }

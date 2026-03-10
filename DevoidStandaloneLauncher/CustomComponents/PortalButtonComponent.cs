@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
 {
-    public class PortalButtonComponent : Component, ICollisionListener
+    public class PortalButtonComponent : Component
     {
         public override string Type => nameof(PortalButtonComponent);
 
@@ -23,11 +23,18 @@ namespace DevoidEngine.Engine.Components
         private Vector3 originalPosition;
         private float currentOffset = 0f;
 
-
+        private AreaComponent area;
 
         public override void OnStart()
         {
             originalPosition = gameObject.transform.LocalPosition;
+        }
+
+        public void SetTriggerArea(AreaComponent area)
+        {
+            this.area = area;
+            area.OnEnter += HandleEnter;
+            area.OnExit += HandleExit;
         }
 
         public override void OnUpdate(float dt)
@@ -36,13 +43,16 @@ namespace DevoidEngine.Engine.Components
 
             currentOffset = MathHelper.Lerp(currentOffset, target, dt * PressSpeed);
 
-            //gameObject.transform.LocalPosition =
-            //    originalPosition + new Vector3(0, currentOffset, 0);
+            area.gameObject.transform.Position = originalPosition + new Vector3(0, 0.6f, 0);
+
+            // Optional animation
+            gameObject.transform.LocalPosition =
+                originalPosition + new Vector3(0, currentOffset, 0);
         }
 
-        public void OnCollisionEnter(GameObject other)
+        private void HandleEnter(GameObject other)
         {
-            //Console.WriteLine("Button Enter!");
+            if (other == gameObject) { return; }
             var rb = other.GetComponent<RigidBodyComponent>();
             if (rb == null) return;
 
@@ -58,9 +68,9 @@ namespace DevoidEngine.Engine.Components
             }
         }
 
-        public void OnCollisionExit(GameObject other)
+        private void HandleExit(GameObject other)
         {
-            //Console.WriteLine("Button Exit!");
+            if (other == gameObject) { return; }
             var rb = other.GetComponent<RigidBodyComponent>();
             if (rb == null) return;
 
@@ -76,11 +86,6 @@ namespace DevoidEngine.Engine.Components
                     OnReleased?.Invoke();
                 }
             }
-        }
-
-        public void OnCollisionStay(GameObject other)
-        {
-
         }
     }
 }

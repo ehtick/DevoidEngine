@@ -23,6 +23,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
         private Dictionary<BodyHandle, IPhysicsBody> bodyWrappers = new();
         private Dictionary<StaticHandle, IPhysicsStatic> staticWrappers = new();
 
+        private Dictionary<BodyHandle, bool> bodyTriggers = new();
+
 
         public event Action<IPhysicsObject, IPhysicsObject> CollisionDetected;
 
@@ -70,6 +72,17 @@ namespace DevoidEngine.Engine.Physics.Bepu
             }
         }
 
+        public bool IsTrigger(CollidableReference c)
+        {
+            if (c.Mobility == CollidableMobility.Dynamic ||
+                c.Mobility == CollidableMobility.Kinematic)
+            {
+                if (bodyTriggers.TryGetValue(c.BodyHandle, out bool trigger))
+                    return trigger;
+            }
+
+            return false;
+        }
 
 
         public void Step(float deltaTime)
@@ -177,6 +190,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
             var wrapper = new BepuPhysicsBody(handle, simulation, desc.Material, this);
 
             bodyWrappers[handle] = wrapper;
+            bodyTriggers[handle] = desc.IsTrigger;
 
             return wrapper;
         }
@@ -334,6 +348,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
 
                 bodyToGameObject.Remove(b.Handle);
                 bodyMaterials.Remove(b.Handle);
+                bodyTriggers.Remove(b.Handle);   // ADD THIS
+                bodyWrappers.Remove(b.Handle);   // also remove wrapper
             } else
             {
                 Console.WriteLine("Removing Static bodies not implemented yet.");
@@ -357,7 +373,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
         {
             hit = default;
 
-            var handler = new RayHitHandler();
+            var handler = new RayHitHandler(this);
 
             simulation.RayCast(
                 ray.Origin,

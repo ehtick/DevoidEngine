@@ -23,15 +23,15 @@ namespace DevoidEngine.Engine.Components
         public float MouseSensitivity = 0.12f;
         public float MinPitch = -89f;
         public float MaxPitch = 89f;
-        public float GroundCheckDistance = 5f;
+        public float GroundCheckDistance = 1f;
 
         // ===============================
         // Shooting / Ammo
         // ===============================
 
         public float FireRate = 0.5f;
-        public float ProjectileSpeed = 80f;
-        public float ProjectileMass = 2f;
+        public float ProjectileSpeed = 50f;
+        public float ProjectileMass = 10f;
         public Vector3 ProjectileScale = new Vector3(0.2f);
 
         public int MaxAmmo = 6;
@@ -82,7 +82,7 @@ namespace DevoidEngine.Engine.Components
         public float InteractionDistance = 20f;
 
         public CanvasComponent UICanvas;
-        public LabelNode UIInteractionText;
+        //public LabelNode UIInteractionText;
 
         private PortalCubeComponent heldCube;
 
@@ -141,11 +141,11 @@ namespace DevoidEngine.Engine.Components
                 Align = AlignItems.End
             };
 
-            UIInteractionText = new LabelNode("T to interact", FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32), 21)
-            {
+            //UIInteractionText = new LabelNode("T to interact", FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32), 21)
+            //{
 
-            };
-            ROOT.Add(UIInteractionText);
+            //};
+            //ROOT.Add(UIInteractionText);
             UICanvas.Canvas.Add(ROOT);
 
             projectileMesh = new Mesh();
@@ -201,7 +201,7 @@ namespace DevoidEngine.Engine.Components
             if (Input.GetMouseDown(MouseButton.Left))
                 TryShoot();
 
-            if (Input.GetKey(Keys.E))
+            if (Input.GetKey(Keys.R))
                 StartReload();
 
             HandleDamage(dt);
@@ -537,7 +537,7 @@ namespace DevoidEngine.Engine.Components
             Vector3 origin = gameObject.transform.Position;
 
             return gameObject.Scene.Physics.Raycast(
-                new Ray(origin, -Vector3.UnitY),
+                new Ray(origin - Vector3.UnitY, -Vector3.UnitY),
                 GroundCheckDistance,
                 out RaycastHit hit
             );

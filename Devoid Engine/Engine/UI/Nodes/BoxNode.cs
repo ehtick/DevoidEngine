@@ -1,23 +1,68 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.UI;
-using DevoidEngine.Engine.UI.Nodes;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
     public class BoxNode : UINode
     {
+        private Texture2D _texture;
+
         public Texture2D Texture
         {
             get => _texture;
             set
             {
                 _texture = value;
+                UpdateMaterial();
             }
         }
 
-        Texture2D _texture;
+        public Vector4 Color
+        {
+            get => _color;
+            set
+            {
+                _color = value;
+                UpdateMaterial();
+            }
+        }
+
+        public float Opacity
+        {
+            get => _opacity;
+            set
+            {
+                _opacity = value;
+                UpdateMaterial();
+            }
+        }
+
+        public float BorderThickness = 0f;
+        public Vector4 BorderColor = new Vector4(0, 0, 0, 1);
+
+        private Vector4 _color = new Vector4(1, 1, 1, 1);
+        private float _opacity = 1f;
+
+        protected override void InitializeCore()
+        {
+            Material = UISystem.UIMaterial;
+            UpdateMaterial();
+        }
+
+        private void UpdateMaterial()
+        {
+            if (Material == null)
+                return;
+
+            Material.SetInt("useTexture", _texture != null ? 1 : 0);
+            Material.SetTexture("MAT_Texture", _texture);
+
+            Vector4 final = _color;
+            final.W *= _opacity;
+
+            Material.SetVector4("COLOR", final);
+        }
 
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {
@@ -27,7 +72,6 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected override void ArrangeCore(UITransform finalRect)
         {
             Rect = finalRect;
-            //UIRenderer.DrawRect(finalRect, DEBUG_NUM_LOCAL);
         }
 
         protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
@@ -36,25 +80,8 @@ namespace DevoidEngine.Engine.UI.Nodes
             {
                 Mesh = UISystem.QuadMesh,
                 Material = Material,
-                Model = UISystem.BuildModel(Rect),
+                Model = UISystem.BuildModel(Rect)
             });
         }
-
-        protected override void InitializeCore()
-        {
-            Material = UISystem.UIMaterial;
-
-            Vector3 color = new Vector3(
-                (DEBUG_NUM_LOCAL * 16807u % 255) / 255.0f,
-                (DEBUG_NUM_LOCAL * 48271u % 255) / 255.0f,
-                (DEBUG_NUM_LOCAL * 69621u % 255) / 255.0f
-            );
-
-            Material.SetInt("useTexture", _texture != null ? 1 : 0);
-            Material.SetTexture("MAT_Texture", _texture);
-
-            Material.SetVector4("COLOR", new Vector4(color, 1));
-        }
     }
-
 }

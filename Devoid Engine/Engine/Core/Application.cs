@@ -20,13 +20,15 @@ namespace DevoidEngine.Engine.Core
         public string Name;
         public int Width, Height;
         public bool forceVsync;
-        public bool useImGui;
-        public bool useImGuiDock;
         public bool useFullscreen;
 
         public bool useCustomTitlebar;
         public string customTitlebarLogo;
         public bool darkTitlebar;
+        public bool useImGui;
+        public bool useImGuiDock;
+        public bool useDebugConsole;
+
 
         public IGraphicsDevice graphicsDevice;
     }
@@ -110,6 +112,8 @@ namespace DevoidEngine.Engine.Core
             ImGuiRenderer.OnGUI += () => { LayerHandler.OnGUILayers(); };
 
 
+            // TODO: Add by conditional applicationSpec.useDebugConsole
+            AddLayer(new DebugConsole());
         }
 
         private void OnMouseMove(OpenTK.Windowing.Common.MouseMoveEventArgs obj)

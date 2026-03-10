@@ -17,12 +17,15 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         GameObject PlayerObject;
         GameObject CameraObject;
+
+        Texture2D gridTexture = Helper.loadImageAsTex("LauncherContents/Textures/grid_lvl_design.png", TextureFilter.Linear);
         MaterialInstance celMaterial = new MaterialInstance(new Material(new Shader("LauncherContents/Shaders/celtoon")));
-        
         FileReloader reloader;
-        string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/platform_test.fbx";
+        string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/devoid_l1.fbx";
         public override void OnInit()
         {
+            gridTexture.SetWrapMode(TextureWrapMode.Repeat, TextureWrapMode.Repeat);
+
             LoadDCC();
 
             Mesh mesh = new Mesh();
@@ -61,7 +64,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 DebugRenderSystem.AllowDebugDraw = mode1 == 1 ? true : false;
             }
 
-            if (Input.GetKeyDown(Keys.R))
+            if (Input.GetKeyDown(Keys.O))
             {
                 mode = mode == 0 ? 1 : 0;
                 if (mode == 1)
@@ -87,7 +90,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         {
             LevelSpawnRegistry.Register("Player_Flycam", (assimpNode, assimpScene) =>
             {
-                Cursor.SetCursorState(CursorState.Grabbed);
+                //Cursor.SetCursorState(CursorState.Grabbed);
 
                 Console.WriteLine("Added freecam");
                 GameObject camera = scene.addGameObject("Camera");
@@ -100,6 +103,30 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             });
 
+            LevelSpawnRegistry.Register("AreaTrigger", (assimpNode, assimpScene) =>
+            {
+                var go = scene.addGameObject(assimpNode.Name);
+
+                Importer.ApplyTransform(go, assimpNode);
+
+                AreaComponent area = go.AddComponent<AreaComponent>();
+                area.Shape = new PhysicsShapeDescription()
+                {
+                    Type = PhysicsShapeType.Box,
+                    Size = Importer.GetTransform(assimpNode).Item3 * 2
+                };
+
+                area.OnEnter += (GameObject g) =>
+                {
+                    Console.WriteLine("Entered Area");
+                };
+
+                area.OnExit += (GameObject g) =>
+                {
+                    Console.WriteLine("Exited Area");
+                };
+            });
+
 
             LevelSpawnRegistry.Register("Model", (assimpNode, assimpScene) =>
             {
@@ -110,10 +137,10 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
                 MeshRenderer mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
-                RenderThread.Enqueue(() =>
-                {
-                    mr.material = celMaterial;
-                });
+                //RenderThread.Enqueue(() =>
+                //{
+                //    mr.material = celMaterial;
+                //});
             });
 
             LevelSpawnRegistry.Register("Collideable_Static", (assimpNode, assimpScene) =>
@@ -127,7 +154,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 mr.AddMesh(mesh);
                 RenderThread.Enqueue(() =>
                 {
-                    mr.material = celMaterial;
+                    mr.material.SetTexture("MAT_AlbedoMap", gridTexture);
                 });
 
                 var rb = go.AddComponent<StaticCollider>();
@@ -173,7 +200,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 playerController.JumpForce = 7f;
                 playerController.MouseSensitivity = 0.15f;
 
-                Cursor.SetCursorState(CursorState.Grabbed);
+                //Cursor.SetCursorState(CursorState.Grabbed);
 
                 // Camera pivot (for vertical rotation)
                 GameObject cameraPivot = scene.addGameObject("CameraPivot");
@@ -233,13 +260,13 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
                 MeshRenderer mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
-                RenderThread.Enqueue(() =>
-                {
-                    mr.material = celMaterial;
-                });
+                //RenderThread.Enqueue(() =>
+                //{
+                //    mr.material = celMaterial;
+                //});
 
                 var rb = go.AddComponent<RigidBodyComponent>();
-                rb.Mass = 100;
+                rb.Mass = 20;
 
                 rb.Shape = new PhysicsShapeDescription()
                 {
@@ -294,10 +321,10 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
                 MeshRenderer mr = door.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
-                RenderThread.Enqueue(() =>
-                {
-                    mr.material = celMaterial;
-                });
+                //RenderThread.Enqueue(() =>
+                //{
+                //    mr.material = celMaterial;
+                //});
 
                 // 5️⃣ Rotate hinge only
                 hinge.AddComponent<DoorComponent>();
@@ -312,68 +339,39 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
                 MeshRenderer mr = button.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
-                RenderThread.Enqueue(() =>
-                {
-                    mr.material = celMaterial;
-                });
+                //RenderThread.Enqueue(() =>
+                //{
+                //    mr.material = celMaterial;
+                //});
 
-                var collider = button.AddComponent<StaticCollider>();
-                collider.Shape = new PhysicsShapeDescription()
+                var btnCollider = button.AddComponent<RigidBodyComponent>();
+                btnCollider.StartKinematic = true;
+                btnCollider.Shape = new PhysicsShapeDescription()
                 {
                     Type = PhysicsShapeType.Box,
-                    Size = Importer.GetTransform(assimpNode).Item3 * 2
+                    Size = new Vector3(2.2f, 2.2f, 1f)
                 };
-
-                collider.Material = new PhysicsMaterial()
+                btnCollider.Material = new PhysicsMaterial()
                 {
                     Restitution = 0,
                     Friction = 1f
                 };
 
 
-                //var buttonComp = button.AddComponent<PortalButtonComponent>();
+                GameObject button_internal = scene.addGameObject(assimpNode.Name + "internal");
+                Importer.ApplyTransform(button_internal, assimpNode);
 
-                //buttonComp.OnPressed += () =>
-                //{
-                //    scene.GetComponentsOfType<DoorComponent>()[0].Turn();
-                //};
-
-                //buttonComp.OnReleased += () =>
-                //{
-                //    scene.GetComponentsOfType<DoorComponent>()[0].Turn();
-                //};
-            });
-
-            LevelSpawnRegistry.Register("Trigger_Button1", (assimpNode, assimpScene) =>
-            {
-                GameObject button = scene.addGameObject(assimpNode.Name);
-
-                Importer.ApplyTransform(button, assimpNode);
-
-                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
-                MeshRenderer mr = button.AddComponent<MeshRenderer>();
-                RenderThread.Enqueue(() =>
-                {
-                    mr.material = celMaterial;
-                });
-
-                var collider = button.AddComponent<RigidBodyComponent>();
-                collider.StartKinematic = true;
+                var collider = button_internal.AddComponent<AreaComponent>();
                 collider.AllowSleep = false;
                 collider.Shape = new PhysicsShapeDescription()
                 {
                     Type = PhysicsShapeType.Box,
-                    Size = new Vector3(3, 3, 1)
-                };
-
-                collider.Material = new PhysicsMaterial()
-                {
-                    Restitution = 0,
-                    Friction = 1f
+                    Size = new Vector3(2.2f, 2.2f, 0.2f)
                 };
 
 
                 var buttonComp = button.AddComponent<PortalButtonComponent>();
+                buttonComp.SetTriggerArea(collider);
 
                 buttonComp.OnPressed += () =>
                 {
@@ -396,10 +394,10 @@ namespace DevoidStandaloneLauncher.Prototypes
                 MeshRenderer mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
 
-                RenderThread.Enqueue(() =>
-                {
-                    mr.material = celMaterial;
-                });
+                //RenderThread.Enqueue(() =>
+                //{
+                //    mr.material = celMaterial;
+                //});
 
                 //RenderThread.Enqueue(() =>
                 //{
@@ -454,7 +452,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                     1f);
 
                 lightComponent.Radius = 200f;
-                lightComponent.Intensity = 70f; // your scale
+                lightComponent.Intensity = 200f; // your scale
             });
         }
 

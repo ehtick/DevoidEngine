@@ -16,7 +16,20 @@ namespace DevoidEngine.Engine.Physics.Bepu
         public Vector3 Normal;
         public CollidableReference Collidable;
 
-        public bool AllowTest(CollidableReference collidable) => true;
+        private IPhysicsBackend backend;
+
+        public RayHitHandler(IPhysicsBackend backend)
+        {
+            this.backend = backend;
+        }
+
+        public bool AllowTest(CollidableReference collidable)
+        {
+            if (backend.IsTrigger(collidable))
+                return false;
+
+            return true;
+        }
 
         public bool AllowTest(CollidableReference collidable, int childIndex) => true;
 

@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using OpenTK.Audio.OpenAL;
 using SharpFont;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -95,7 +96,10 @@ namespace DevoidEngine.Engine.UI.Text
 
             Ascender = face.Size.Metrics.Ascender.ToSingle() * scaleFactor;
             Descender = face.Size.Metrics.Descender.ToSingle() * scaleFactor;
-            LineHeight = face.Size.Metrics.Height.ToSingle() * scaleFactor;
+            //LineHeight = face.Size.Metrics.Height.ToSingle() * scaleFactor;
+
+            LineHeight = (Ascender - Descender) * scaleFactor;
+            
 
             Metrics = new Dictionary<uint, GlyphMetric>();
             

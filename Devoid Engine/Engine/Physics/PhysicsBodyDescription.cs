@@ -15,6 +15,7 @@ namespace DevoidEngine.Engine.Physics
         public bool AllowSleep;
         public float Mass;
         public bool IsKinematic;
+        public bool IsTrigger;
 
         public PhysicsShapeDescription Shape;
 

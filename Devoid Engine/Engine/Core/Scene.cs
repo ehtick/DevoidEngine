@@ -26,7 +26,7 @@ namespace DevoidEngine.Engine.Core
         public event Action<Component>? OnComponentRemoved;
 
 
-        public  float fixedDeltaTime = 1f / 165f;
+        public  float fixedDeltaTime = 1f / 300f;
         private float accumulator = 0f;
 
         public Scene()

@@ -22,6 +22,11 @@ namespace DevoidEngine.Engine.Components
             this.mesh = mesh;
         }
 
+        public Mesh GetMesh()
+        {
+            return mesh;
+        }
+
         public void Collect(CameraComponent3D camera, CameraRenderContext viewData)
         {
             if (mesh == null || !gameObject.Enabled)

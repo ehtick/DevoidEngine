@@ -200,7 +200,7 @@ float3 ComputeLighting(
     float3 albedo)
 {
     float3 result = 0;
-    float shininess = 32.0;
+    float shininess = 0.0;
 
     // Directional
     for (uint i = 0; i < directionalLightCount; i++)
