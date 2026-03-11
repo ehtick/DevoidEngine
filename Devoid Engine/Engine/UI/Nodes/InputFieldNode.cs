@@ -130,6 +130,17 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
         }
 
+        protected override void UpdateCore(float deltaTime)
+        {
+            caretTimer += deltaTime;
+
+            if (caretTimer > 0.8f)
+            {
+                caretVisible = !caretVisible;
+                caretTimer = 0;
+            }
+        }
+
         public override void OnMouseDown(Vector2 position)
         {
             UISystem.SetFocus(this);
@@ -189,17 +200,6 @@ namespace DevoidEngine.Engine.UI.Nodes
         public override void OnBlur()
         {
             caretVisible = false;
-        }
-
-        public void Update(float deltaTime)
-        {
-            caretTimer += deltaTime;
-
-            if (caretTimer > 0.5f)
-            {
-                caretVisible = !caretVisible;
-                caretTimer = 0;
-            }
         }
     }
 }

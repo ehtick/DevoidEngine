@@ -76,10 +76,20 @@ namespace DevoidEngine.Engine.UI.Nodes
         }
         public void Render(List<RenderItem> renderList, Matrix4x4 model)
         {
+            if (!Visible) return;
             RenderCore(renderList, model);
             for (int i = 0; i < _children.Count; i++)
             {
                 _children[i].Render(renderList, model);
+            }
+        }
+
+        public void Update(float deltaTime)
+        {
+            UpdateCore(deltaTime);
+            for (int i = 0; i < _children.Count; i++)
+            {
+                _children[i].Update(deltaTime);
             }
         }
 
@@ -88,6 +98,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected abstract Vector2 MeasureCore(Vector2 availableSize);
         protected abstract void ArrangeCore(UITransform finalRect);
         protected abstract void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel);
+        protected abstract void UpdateCore(float deltaTime);
 
         // Input handling
 

@@ -63,12 +63,13 @@ namespace DevoidEngine.Engine.UI
             FocusedNode?.OnFocus();
         }
 
-        public static void Update()
+        public static void Update(float deltaTime)
         {
             Vector2 screen = Screen.Size;
 
             foreach (var root in Roots)
             {
+                root.Update(deltaTime);
                 root.Measure(screen);
                 root.Arrange(new UITransform(Vector2.Zero, screen));
             }

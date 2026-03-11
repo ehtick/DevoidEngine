@@ -178,5 +178,10 @@ namespace DevoidEngine.Engine.UI.Nodes
             Material = UISystem.TextMaterial;
             Material.SetTexture("MAT_fontSDFAtlas", Font.Atlas.GPUTexture);
         }
+
+        protected override void UpdateCore(float deltaTime)
+        {
+
+        }
     }
 }

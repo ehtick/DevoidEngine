@@ -32,8 +32,8 @@ namespace DevoidEngine.Engine.UI.Text
                 Width = Width,
                 Height = Height,
                 IsDepthStencil = false,
-                GenerateMipmaps = false,
-                MipLevels = 1,
+                GenerateMipmaps = true,
+                MipLevels = 0,
                 IsRenderTarget = true,
                 IsMutable = false,
             });
@@ -41,6 +41,7 @@ namespace DevoidEngine.Engine.UI.Text
             GPUTexture.SetFilter(DevoidGPU.TextureFilter.Linear, DevoidGPU.TextureFilter.Linear);
 
             GPUTexture.SetData(TextureData);
+            GPUTexture.GenerateMipmaps();
         }
 
         internal void Pack(Dictionary<uint, BitmapData> glyphs)

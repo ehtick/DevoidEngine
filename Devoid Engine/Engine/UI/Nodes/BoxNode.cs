@@ -83,5 +83,10 @@ namespace DevoidEngine.Engine.UI.Nodes
                 Model = UISystem.BuildModel(Rect)
             });
         }
+
+        protected override void UpdateCore(float deltaTime)
+        {
+
+        }
     }
 }

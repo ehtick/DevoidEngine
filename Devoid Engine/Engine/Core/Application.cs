@@ -206,7 +206,7 @@ namespace DevoidEngine.Engine.Core
 
             LayerHandler.UpdateLayers((float)deltaTime);
 
-            UISystem.Update();
+            UISystem.Update((float)deltaTime);
 
             FramePipeline.ExecuteUpdateThread((float)deltaTime);
 

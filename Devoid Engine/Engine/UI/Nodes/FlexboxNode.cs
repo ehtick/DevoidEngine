@@ -226,5 +226,10 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
 
         }
+
+        protected override void UpdateCore(float deltaTime)
+        {
+
+        }
     }
 }
