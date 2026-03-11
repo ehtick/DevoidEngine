@@ -57,7 +57,7 @@ namespace DevoidEngine.Engine.Core
             BoxNode background = new BoxNode()
             {
                 Size = new Vector2(600, 350),
-                Color = new Vector4(0, 1, 0, 0.2f)
+                Color = new Vector4(0, 0, 0, 0.9f)
             };
 
             logArea = new FlexboxNode()
@@ -89,6 +89,12 @@ namespace DevoidEngine.Engine.Core
         public override void OnUpdate(float deltaTime)
         {
             
+        }
+
+        public override void OnRender(float deltaTime)
+        {
+            //Matrix4x4 model = UISystem.BuildModel(new UITransform(new Vector2(10, 10), new Vector2(100, 100)));
+            //DebugRenderSystem.DrawRectUI(model);
         }
 
         public override void OnLateRender()

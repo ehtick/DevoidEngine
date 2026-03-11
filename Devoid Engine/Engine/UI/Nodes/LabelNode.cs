@@ -108,12 +108,15 @@ namespace DevoidEngine.Engine.UI.Nodes
             var opts = LayoutOptions;
             opts.MaxWidth = widthConstraint;
 
-            return TextMeshGenerator.Measure(
+            Vector2 textSize = TextMeshGenerator.Measure(
                 Font,
                 _text,
                 Font.GetScaleForFontSize(Scale),
                 opts
             );
+
+            textSize.Y = Math.Max((Font.Ascender - Font.Descender) * Font.GetScaleForFontSize(Scale), textSize.Y);
+            return textSize;
         }
 
         protected override void ArrangeCore(UITransform finalRect)
@@ -148,6 +151,26 @@ namespace DevoidEngine.Engine.UI.Nodes
                 Material = Material,
                 Model = final
             });
+        }
+
+        public Vector2 GetCursorPosition(int characterIndex, float widthConstraint)
+        {
+            if (Font == null || string.IsNullOrEmpty(Text) || characterIndex <= 0)
+                return Vector2.Zero;
+
+            int safeIndex = Math.Clamp(characterIndex, 0, Text.Length);
+            string substring = Text.Substring(0, safeIndex);
+
+            var opts = LayoutOptions;
+            opts.MaxWidth = widthConstraint;
+
+            // USE THE NEW METHOD HERE, NOT Measure()!
+            return TextMeshGenerator.GetCursorPosition(
+                Font,
+                substring,
+                Font.GetScaleForFontSize(Scale),
+                opts
+            );
         }
 
         protected override void InitializeCore()

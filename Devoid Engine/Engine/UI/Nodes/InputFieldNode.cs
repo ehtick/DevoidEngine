@@ -18,6 +18,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         LabelNode label;
         BoxNode caret;
         BoxNode background;
+        BoxNode foreground;
 
         FontInternal font;
 
@@ -37,6 +38,12 @@ namespace DevoidEngine.Engine.UI.Nodes
             background = new BoxNode()
             {
                 Color = BackgroundColor,
+                ParticipatesInLayout = false
+            };
+
+            foreground = new BoxNode()
+            {
+                Color = new Vector4(1, 0, 0, 1),
                 ParticipatesInLayout = false
             };
 
@@ -60,79 +67,67 @@ namespace DevoidEngine.Engine.UI.Nodes
             Add(background);
             Add(label);
             Add(caret);
+            //Add(foreground);
         }
 
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {
             label.Text = Text;
 
-            Vector2 textSize = label.Measure(
-                new Vector2(
-                    availableSize.X - Padding.X * 2,
-                    float.PositiveInfinity
-                )
-            );
+            float availableWidth = availableSize.X;
+            float textMaxWidth = availableWidth - (Padding.X * 2);
+            if (textMaxWidth < 0) textMaxWidth = 0;
 
-            return new Vector2(
-                availableSize.X,
-                textSize.Y + Padding.Y * 2
-            );
+            // 1. Tell the label to measure itself using the constrained width
+            label.Measure(new Vector2(textMaxWidth, float.PositiveInfinity));
+
+            // 2. The label now knows its own height (including your empty-text line-height logic!)
+            float requiredHeight = label.DesiredSize.Y + (Padding.Y * 2);
+
+            return new Vector2(availableWidth, requiredHeight);
         }
 
         protected override void ArrangeCore(UITransform finalRect)
         {
             Rect = finalRect;
 
-            background.Color = BackgroundColor;
+            float textMaxWidth = finalRect.size.X - (Padding.X * 2);
+            if (textMaxWidth < 0) textMaxWidth = 0;
 
+            // 1. We might need to re-measure the label if the Arrange width is 
+            // strictly different from the Measure width.
+            label.Measure(new Vector2(textMaxWidth, float.PositiveInfinity));
+
+            float requiredHeight = label.DesiredSize.Y + (Padding.Y * 2);
+
+            // 2. Arrange Background (Width of container, Height of Label + Padding)
+            background.Color = BackgroundColor;
             background.Arrange(new UITransform(
                 finalRect.position,
-                finalRect.size
+                new Vector2(finalRect.size.X, requiredHeight)
             ));
 
+            // 3. Arrange Label
             Vector2 contentPos = finalRect.position + Padding;
-
-            Vector2 labelSize = new Vector2(
-                finalRect.size.X - Padding.X * 2,
-                label.DesiredSize.Y
-            );
-
             label.Arrange(new UITransform(
                 contentPos,
-                labelSize
+                // Give it the full textMaxWidth, NOT the shrink-wrapped label.DesiredSize.X!
+                new Vector2(textMaxWidth, label.DesiredSize.Y)
             ));
 
-            // Measure caret position based on substring
-            string left = CaretIndex > 0
-                ? Text.Substring(0, CaretIndex)
-                : "";
-
-            float textWidth = finalRect.size.X - Padding.X * 2;
-
-            var opts = TextLayoutOptions.Default;
-            opts.MaxWidth = textWidth;
-            opts.Overflow = TextOverflow.Clip;
-
-            Vector2 caretOffset =
-                TextMeshGenerator.Measure(
-                    font,
-                    left,
-                    font.GetScaleForFontSize(fontSize),
-                    opts
-                );
+            // 4. Arrange Caret (Using our new cleanly encapsulated method!)
+            Vector2 caretOffset = label.GetCursorPosition(CaretIndex, textMaxWidth);
 
             caret.Color = CaretColor;
             caret.Visible = caretVisible;
-
             caret.Arrange(new UITransform(
-                contentPos + new Vector2(caretOffset.X, 0),
-                caret.Size ?? new Vector2(2, finalRect.size.Y - Padding.Y * 2)
+                contentPos + new Vector2(caretOffset.X, caretOffset.Y),
+                caret.Size ?? new Vector2(2, (font.Ascender - font.Descender) * font.GetScaleForFontSize(fontSize))
             ));
         }
 
         protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
         {
-
         }
 
         public override void OnMouseDown(Vector2 position)

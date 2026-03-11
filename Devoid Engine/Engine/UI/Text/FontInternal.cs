@@ -98,7 +98,7 @@ namespace DevoidEngine.Engine.UI.Text
             Descender = face.Size.Metrics.Descender.ToSingle() * scaleFactor;
             //LineHeight = face.Size.Metrics.Height.ToSingle() * scaleFactor;
 
-            LineHeight = (Ascender - Descender) * scaleFactor;
+            LineHeight = (Ascender - Descender);
             
 
             Metrics = new Dictionary<uint, GlyphMetric>();

@@ -16,15 +16,25 @@ namespace DevoidEngine.Engine.Rendering
         public Vector4 Color;
     }
 
+    public struct DebugRect
+    {
+        public Matrix4x4 Model;
+        public Vector4 Color;
+    }
+
     public static class DebugRenderSystem
     {
         static Shader debugShader;
         static MaterialInstance debugMaterial;
-        static RenderState debugRenderState;
+
+        static RenderState debug3DRenderState;
+        static RenderState debug2DRenderState;
 
         static Mesh debugCube;
+        static Mesh debugQuad;
 
         static List<DebugCube> cubes = new();
+        static List<DebugRect> rects = new();
 
         public static bool AllowDebugDraw = true;
 
@@ -36,14 +46,28 @@ namespace DevoidEngine.Engine.Rendering
             debugCube.SetVertices(Primitives.GetCubeLineVertices());
             debugCube.SetIndices(Primitives.GetCubeLineIndices());
 
+            debugQuad = new Mesh();
+            debugQuad.SetVertices(Primitives.GetQuadLineVertices());
+            debugQuad.SetIndices(Primitives.GetQuadLineIndices());
+
 
             debugShader = new Shader("Engine/Content/Shaders/Testing/debugShader");
             debugMaterial = new MaterialInstance(new Material(debugShader));
-            debugRenderState = new RenderState()
+            debug3DRenderState = new RenderState()
             {
                 CullMode = CullMode.None,
                 DepthTest = DepthTest.LessEqual,
                 DepthWrite = true,
+                FillMode = FillMode.Solid,
+                PrimitiveType = PrimitiveType.Lines,
+                BlendMode = BlendMode.Opaque
+            };
+
+            debug2DRenderState = new RenderState()
+            {
+                CullMode = CullMode.None,
+                DepthTest = DepthTest.Disabled,
+                DepthWrite = false,
                 FillMode = FillMode.Solid,
                 PrimitiveType = PrimitiveType.Lines,
                 BlendMode = BlendMode.Opaque
@@ -58,6 +82,14 @@ namespace DevoidEngine.Engine.Rendering
             });
         }
 
+        public static void DrawRectUI(Matrix4x4 model)
+        {
+            rects.Add(new DebugRect()
+            {
+                Model = model,
+                Color = new Vector4(0, 0.3f, 0.2f, 1)
+            });
+        }
         public static void Render(CameraData cameraData, Framebuffer cameraRenderSurface)
         {
             if (cubes.Count == 0 || !AllowDebugDraw)
@@ -70,11 +102,11 @@ namespace DevoidEngine.Engine.Rendering
 
             RenderBase.SetupCamera(cameraData); // 🔥 THIS IS MISSING
 
-            List<RenderItem> renderItems = new List<RenderItem>();
+            List<RenderItem> renderItems3D = new List<RenderItem>();
 
             for (int i = 0; i < cubes.Count; i++)
             {
-                renderItems.Add(new RenderItem()
+                renderItems3D.Add(new RenderItem()
                 {
                     Material = debugMaterial,
                     Mesh = debugCube,
@@ -82,14 +114,33 @@ namespace DevoidEngine.Engine.Rendering
                 });
             }
 
-            RenderBase.Execute(renderItems, debugRenderState);
+            RenderBase.Execute(renderItems3D, debug3DRenderState);
 
+            List<RenderItem> renderItems2D = new List<RenderItem>();
+
+            RenderBase.SetupCamera(UIRenderer.ScreenData);
+
+            for (int i = 0;i < rects.Count; i++)
+            {
+                renderItems2D.Add(new RenderItem()
+                {
+                    Material = debugMaterial,
+                    Mesh = debugQuad,
+                    Model = rects[i].Model
+                });
+            }
+
+            RenderBase.Execute(renderItems2D, debug2DRenderState);
+
+            renderItems3D.Clear();
+            renderItems2D.Clear();
             ClearDebugShapes();
         }
 
         public static void ClearDebugShapes()
         {
             cubes.Clear();
+            rects.Clear();
         }
     }
 }

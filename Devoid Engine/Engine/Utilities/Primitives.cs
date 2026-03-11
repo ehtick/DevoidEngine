@@ -152,7 +152,26 @@ namespace DevoidEngine.Engine.Utilities
             };
         }
 
-
+        public static Vertex[] GetQuadLineVertices()
+        {
+            return new Vertex[]
+            {
+                new Vertex(new Vector3(0.0f, 0.0f, 0.0f), Vector3.UnitZ, new Vector2(0, 0)), // 0 bottom-left
+                new Vertex(new Vector3(1.0f, 0.0f, 0.0f), Vector3.UnitZ, new Vector2(1, 0)), // 1 bottom-right
+                new Vertex(new Vector3(1.0f, 1.0f, 0.0f), Vector3.UnitZ, new Vector2(1, 1)), // 2 top-right
+                new Vertex(new Vector3(0.0f, 1.0f, 0.0f), Vector3.UnitZ, new Vector2(0, 1)), // 3 top-left
+            };
+        }
+        public static int[] GetQuadLineIndices()
+        {
+            return new int[]
+            {
+                0, 1, // bottom
+                1, 2, // right
+                2, 3, // top
+                3, 0  // left
+            };
+        }
 
     }
 }
