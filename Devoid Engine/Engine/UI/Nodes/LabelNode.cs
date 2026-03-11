@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Text;
 using System.Numerics;
@@ -142,7 +143,15 @@ namespace DevoidEngine.Engine.UI.Nodes
             if (Font == null || string.IsNullOrEmpty(Text) || _mesh == null)
                 return;
 
-            Matrix4x4 local = UISystem.BuildTranslationModel(Rect);
+            Vector2 pos = Rect.position;
+
+            pos.X = MathF.Round(pos.X);
+            pos.Y = MathF.Round(pos.Y);
+
+            //Matrix4x4 model =
+            //    Matrix4x4.CreateTranslation(pos.X, pos.Y, 0);
+
+            Matrix4x4 local = UISystem.BuildTranslationModel(new UITransform(pos, Rect.size));
             Matrix4x4 final = local * canvasModel;
 
             renderList.Add(new RenderItem()

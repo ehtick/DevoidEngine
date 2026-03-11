@@ -188,11 +188,28 @@ namespace DevoidEngine.Engine.UI.Text
                         var vert = vertices[v];
                         var position = vert.Position;
                         position.X += offset;
-                        Vertex newVert = new Vertex(position, vert.Normal, vert.UV1, vert.Tangent, vert.BiTangent);
-                        vertices[v] = newVert;
+                        vertices[v] = new Vertex(position, vert.Normal, vert.UV1, vert.Tangent, vert.BiTangent);
                     }
                 }
             }
+
+            // -------- PIXEL SNAP FIX (single offset) --------
+
+            float snapX = MathF.Round(startX) - startX;
+            float snapY = MathF.Round(startY) - startY;
+
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                var vert = vertices[i];
+                var pos = vert.Position;
+
+                pos.X += snapX;
+                pos.Y += snapY;
+
+                vertices[i] = new Vertex(pos, vert.Normal, vert.UV1, vert.Tangent, vert.BiTangent);
+            }
+
+            // -----------------------------------------------
 
             Mesh mesh = new Mesh();
             mesh.SetVertices(vertices.ToArray());

@@ -25,7 +25,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         float caretTimer;
         bool caretVisible = true;
 
-        const float fontSize = 18f;
+        const float fontSize = 9f;
 
         public InputFieldNode(FontInternal font)
         {

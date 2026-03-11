@@ -74,6 +74,7 @@ namespace DevoidEngine.Engine.UI.Text
         private const int TargetSpread = 8;
         public const int AtlasTileSize = 64;
         private const int highResSourceSize = 512;
+        private Vector2 AtlasSize = new Vector2(2048, 2048);
 
         public readonly float Ascender;
         public readonly float Descender;
@@ -129,7 +130,7 @@ namespace DevoidEngine.Engine.UI.Text
             // ============================================================
             if (File.Exists(loadPath + ".bin"))
             {
-                Atlas = new GlyphAtlas(2048, 2048);
+                Atlas = new GlyphAtlas((int)AtlasSize.X, (int)AtlasSize.Y);
                 LoadFromDisk(loadPath + ".bin");
                 Atlas.UploadGPU();
                 return;
@@ -151,7 +152,7 @@ namespace DevoidEngine.Engine.UI.Text
                 charCode = face.GetNextChar(charCode, out glyphIndex);
             }
 
-            Atlas = new GlyphAtlas(2048, 2048);
+            Atlas = new GlyphAtlas((int)AtlasSize.X, (int)AtlasSize.Y);
             Atlas.Pack(rawGlyphs);
             Atlas.UploadGPU();
 
