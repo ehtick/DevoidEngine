@@ -65,6 +65,8 @@ namespace DevoidEngine.Engine.UI
 
         public static void Update(float deltaTime)
         {
+            
+
             Vector2 screen = Screen.Size;
 
             foreach (var root in Roots)
@@ -92,6 +94,20 @@ namespace DevoidEngine.Engine.UI
             SetFocus(null);
         }
 
+        public static void HandleMouseWheel(Vector2 mousePosition, float delta)
+        {
+            for (int i = Roots.Count - 1; i >= 0; i--)
+            {
+                var node = HitTest(Roots[i], mousePosition);
+                Console.WriteLine(node.GetType().Name);
+
+                if (node != null)
+                {
+                    node.OnMouseWheel(delta);
+                    return;
+                }
+            }
+        }
         public static void HandleTextInput(char c)
         {
             FocusedNode?.OnTextInput(c);
@@ -121,17 +137,16 @@ namespace DevoidEngine.Engine.UI
 
             var rect = node.Rect;
 
-            Console.WriteLine(node.GetType().Name);
-            Console.WriteLine(rect.position);
-            Console.WriteLine(rect.size);
-            Console.WriteLine(position);
+            //Console.WriteLine(node.GetType().Name);
+            //Console.WriteLine(rect.position);
+            //Console.WriteLine(rect.size);
+            //Console.WriteLine(position);
 
             if (position.X >= rect.position.X &&
                 position.X <= rect.position.X + rect.size.X &&
                 position.Y >= rect.position.Y &&
                 position.Y <= rect.position.Y + rect.size.Y)
             {
-                Console.WriteLine("HIT!");
                 return node;
             }
 

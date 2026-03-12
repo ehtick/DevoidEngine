@@ -17,7 +17,7 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         LabelNode label;
         BoxNode caret;
-        public BoxNode background;
+        BoxNode background;
         BoxNode foreground;
 
         FontInternal font;

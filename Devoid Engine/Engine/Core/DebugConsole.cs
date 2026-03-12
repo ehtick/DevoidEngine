@@ -33,7 +33,7 @@ namespace DevoidEngine.Engine.Core
         FontInternal font;
 
         FlexboxNode consolePanel;
-        FlexboxNode logArea;
+        ScrollNode logArea;
         InputFieldNode inputLabel;
         BoxNode background;
 
@@ -68,7 +68,7 @@ namespace DevoidEngine.Engine.Core
                 Color = new Vector4(0, 0, 0, 0.9f)
             };
 
-            logArea = new FlexboxNode()
+            logArea = new ScrollNode()
             {
                 Direction = FlexDirection.Column,
                 Layout = new LayoutOptions()
