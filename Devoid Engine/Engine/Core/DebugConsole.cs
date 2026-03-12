@@ -67,15 +67,15 @@ namespace DevoidEngine.Engine.Core
             background = new BoxNode()
             {
                 Size = new Vector2(600, 350),
-                Color = new Vector4(0, 0, 0, 0.9f)
+                Color = new Vector4(0, 0, 0, 0.2f)
             };
 
             logAreaContainer = new ContainerNode()
             {
-                Color = new Vector4(1, 0, 0, 0.1f),
+                Color = new Vector4(1, 0, 0, 0f),
                 Padding = new Padding()
                 {
-                    Top = 5,
+                    Top = 50,
                     Left = 5
                 }
             };

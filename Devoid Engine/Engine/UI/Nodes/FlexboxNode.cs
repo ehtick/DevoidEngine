@@ -51,13 +51,19 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected override void ArrangeCore(UITransform finalRect)
         {
             Rect = finalRect;
-            //Console.WriteLine("---- HEADER CONTAINER ----");
-            //Console.WriteLine($"finalRect.size: {finalRect.size}");
-            //Console.WriteLine($"DesiredSize: {DesiredSize}");
 
+            Vector2 contentPos = new Vector2(
+                finalRect.position.X + Padding.Left,
+                finalRect.position.Y + Padding.Top
+            );
 
-            float containerMain = FlexboxTools.Main(finalRect.size, Direction);
-            float containerCross = FlexboxTools.Cross(finalRect.size, Direction);
+            Vector2 contentSize = new Vector2(
+                finalRect.size.X - Padding.Left - Padding.Right,
+                finalRect.size.Y - Padding.Top - Padding.Bottom
+            );
+
+            float containerMain = FlexboxTools.Main(contentSize, Direction);
+            float containerCross = FlexboxTools.Cross(contentSize, Direction);
 
             List<UINode> children = _children.Where(x => x.Visible && x.ParticipatesInLayout).ToList();
 
