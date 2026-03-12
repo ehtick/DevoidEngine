@@ -83,6 +83,7 @@ namespace DevoidEngine.Engine.UI.Nodes
                 Model = UISystem.BuildModel(Rect)
             });
 
+
             UIScissorStack.Push(Rect.position.X, Rect.position.Y, Rect.size.X, Rect.size.Y);
             for (int i = 0; i < _children.Count; i++)
             {

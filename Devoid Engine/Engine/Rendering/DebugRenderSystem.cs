@@ -92,7 +92,7 @@ namespace DevoidEngine.Engine.Rendering
         }
         public static void Render(CameraData cameraData, Framebuffer cameraRenderSurface)
         {
-            if (cubes.Count == 0 || !AllowDebugDraw)
+            if (!AllowDebugDraw)
             {
                 ClearDebugShapes();
                 return;
@@ -131,6 +131,7 @@ namespace DevoidEngine.Engine.Rendering
             }
 
             RenderBase.Execute(renderItems2D, debug2DRenderState);
+
 
             renderItems3D.Clear();
             renderItems2D.Clear();

@@ -35,6 +35,7 @@ namespace DevoidEngine.Engine.Core
         FlexboxNode consolePanel;
         FlexboxNode logArea;
         InputFieldNode inputLabel;
+        BoxNode background;
 
         List<string> logs = new();
         string currentInput = "";
@@ -61,7 +62,7 @@ namespace DevoidEngine.Engine.Core
             };
 
             // background
-            BoxNode background = new BoxNode()
+            background = new BoxNode()
             {
                 Size = new Vector2(600, 350),
                 Color = new Vector4(0, 0, 0, 0.9f)
@@ -183,6 +184,10 @@ namespace DevoidEngine.Engine.Core
         {
             //Matrix4x4 model = UISystem.BuildModel(new UITransform(new Vector2(10, 10), new Vector2(100, 100)));
             //DebugRenderSystem.DrawRectUI(model);
+
+            //DebugRenderSystem.DrawRectUI(
+            //    UISystem.BuildModel(background.Rect)
+            //);
         }
 
         public override void OnLateRender()

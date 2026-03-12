@@ -1,4 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Rendering;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.UI
@@ -15,9 +16,9 @@ namespace DevoidEngine.Engine.UI
         public static void Push(float x, float y, float width, float height)
         {
             // Convert from UI top-left origin → GPU bottom-left origin
-            float gpuY = Screen.Size.Y - (y + height);
+            //float gpuY = Renderer.Height - (y + height);
 
-            Vector4 rect = new Vector4(x, gpuY, width, height);
+            Vector4 rect = new Vector4(x, y, width, height);
 
             if (stack.Count > 0)
             {
@@ -25,6 +26,10 @@ namespace DevoidEngine.Engine.UI
             }
 
             stack.Push(rect);
+
+            //DebugRenderSystem.DrawRectUI(
+            //    UISystem.BuildModel(new UITransform(new Vector2(rect.X, rect.Y), new Vector2(rect.Z, rect.W)))
+            //);
         }
 
         public static void Pop()
