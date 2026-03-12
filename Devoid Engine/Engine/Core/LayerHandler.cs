@@ -93,7 +93,7 @@ namespace DevoidEngine.Engine.Core
             {
                 layers[i].OnMouseWheel(mouseWheelEvent);
             }
-            UISystem.HandleMouseWheel(Input.MousePosition, Input.MouseScrollDelta.Y);
+            UISystem.HandleMouseWheel(Input.MousePosition, mouseWheelEvent.Offset.Y);
         }
 
         public void OnMouseButtonEvent(OpenTK.Windowing.Common.MouseButtonEventArgs obj)

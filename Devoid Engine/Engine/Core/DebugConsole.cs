@@ -167,6 +167,10 @@ namespace DevoidEngine.Engine.Core
             foreach (var log in logs)
             {
                 logArea.Add(new LabelNode(log, font, 16));
+                logArea.Add(new BoxNode() {
+                    Size = new Vector2(600, 350),
+                    Color = new Vector4(0, 1, 0, 0.9f)
+                });
             }
         }
 

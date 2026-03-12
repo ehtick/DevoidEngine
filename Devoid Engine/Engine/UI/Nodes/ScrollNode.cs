@@ -16,6 +16,11 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         public float ScrollSpeed = 30f;
 
+        protected override void InitializeCore()
+        {
+            BlockInput = true;
+        }
+
         protected override Vector2 MeasureCore(Vector2 available)
         {
             contentSize = base.MeasureCore(available);
@@ -28,14 +33,16 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
             Rect = finalRect;
 
-            Vector2 shiftedPos = finalRect.position - ScrollOffset;
+            // normal flex layout
+            base.ArrangeCore(finalRect);
 
-            UITransform contentRect = new UITransform(
-                shiftedPos,
-                finalRect.size
-            );
+            // shift children by scroll offset
+            for (int i = 0; i < _children.Count; i++)
+            {
+                var child = _children[i];
 
-            base.ArrangeCore(contentRect);
+                child.Rect.position -= ScrollOffset;
+            }
         }
 
         public override void Render(List<RenderItem> renderList, Matrix4x4 canvas)
@@ -60,6 +67,7 @@ namespace DevoidEngine.Engine.UI.Nodes
 
             ScrollOffset.Y = Math.Clamp(ScrollOffset.Y, 0, maxScroll);
 
+            Console.WriteLine(delta);
             Console.WriteLine(ScrollOffset);
         }
 

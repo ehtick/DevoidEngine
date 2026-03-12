@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    public class BoxNode : FlexboxNode
+    public class BoxNode : UINode
     {
         private Texture2D _texture;
 
@@ -64,17 +64,17 @@ namespace DevoidEngine.Engine.UI.Nodes
             Material.SetVector4("COLOR", final);
         }
 
-        //protected override Vector2 MeasureCore(Vector2 availableSize)
-        //{
-        //    return Size ?? Vector2.Zero;
-        //}
+        protected override Vector2 MeasureCore(Vector2 availableSize)
+        {
+            return Size ?? Vector2.Zero;
+        }
 
-        //protected override void ArrangeCore(UITransform finalRect)
-        //{
-        //    Rect = finalRect;
-        //}
+        protected override void ArrangeCore(UITransform finalRect)
+        {
+            Rect = finalRect;
+        }
 
-        public override void Render(List<RenderItem> renderList, Matrix4x4 canvasModel)
+        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
         {
             renderList.Add(new RenderItem()
             {
@@ -82,14 +82,6 @@ namespace DevoidEngine.Engine.UI.Nodes
                 Material = Material,
                 Model = UISystem.BuildModel(Rect)
             });
-
-
-            UIScissorStack.Push(Rect.position.X, Rect.position.Y, Rect.size.X, Rect.size.Y);
-            for (int i = 0; i < _children.Count; i++)
-            {
-                _children[i].Render(renderList, canvasModel);
-            }
-            UIScissorStack.Pop();
         }
 
         protected override void UpdateCore(float deltaTime)

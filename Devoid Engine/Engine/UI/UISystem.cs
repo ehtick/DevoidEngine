@@ -99,7 +99,6 @@ namespace DevoidEngine.Engine.UI
             for (int i = Roots.Count - 1; i >= 0; i--)
             {
                 var node = HitTest(Roots[i], mousePosition);
-                Console.WriteLine(node.GetType().Name);
 
                 if (node != null)
                 {
