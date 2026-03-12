@@ -22,10 +22,13 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         FontInternal font;
 
+        public Action<string>? OnSubmit;
+
+
         float caretTimer;
         bool caretVisible = true;
 
-        const float fontSize = 9f;
+        const float fontSize = 16f;
 
         public InputFieldNode(FontInternal font)
         {
@@ -156,6 +159,11 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
             switch (key)
             {
+                case Keys.Enter:
+                    OnSubmit?.Invoke(Text);
+                    Text = "";
+                    CaretIndex = 0;
+                    break;
                 case Keys.Backspace:
                     if (CaretIndex > 0)
                     {

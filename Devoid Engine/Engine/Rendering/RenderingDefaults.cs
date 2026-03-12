@@ -15,7 +15,7 @@ namespace DevoidEngine.Engine.Rendering
         {
             DefaultMaterial = new Material(ShaderLibrary.GetShader("PBR/ForwardPBR"));
             DefaultMaterial.SetVector4("Albedo", new System.Numerics.Vector4(1, 1, 1, 1));
-            DefaultMaterial.SetFloat("Roughness", 0.9f);
+            DefaultMaterial.SetFloat("Roughness", 1f);
             DefaultMaterial.SetFloat("AO", 1);
             DefaultMaterial.SetVector3("SpecularColor", new System.Numerics.Vector3(0.04f));
         }

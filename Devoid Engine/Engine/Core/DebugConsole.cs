@@ -1,7 +1,9 @@
-﻿using DevoidEngine.Engine.Rendering;
+﻿using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
+using DevoidEngine.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,9 +39,14 @@ namespace DevoidEngine.Engine.Core
         List<string> logs = new();
         string currentInput = "";
 
+        Dictionary<string, Action<string[]>> commands = new();
+
         public override void OnAttach()
         {
             font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 20);
+
+
+            RegisterCommands();
 
             UISystem.Roots.Add(rootNode);
 
@@ -72,13 +79,94 @@ namespace DevoidEngine.Engine.Core
 
             inputLabel = new InputFieldNode(font)
             {
-                Text = ">Input pending."
+                Text = "",
+                
             };
 
             consolePanel.Add(background);
             consolePanel.Add(inputLabel);
+            background.Add(logArea);
 
             rootNode.Add(consolePanel);
+
+            inputLabel.OnSubmit += ExecuteCommand;
+        }
+
+        void RegisterCommands()
+        {
+            commands["help"] = args =>
+            {
+                Log("Available commands:");
+                foreach (var cmd in commands.Keys)
+                    Log(" - " + cmd);
+            };
+
+            commands["spawnCube"] = args =>
+            {
+                Mesh mesh = new Mesh();
+                mesh.SetVertices(Primitives.GetCubeVertex());
+
+                GameObject go = SceneManager.CurrentScene.addGameObject("CubeObject-Console");
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+
+                if (args.Length == 3)
+                {
+                    go.transform.Position = new Vector3(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]));
+                }
+
+
+                Log("Successfully Added GameObject Cube");
+            };
+
+            commands["clear"] = args =>
+            {
+                logs.Clear();
+                RefreshLogs();
+            };
+
+            commands["echo"] = args =>
+            {
+                Log(string.Join(" ", args));
+            };
+        }
+
+        void ExecuteCommand(string input)
+        {
+            Console.WriteLine(input);
+            Log("> " + input);
+
+            if (string.IsNullOrWhiteSpace(input))
+                return;
+
+            string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            string cmd = parts[0];
+            string[] args = parts.Skip(1).ToArray();
+
+            if (commands.TryGetValue(cmd, out var command))
+            {
+                command(args);
+            }
+            else
+            {
+                Log("Unknown command: " + cmd);
+            }
+        }
+
+        void Log(string text)
+        {
+            logs.Add(text);
+            RefreshLogs();
+        }
+
+        void RefreshLogs()
+        {
+            logArea.Clear();
+            foreach (var log in logs)
+            {
+                logArea.Add(new LabelNode(log, font, 16));
+            }
         }
 
         public override void OnDetach()

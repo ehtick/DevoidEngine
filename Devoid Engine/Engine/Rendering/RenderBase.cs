@@ -106,6 +106,9 @@ namespace DevoidEngine.Engine.Rendering
             Shader currentShader = null;
             Mesh currentMesh = null;
 
+            bool currentClipState = false;
+            Vector4 currentClipRect = default;
+
             ApplyRenderState(renderState);
 
             int currentObjectDataBindSlot = -1;
@@ -113,6 +116,13 @@ namespace DevoidEngine.Engine.Rendering
             for (int i = 0; i < items.Count; i++)
             {
                 var item = items[i];
+                if (item.useClipping != currentClipState || item.ClipRegion != currentClipRect)
+                {
+                    currentClipState = item.useClipping;
+                    currentClipRect = item.ClipRegion;
+
+                    ApplyClipRegion(currentClipState, currentClipRect);
+                }
 
 
                 if (item.Material != currentMaterial)
@@ -179,6 +189,15 @@ namespace DevoidEngine.Engine.Rendering
                 Matrix4x4.CreateTranslation(position);
         }
 
+        static void ApplyClipRegion(bool state, Vector4 rect)
+        {
+            Renderer.graphicsDevice.SetScissorState(state);
+
+            if (state)
+                Renderer.graphicsDevice.SetScissorRectangle(
+                    (int)rect.X, (int)rect.Y,
+                    (int)rect.Z, (int)rect.W);
+        }
         static void ApplyRenderState(RenderState renderState)
         {
             Renderer.graphicsDevice.SetBlendState(renderState.BlendMode);

@@ -39,6 +39,9 @@ namespace DevoidStandaloneLauncher.Prototypes
             });
             LoadLevel();
 
+            Cursor.SetCursorState(CursorState.Normal);
+            scene.Pause();
+
         }
 
         void LoadLevel()
@@ -200,7 +203,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 playerController.JumpForce = 7f;
                 playerController.MouseSensitivity = 0.15f;
 
-                //Cursor.SetCursorState(CursorState.Grabbed);
+                Cursor.SetCursorState(CursorState.Grabbed);
 
                 // Camera pivot (for vertical rotation)
                 GameObject cameraPivot = scene.addGameObject("CameraPivot");

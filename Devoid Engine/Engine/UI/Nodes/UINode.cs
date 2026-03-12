@@ -24,7 +24,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         public bool Visible = true;
         public bool Interactable = true;
 
-        internal readonly List<UINode> _children = new();
+        internal List<UINode> _children = new();
 
 
 
@@ -74,7 +74,7 @@ namespace DevoidEngine.Engine.UI.Nodes
 
             ArrangeCore(finalRect);
         }
-        public void Render(List<RenderItem> renderList, Matrix4x4 model)
+        public virtual void Render(List<RenderItem> renderList, Matrix4x4 model)
         {
             if (!Visible) return;
             RenderCore(renderList, model);
@@ -103,7 +103,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         // Input handling
 
         public virtual void OnMouseDown(Vector2 position) { }
-
+        public virtual void OnMouseWheel(float delta) { }
         public virtual void OnTextInput(char c) { }
 
         public virtual void OnKeyDown(Keys key) { }
@@ -111,6 +111,17 @@ namespace DevoidEngine.Engine.UI.Nodes
         public virtual void OnFocus() { }
 
         public virtual void OnBlur() { }
+
+        public virtual void Dispose() { }
+
+        public void Clear()
+        {
+            for (int i = 0; i < _children.Count; i++)
+            {
+                _children[i].Dispose();
+            }
+            _children.Clear();
+        }
 
         public IReadOnlyList<UINode> Children => _children;
     }

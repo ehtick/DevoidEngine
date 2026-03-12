@@ -32,8 +32,8 @@ namespace DevoidEngine.Engine.UI.Text
                 Width = Width,
                 Height = Height,
                 IsDepthStencil = false,
-                GenerateMipmaps = true,
-                MipLevels = 0,
+                GenerateMipmaps = false,
+                MipLevels = 1,
                 IsRenderTarget = true,
                 IsMutable = false,
             });

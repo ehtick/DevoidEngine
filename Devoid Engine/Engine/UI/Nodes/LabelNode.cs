@@ -154,12 +154,21 @@ namespace DevoidEngine.Engine.UI.Nodes
             Matrix4x4 local = UISystem.BuildTranslationModel(new UITransform(pos, Rect.size));
             Matrix4x4 final = local * canvasModel;
 
-            renderList.Add(new RenderItem()
+            RenderItem renderItem = new RenderItem()
             {
                 Mesh = _mesh,
                 Material = Material,
-                Model = final
-            });
+                Model = final,
+
+            };
+
+            if (UIScissorStack.HasClip)
+            {
+                renderItem.useClipping = true;
+                renderItem.ClipRegion = UIScissorStack.Current;
+            }
+
+            renderList.Add(renderItem);
         }
 
         public Vector2 GetCursorPosition(int characterIndex, float widthConstraint)
@@ -190,6 +199,13 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         protected override void UpdateCore(float deltaTime)
         {
+
+        }
+
+        public override void Dispose()
+        {
+            _mesh?.Dispose();
+            _text = "";
 
         }
     }
