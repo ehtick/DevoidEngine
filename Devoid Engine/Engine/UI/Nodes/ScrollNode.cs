@@ -54,9 +54,21 @@ namespace DevoidEngine.Engine.UI.Nodes
                 Rect.size.Y
             );
 
+
+
+            //DebugRenderSystem.DrawRectUI(
+            //    UISystem.BuildModel(Rect)    
+            //);
+
             base.Render(renderList, canvas);
 
             UIScissorStack.Pop();
+        }
+
+        public void ScrollToBottom()
+        {
+            float maxScroll = Math.Max(0, contentSize.Y - Rect.size.Y);
+            ScrollOffset.Y = maxScroll;
         }
 
         public override void OnMouseWheel(float delta)
@@ -66,9 +78,6 @@ namespace DevoidEngine.Engine.UI.Nodes
             float maxScroll = Math.Max(0, contentSize.Y - Rect.size.Y);
 
             ScrollOffset.Y = Math.Clamp(ScrollOffset.Y, 0, maxScroll);
-
-            Console.WriteLine(delta);
-            Console.WriteLine(ScrollOffset);
         }
 
     }

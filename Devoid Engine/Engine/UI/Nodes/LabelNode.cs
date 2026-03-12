@@ -97,7 +97,8 @@ namespace DevoidEngine.Engine.UI.Nodes
             if (Font == null)
                 return Vector2.Zero;
 
-            float widthConstraint = availableSize.X;
+            //float widthConstraint = availableSize.X;
+            float widthConstraint = Math.Min(availableSize.X, Rect?.size.X ?? availableSize.X);
 
             if ((_meshDirty || _lastWidthConstraint != widthConstraint) && !string.IsNullOrEmpty(_text))
             {

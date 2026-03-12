@@ -8,6 +8,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         public FlexDirection Direction = FlexDirection.Row;
         public JustifyContent Justify = JustifyContent.Start;
         public AlignItems Align = AlignItems.Stretch;
+        public Padding Padding;
         public float Gap = 0f;
 
         protected override Vector2 MeasureCore(Vector2 availableSize)
@@ -24,10 +25,6 @@ namespace DevoidEngine.Engine.UI.Nodes
                 if (!child.Visible || !child.Interactable)
                     continue;
 
-                //Vector2 childAvailableSize = Direction == FlexDirection.Row
-                //    ? new Vector2(float.PositiveInfinity, availableSize.Y)
-                //    : new Vector2(availableSize.X, float.PositiveInfinity);
-
                 Vector2 childAvailableSize = availableSize;
 
                 Vector2 childSize = child.Measure(childAvailableSize);
@@ -41,11 +38,14 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
 
             if (count > 1)
-            {
-                totalMainAxisSize += (Gap) * (count - 1);
-            }
+                totalMainAxisSize += Gap * (count - 1);
 
-            return FlexboxTools.FromMainCross(totalMainAxisSize, maximumCrossAxisSize, Direction);
+            Vector2 contentSize = FlexboxTools.FromMainCross(totalMainAxisSize, maximumCrossAxisSize, Direction);
+
+            return new Vector2(
+                contentSize.X + Padding.Left + Padding.Right,
+                contentSize.Y + Padding.Top + Padding.Bottom
+            );
         }
 
         protected override void ArrangeCore(UITransform finalRect)

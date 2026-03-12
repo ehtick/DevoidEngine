@@ -34,6 +34,8 @@ namespace DevoidEngine.Engine.Core
 
         FlexboxNode consolePanel;
         ScrollNode logArea;
+        ContainerNode logAreaContainer;
+
         InputFieldNode inputLabel;
         BoxNode background;
 
@@ -68,14 +70,21 @@ namespace DevoidEngine.Engine.Core
                 Color = new Vector4(0, 0, 0, 0.9f)
             };
 
+            logAreaContainer = new ContainerNode()
+            {
+                Color = new Vector4(1, 0, 0, 0.1f),
+                Padding = new Padding()
+                {
+                    Top = 5,
+                    Left = 5
+                }
+            };
+
             logArea = new ScrollNode()
             {
                 Direction = FlexDirection.Column,
-                Layout = new LayoutOptions()
-                {
-                    FlexGrowMain = 1
-                },
-                Gap = 2
+                MaxSize = new Vector2(600, 350),
+                Gap = 2,
             };
 
             inputLabel = new InputFieldNode(font)
@@ -86,7 +95,8 @@ namespace DevoidEngine.Engine.Core
 
             consolePanel.Add(background);
             consolePanel.Add(inputLabel);
-            background.Add(logArea);
+            background.Add(logAreaContainer);
+            logAreaContainer.Add(logArea);
 
             rootNode.Add(consolePanel);
 
@@ -100,6 +110,15 @@ namespace DevoidEngine.Engine.Core
                 Log("Available commands:");
                 foreach (var cmd in commands.Keys)
                     Log(" - " + cmd);
+            };
+
+            commands["list"] = args =>
+            {
+                List<GameObject> gameObjects = SceneManager.CurrentScene.GameObjects;
+                Log($"GameObjects ({gameObjects.Count}):");
+                foreach (GameObject go in gameObjects)
+                    Log(" " + go.Name);
+
             };
 
             commands["spawnCube"] = args =>
@@ -164,14 +183,13 @@ namespace DevoidEngine.Engine.Core
         void RefreshLogs()
         {
             logArea.Clear();
+
             foreach (var log in logs)
             {
                 logArea.Add(new LabelNode(log, font, 16));
-                logArea.Add(new BoxNode() {
-                    Size = new Vector2(600, 350),
-                    Color = new Vector4(0, 1, 0, 0.9f)
-                });
             }
+
+            logArea.ScrollToBottom();
         }
 
         public override void OnDetach()

@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace DevoidEngine.Engine.UI.Nodes
 {
-    public class BoxNode : FlexboxNode
+    public class ContainerNode : FlexboxNode
     {
         private Texture2D _texture;
 

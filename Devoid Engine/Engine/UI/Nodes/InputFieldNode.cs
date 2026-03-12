@@ -58,7 +58,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             caret = new BoxNode()
             {
                 Size = new Vector2(
-                    2,
+                    1,
                     (font.Ascender - font.Descender) * font.GetScaleForFontSize(fontSize)
                 ),
                 Color = CaretColor,
