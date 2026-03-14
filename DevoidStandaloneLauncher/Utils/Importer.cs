@@ -192,7 +192,12 @@ namespace DevoidStandaloneLauncher.Utils
             if (normalTexture != null)
             {
                 devoidMaterial.SetInt("useNormalMap", 1);
-                devoidMaterial.SetFloat("NormalStrength", 1f);
+                if (assimpMat.HasBumpScaling) {
+                    devoidMaterial.SetFloat("NormalStrength", assimpMat.BumpScaling);
+                } else
+                {
+                    devoidMaterial.SetFloat("NormalStrength", 1);
+                }
                 devoidMaterial.SetTexture("MAT_NormalMap", normalTexture);
             }
 
@@ -230,12 +235,21 @@ namespace DevoidStandaloneLauncher.Utils
 
             //}
 
+            MaterialProperty[] mps = assimpMat.GetAllProperties();
+            foreach (var mp in mps)
+            {
+                Console.WriteLine(mp.Name);
+                if (mp.Name == "$mat.shininess")
+                {
+                    Console.WriteLine(mp.GetFloatValue());
+                }
+            }
+            
             //devoidMaterial.SetVector3("SpecularColor", new Vector3(1, 1, 1));
-
-            //if (assimpMat.HasShininess)
-            //    devoidMaterial.SetFloat("Metallic", assimpMat.Shininess);
-            //else
-            //    devoidMaterial.SetFloat("Metallic", 0f);
+            if (assimpMat.HasShininess)
+                devoidMaterial.SetFloat("Metallic", assimpMat.Shininess/100);
+            else
+                devoidMaterial.SetFloat("Metallic", 0f);
 
             devoidMaterial.SetFloat("AO", 1f);
 

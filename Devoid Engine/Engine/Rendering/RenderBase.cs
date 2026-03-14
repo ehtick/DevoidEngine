@@ -85,9 +85,8 @@ namespace DevoidEngine.Engine.Rendering
                 Console.WriteLine("[Renderer]: Render technique was not set. No Object rendered.");
             Output = ActiveRenderTechnique?.Render(ctx);
             Renderer.graphicsDevice.UnbindAllShaderResources();
-
+            
             Texture2D finalColor = PostProcessor.Run(Output);
-
             RenderAPI.RenderToBuffer(finalColor, ctx.cameraTargetSurface);
             DebugRenderSystem.Render(ctx.cameraData, ctx.cameraTargetSurface);
         }

@@ -123,6 +123,7 @@ namespace DevoidEngine.Engine.Rendering
 
             Renderer.graphicsDevice.SetRasterizerState(CullMode.None);
             Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
+            Renderer.graphicsDevice.SetDepthState(DepthTest.LessEqual, false);
 
             IInputLayout inputLayout = Renderer.GetInputLayout(mesh, ShaderLibrary.GetShader("Screen/RENDER_SCREEN"));
 

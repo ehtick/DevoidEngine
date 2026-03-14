@@ -41,7 +41,7 @@ namespace DevoidEngine.Engine.UI.Text
             GPUTexture.SetFilter(DevoidGPU.TextureFilter.Linear, DevoidGPU.TextureFilter.Linear);
 
             GPUTexture.SetData(TextureData);
-            GPUTexture.GenerateMipmaps();
+            //GPUTexture.GenerateMipmaps();
         }
 
         internal void Pack(Dictionary<uint, BitmapData> glyphs)

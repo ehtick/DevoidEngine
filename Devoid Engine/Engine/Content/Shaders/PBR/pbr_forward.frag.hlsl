@@ -28,18 +28,18 @@
 
 cbuffer Material : register(b3)
 {
-    float4 Albedo;
+    float4 Albedo; // base color multiplier
 
-    float Metallic;
-    float Roughness;
-    float AO;
-    float EmissiveStrength;
+    float Metallic; // metallic multiplier
+    float Roughness; // roughness multiplier
+    float AO; // ambient occlusion multiplier
+    float EmissiveStrength; // emissive intensity
 
-    float3 SpecularColor;
-    int useNormalMap;
+    float3 EmissiveColor; // emissive color
+    int useNormalMap; // toggle normal map
 
-    float3 EmissiveColor;
-    float NormalStrength;
+    float NormalStrength; // normal intensity
+    float3 _padding1; // padding for 16-byte alignment
 };
 
 Texture2D MAT_AlbedoMap : register(t0);
@@ -47,16 +47,14 @@ Texture2D MAT_NormalMap : register(t1);
 Texture2D MAT_MetallicMap : register(t2);
 Texture2D MAT_RoughnessMap : register(t3);
 Texture2D MAT_AOMap : register(t4);
-Texture2D MAT_SpecularMap : register(t5);
-Texture2D MAT_EmissiveMap : register(t6);
+Texture2D MAT_EmissiveMap : register(t5);
 
 SamplerState MAT_AlbedoSampler : register(s0);
 SamplerState MAT_NormalSampler : register(s1);
 SamplerState MAT_MetallicSampler : register(s2);
 SamplerState MAT_RoughnessSampler : register(s3);
 SamplerState MAT_AOSampler : register(s4);
-SamplerState MAT_SpecularSampler : register(s5);
-SamplerState MAT_EmissiveSampler : register(s6);
+SamplerState MAT_EmissiveSampler : register(s5);
 
 #include "./pbr_methods.hlsl"
 
@@ -94,14 +92,12 @@ float4 PSMain(PSInput input) : SV_TARGET
     float metallicTex = MAT_MetallicMap.Sample(MAT_RoughnessSampler, uv).b;
     float roughnessTex = MAT_RoughnessMap.Sample(MAT_RoughnessSampler, uv).g;
     float aoTex = MAT_AOMap.Sample(MAT_AOSampler, uv).r;
-    float3 specTex = MAT_SpecularMap.Sample(MAT_SpecularSampler, uv).rgb;
     float3 emissiveTex = MAT_EmissiveMap.Sample(MAT_EmissiveSampler, uv).rgb;
     
     float3 albedo = albedoTex * Albedo.rgb;
     float metallic = saturate(metallicTex * Metallic);
     float roughness = saturate(roughnessTex * Roughness);
     float ao = aoTex * AO;
-    float3 specColor = specTex * SpecularColor;
     float3 emission = emissiveTex * EmissiveColor * EmissiveStrength;
     
     roughness = max(roughness, 0.04); // avoid zero roughness
@@ -109,7 +105,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     float3 N = GetNormalFromMap(input);
     float3 V = normalize(Position - input.WorldspacePosition);
     
-    float3 F0 = lerp(specColor, albedo, metallic);
+    float3 F0 = lerp(float3(0.04, 0.04, 0.04), albedo, metallic);
     float3 Lo = 0;
     
     for (uint p = 0; p < pointLightCount; ++p)
