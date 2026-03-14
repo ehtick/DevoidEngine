@@ -16,9 +16,14 @@ namespace DevoidEngine.Engine.Rendering
             resources = res;
         }
 
-        public Texture GetTexture(RGResource handle)
+        public Texture2D GetTexture(RGResource handle)
         {
             return resources[handle.Id].Texture;
+        }
+
+        public void SetTexture(RGResource handle, Texture2D tex)
+        {
+            resources[handle.Id].Texture = tex;
         }
     }
 }

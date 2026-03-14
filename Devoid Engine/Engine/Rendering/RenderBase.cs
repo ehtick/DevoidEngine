@@ -1,4 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Rendering.PostProcessing;
 using DevoidEngine.Engine.UI;
 using DevoidGPU;
 using System.Numerics;
@@ -40,6 +41,7 @@ namespace DevoidEngine.Engine.Rendering
         public static Texture2D Output { get; set; }
 
         public static IRenderTechnique ActiveRenderTechnique;
+        public static PostProcessor PostProcessor;
 
         // Renderer objects
         static MeshRenderData _meshRenderData;
@@ -65,6 +67,11 @@ namespace DevoidEngine.Engine.Rendering
             ActiveRenderTechnique = new ForwardRenderTechnique();
 
             ActiveRenderTechnique?.Initialize(width, height);
+
+            PostProcessor = new PostProcessor();
+            var tone = new ToneMapEffect();
+            tone.Initialize(width, height);
+            PostProcessor.AddEffect(tone);
         }
 
         public static void Resize(int width, int height)
@@ -78,7 +85,10 @@ namespace DevoidEngine.Engine.Rendering
                 Console.WriteLine("[Renderer]: Render technique was not set. No Object rendered.");
             Output = ActiveRenderTechnique?.Render(ctx);
             Renderer.graphicsDevice.UnbindAllShaderResources();
-            //RenderAPI.RenderToBuffer(Output, ctx.cameraTargetSurface);
+
+            Texture2D finalColor = PostProcessor.Run(Output);
+
+            RenderAPI.RenderToBuffer(finalColor, ctx.cameraTargetSurface);
             DebugRenderSystem.Render(ctx.cameraData, ctx.cameraTargetSurface);
         }
 

@@ -61,10 +61,10 @@ namespace DevoidEngine.Engine.Rendering
         public Texture2D Render(CameraRenderContext ctx)
         {
 
-            //finalOutputBuffer.Bind();
-            //finalOutputBuffer.Clear();
-            ctx.cameraTargetSurface.Bind();
-            ctx.cameraTargetSurface.Clear();
+            finalOutputBuffer.Bind();
+            finalOutputBuffer.Clear();
+            //ctx.cameraTargetSurface.Bind();
+            //ctx.cameraTargetSurface.Clear();
 
             Renderer.graphicsDevice.SetViewport(0, 0, Renderer.Width, Renderer.Height);
 

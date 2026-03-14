@@ -1,5 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering.GPUResource;
+using DevoidGPU;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,11 @@ namespace DevoidEngine.Engine.Rendering
 
         public Texture2D Texture;
 
+        public TextureDescription Description;
+
         public bool Imported;
+
+        public bool Allocated;
 
         public RenderGraphPass Producer;
     }
