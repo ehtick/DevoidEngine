@@ -1,4 +1,4 @@
-struct PSInput
+﻿struct PSInput
 {
     float4 Position : SV_POSITION;
     float3 Normal : NORMAL;
@@ -90,6 +90,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     float2 uv = input.UV0;
     
     float3 albedoTex = MAT_AlbedoMap.Sample(MAT_AlbedoSampler, uv).rgb;
+    //albedoTex = pow(albedoTex, 2.2); // sRGB → linear
     float metallicTex = MAT_MetallicMap.Sample(MAT_RoughnessSampler, uv).b;
     float roughnessTex = MAT_RoughnessMap.Sample(MAT_RoughnessSampler, uv).g;
     float aoTex = MAT_AOMap.Sample(MAT_AOSampler, uv).r;
@@ -146,7 +147,7 @@ float4 PSMain(PSInput input) : SV_TARGET
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
     
-    float3 ambient = 0.03 * albedo * ao;
+    float3 ambient = 0; //= 0.03 * albedo * ao;
 
     float3 color = ambient + Lo + emission;
     return float4(color, 1.0);

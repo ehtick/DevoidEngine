@@ -475,7 +475,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                     1f);
 
                 lightComponent.Radius = 200f;
-                lightComponent.Intensity = 150f; // your scale
+                lightComponent.Intensity = 20f; // your scale
             });
         }
 
