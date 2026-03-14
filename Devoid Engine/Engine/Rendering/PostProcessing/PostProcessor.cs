@@ -21,6 +21,11 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             graph.RemovePass(pass);
         }
 
+        public void Resize(int width, int height)
+        {
+            graph.Resize(width, height);
+        }
+
         public Texture2D Run(Texture2D input)
         {
             return graph.Execute(input);

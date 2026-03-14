@@ -75,6 +75,14 @@ namespace DevoidEngine.Engine.Rendering
             return sceneColor;
         }
 
+        public void Resize(int width, int height)
+        {
+            foreach (var pass in passes)
+            {
+                pass.Resize(width, height);
+            }
+        }
+
         List<RenderGraphPass> ResolvePassOrder()
         {
             Dictionary<RenderGraphPass, List<RenderGraphPass>> edges = new();

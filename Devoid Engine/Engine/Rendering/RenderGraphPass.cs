@@ -26,5 +26,6 @@ namespace DevoidEngine.Engine.Rendering
 
         public abstract void Setup();
         public abstract void Execute(RenderGraphContext ctx);
+        public abstract void Resize(int width, int height);
     }
 }

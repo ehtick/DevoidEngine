@@ -30,6 +30,8 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             framebuffer.AttachRenderTexture(output);
         }
 
+
+
         public override void Setup()
         {
             Read("SceneColor");
@@ -45,6 +47,11 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             //RenderAPI.RenderToBuffer(input, framebuffer);
 
             ctx.SetTexture("ToneMapped", output);
+        }
+
+        public override void Resize(int width, int height)
+        {
+            framebuffer.Resize(width, height);
         }
     }
 }

@@ -76,6 +76,7 @@ namespace DevoidEngine.Engine.Rendering
         public static void Resize(int width, int height)
         {
             ActiveRenderTechnique?.Resize(width, height);
+            PostProcessor.Resize(width, height);
         }
 
         public static void Render(CameraRenderContext ctx)

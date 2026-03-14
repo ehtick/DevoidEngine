@@ -18,6 +18,7 @@ namespace DevoidGPU.DX11
                 TextureFormat.R8_UNorm => Format.R8_UNorm,
 
 
+
                 TextureFormat.Depth24_Stencil8 => Format.D24_UNorm_S8_UInt,
                 TextureFormat.Depth32_Float => Format.D32_Float,
                 _ => Format.Unknown

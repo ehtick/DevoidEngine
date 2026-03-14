@@ -223,11 +223,13 @@ namespace DevoidStandaloneLauncher.Utils
                 devoidMaterial.SetFloat("Roughness", 0.5f);
             }
 
-            if (assimpMat.HasColorSpecular)
-            {
-                var c = assimpMat.ColorSpecular;
-                devoidMaterial.SetVector3("SpecularColor", new Vector3(c.R, c.G, c.B));
-            }
+            //if (assimpMat.HasColorSpecular)
+            //{
+            //    var c = assimpMat.ColorSpecular;
+            //    devoidMaterial.SetVector3("SpecularColor", new Vector3(c.R, c.G, c.B));
+
+            //}
+
             //devoidMaterial.SetVector3("SpecularColor", new Vector3(1, 1, 1));
 
             //if (assimpMat.HasShininess)
