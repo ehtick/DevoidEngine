@@ -50,15 +50,19 @@ namespace DevoidEngine.Engine.Rendering
             dirty = false;
         }
 
-        public void Execute()
+        public Texture2D Execute(Texture2D sceneColor)
         {
             if (dirty)
                 Compile();
 
             var ctx = new RenderGraphContext();
 
+            ctx.SetTexture("SceneColor", sceneColor);
+
             foreach (var pass in compiledPasses)
                 pass.Execute(ctx);
+
+            return ctx.GetTexture("Final") ?? sceneColor;
         }
 
         List<RenderGraphPass> ResolvePassOrder()

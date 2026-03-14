@@ -6,25 +6,12 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
 {
     public class TonemapPass : RenderGraphPass
     {
-        Texture2D input;
         Texture2D output;
-
         Framebuffer framebuffer;
 
-        int width;
-        int height;
-
-        public Texture2D OutputTexture => output;
+        public override Texture2D OutputTexture => output;
 
         public TonemapPass(int width, int height)
-        {
-            this.width = width;
-            this.height = height;
-
-            CreateResources();
-        }
-
-        void CreateResources()
         {
             output = new Texture2D(new TextureDescription()
             {
@@ -38,21 +25,20 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             framebuffer.AttachRenderTexture(output);
         }
 
-        public void SetInput(Texture2D input)
-        {
-            this.input = input;
-        }
-
         public override void Setup()
         {
             Read("SceneColor");
             Write("ToneMapped");
-            Console.WriteLine("Tonemap Pass has been set up!");
         }
 
         public override void Execute(RenderGraphContext ctx)
         {
-            //RenderAPI.RenderToBuffer(input, framebuffer);
+            Texture2D input = ctx.GetTexture("SceneColor");
+
+            RenderAPI.RenderToBuffer(input, framebuffer);
+
+            ctx.SetTexture("ToneMapped", output);
+            //ctx.SetTexture("Final", output); // optional if this is last pass
         }
     }
 }
