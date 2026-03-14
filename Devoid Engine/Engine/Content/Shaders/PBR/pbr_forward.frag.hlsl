@@ -149,10 +149,5 @@ float4 PSMain(PSInput input) : SV_TARGET
     float3 ambient = 0.03 * albedo * ao;
 
     float3 color = ambient + Lo + emission;
-
-    //return float4(input.Tangent.xyz * 0.5 + 0.5, 1);
-    //return float4(N, 1.0);
     return float4(color, 1.0);
-    //return float4(normalize(input.Normal) * 0.5 + 0.5, 1);
-    //return float4(input.UV0.x, input.UV0.y, 1.0, 1.0);
 }

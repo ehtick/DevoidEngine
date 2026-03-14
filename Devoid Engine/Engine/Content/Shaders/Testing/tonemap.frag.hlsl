@@ -39,20 +39,39 @@ float3 AgxLookPunchy(float3 color)
     return lerp(luma.xxx, color, 1.35);
 }
 
-float3 TonemapAgX(float3 color)
+float3 TonemapAgX(float3 x)
 {
-    const float minEv = -12.47393;
-    const float maxEv = 4.026069;
+    const float3x3 agx_inset = float3x3(
+        0.842479062253094, 0.0423282422610123, 0.0423756549057051,
+        0.0784335999999992, 0.878468636469772, 0.0784336,
+        0.0792237451477643, 0.0791661274605434, 0.879142973793104
+    );
 
-    color = log2(max(color, 1e-6));
+    const float3x3 agx_outset = float3x3(
+        1.19687900512017, -0.0528968517574562, -0.0529716355144438,
+        -0.0980208811401368, 1.15190312990417, -0.0980434501171241,
+        -0.0990297440797205, -0.0989611768448433, 1.15107367264116
+    );
 
-    color = (color - minEv) / (maxEv - minEv);
-    color = saturate(color);
+    x = mul(agx_inset, x);
 
-    // contrast curve
-    color = color * color * (3.0 - 2.0 * color);
+    const float min_ev = -12.47393;
+    const float max_ev = 4.026069;
 
-    return color;
+    x = log2(max(x, 1e-6));
+    x = (x - min_ev) / (max_ev - min_ev);
+    x = saturate(x);
+
+    x = x * x * (3.0 - 2.0 * x);
+
+    x = mul(agx_outset, x);
+
+    return x;
+}
+
+float3 TonemapSimple(float3 c)
+{
+    return c / (1.0 + c);
 }
 
 
@@ -60,13 +79,11 @@ float4 PSMain(PSInput input) : SV_TARGET
 {
     float3 hdr = MAT_SceneColor.Sample(MAT_SceneColorSampler, input.UV0).rgb;
 
-    float exposure = 1.0;
-    hdr *= exposure;
+    hdr *= 1.0;
 
     float3 color = TonemapAgX(hdr);
-    color = AgxLookPunchy(color);
 
     color = pow(color, 1.0 / 2.2);
 
-    return float4(color, 1.0);
+    return float4(color, 1);
 }
