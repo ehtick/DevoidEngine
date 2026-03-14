@@ -97,11 +97,15 @@ float4 PSMain(PSInput input) : SV_TARGET
 {
     float3 hdr = MAT_SceneColor.Sample(MAT_SceneColorSampler, input.UV0).rgb;
 
-    float exposure = 2;
+    float exposure = 1;
     hdr *= exposure;
 
     float3 color = ACESFitted(hdr);
     //color = pow(color, 1.0 / 2.2);
 
+    //float3 color = hdr;
+    color = pow(color, 1.0 / 2.2);
+    //return float4(color, 1);
+    
     return float4(color, 1.0);
 }

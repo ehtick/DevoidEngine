@@ -54,7 +54,7 @@ namespace DevoidEngine.Engine.Content.Scenes
             root.Add(new BoxNode()
             {
                 Size = (new System.Numerics.Vector2(1920, 1080)) * 0.25f,
-                Texture = Helper.loadImageAsTex("Engine/Content/Textures/DevoidLogo.png", DevoidGPU.TextureFilter.Linear)
+                Texture = Helper.LoadImageAsTex("Engine/Content/Textures/DevoidLogo.png", DevoidGPU.TextureFilter.Linear)
             });
 
             canvas.Canvas.Add(root);

@@ -18,7 +18,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         GameObject PlayerObject;
         GameObject CameraObject;
 
-        Texture2D gridTexture = Helper.loadImageAsTex("LauncherContents/Textures/grid_lvl_design.png", TextureFilter.Linear);
+        Texture2D gridTexture = Helper.LoadImageAsTex("LauncherContents/Textures/grid_lvl_design.png", TextureFilter.Linear);
         MaterialInstance celMaterial = new MaterialInstance(new Material(new Shader("LauncherContents/Shaders/celtoon")));
         FileReloader reloader;
         string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/devoid_l1.fbx";

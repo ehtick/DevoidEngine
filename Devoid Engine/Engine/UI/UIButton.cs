@@ -49,7 +49,7 @@ namespace DevoidEngine.Engine.UI
             TexNode node1 = new TexNode()
             {
                 Size = new Vector2(50, 50),
-                texture = Helper.loadImageAsTex("Engine/Content/Textures/shrk.png", DevoidGPU.TextureFilter.Nearest),
+                texture = Helper.LoadImageAsTex("Engine/Content/Textures/shrk.png", DevoidGPU.TextureFilter.Nearest),
                 Layout = new LayoutOptions()
                 {
                     FlexGrowMain = 0
@@ -59,7 +59,7 @@ namespace DevoidEngine.Engine.UI
             TexNode node2 = new TexNode()
             {
                 Size = new Vector2(50, 50),
-                texture = Helper.loadImageAsTex("Engine/Content/Textures/shrk.png", DevoidGPU.TextureFilter.Nearest),
+                texture = Helper.LoadImageAsTex("Engine/Content/Textures/shrk.png", DevoidGPU.TextureFilter.Nearest),
                 Layout = new LayoutOptions()
                 {
                     FlexGrowMain = 0

@@ -216,7 +216,7 @@ namespace DevoidStandaloneLauncher.Utils
                 // convert phong shininess → roughness
                 float shininess = assimpMat.ShininessStrength;
                 shininess = 1 - (shininess / 100);
-                devoidMaterial.SetFloat("Roughness", 1 - (shininess / 100));
+                devoidMaterial.SetFloat("Roughness", shininess);
             }
             else
             {
@@ -291,10 +291,13 @@ namespace DevoidStandaloneLauncher.Utils
                 Texture2D tex;
                 if (type == Assimp.TextureType.Normals)
                 {
-                    tex = Helper.loadNormalMap(fullPath, TextureFilter.Linear);
+                    tex = Helper.LoadNormalMap(fullPath, TextureFilter.Linear);
+                } else if (type != Assimp.TextureType.Diffuse)
+                {
+                    tex = Helper.LoadImageAsDataTex(fullPath, TextureFilter.Linear);
                 } else
                 {
-                    tex = Helper.loadImageAsTex(fullPath, TextureFilter.Linear);
+                    tex = Helper.LoadImageAsTex(fullPath, TextureFilter.Linear);
                 }
                     SetWrap(slot.WrapModeU, slot.WrapModeV, tex);
 
