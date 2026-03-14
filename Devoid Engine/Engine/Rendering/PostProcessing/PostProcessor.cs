@@ -9,26 +9,36 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
 {
     public class PostProcessor
     {
-        List<RenderGraphPass> passes = new();
         RenderGraph graph = new();
+        List<RenderGraphPass> passes = new();
+
+        bool dirty = true;
 
         public void AddPass(RenderGraphPass pass)
         {
             passes.Add(pass);
+            graph.AddPass(pass);
+            dirty = true;
         }
 
-        public Texture2D Run(Texture2D sceneColor)
+        public void RemovePass(RenderGraphPass pass)
         {
-            graph.Clear();
+            passes.Remove(pass);
+            graph.RemovePass(pass);
+            dirty = true;
+        }
 
-            foreach (var pass in passes)
+        public Texture2D Run(Texture2D input)
+        {
+            if (dirty)
             {
-                graph.AddPass(pass);
+                graph.Compile();
+                dirty = false;
             }
 
             graph.Execute();
 
-            return sceneColor;
+            return input;
         }
     }
 }

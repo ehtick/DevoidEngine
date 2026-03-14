@@ -11,14 +11,19 @@ namespace DevoidEngine.Engine.Rendering
 
         Dictionary<string, RenderGraphPass> producers = new();
 
-        bool compiled = false;
+        bool dirty = true;
 
         public void AddPass(RenderGraphPass pass)
         {
             pass.Setup();
             passes.Add(pass);
+            dirty = true;
+        }
 
-            compiled = false;
+        public void RemovePass(RenderGraphPass pass)
+        {
+            passes.Remove(pass);
+            dirty = true;
         }
 
         public void Clear()
@@ -26,7 +31,7 @@ namespace DevoidEngine.Engine.Rendering
             passes.Clear();
             compiledPasses.Clear();
             producers.Clear();
-            compiled = false;
+            dirty = true;
         }
 
         public void Compile()
@@ -42,20 +47,18 @@ namespace DevoidEngine.Engine.Rendering
             }
 
             compiledPasses = ResolvePassOrder();
-            compiled = true;
+            dirty = false;
         }
 
         public void Execute()
         {
-            if (!compiled)
+            if (dirty)
                 Compile();
 
             var ctx = new RenderGraphContext();
 
             foreach (var pass in compiledPasses)
-            {
                 pass.Execute(ctx);
-            }
         }
 
         List<RenderGraphPass> ResolvePassOrder()
@@ -65,7 +68,7 @@ namespace DevoidEngine.Engine.Rendering
 
             foreach (var pass in passes)
             {
-                edges[pass] = new List<RenderGraphPass>();
+                edges[pass] = new();
                 incoming[pass] = 0;
             }
 
@@ -87,10 +90,8 @@ namespace DevoidEngine.Engine.Rendering
             Queue<RenderGraphPass> ready = new();
 
             foreach (var pass in passes)
-            {
                 if (incoming[pass] == 0)
                     ready.Enqueue(pass);
-            }
 
             List<RenderGraphPass> result = new();
 

@@ -69,9 +69,8 @@ namespace DevoidEngine.Engine.Rendering
             ActiveRenderTechnique?.Initialize(width, height);
 
             PostProcessor = new PostProcessor();
-            var tone = new ToneMapEffect();
-            tone.Initialize(width, height);
-            PostProcessor.AddEffect(tone);
+            var tonemapPass = new TonemapPass(width, height);
+            PostProcessor.AddPass(tonemapPass);
         }
 
         public static void Resize(int width, int height)
