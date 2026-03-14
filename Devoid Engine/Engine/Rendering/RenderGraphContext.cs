@@ -9,21 +9,5 @@ namespace DevoidEngine.Engine.Rendering
 {
     public class RenderGraphContext
     {
-        Dictionary<int, RenderGraphResource> resources;
-
-        public RenderGraphContext(Dictionary<int, RenderGraphResource> res)
-        {
-            resources = res;
-        }
-
-        public Texture2D GetTexture(RGResource handle)
-        {
-            return resources[handle.Id].Texture;
-        }
-
-        public void SetTexture(RGResource handle, Texture2D tex)
-        {
-            resources[handle.Id].Texture = tex;
-        }
     }
 }

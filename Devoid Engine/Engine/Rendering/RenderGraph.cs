@@ -6,82 +6,16 @@ namespace DevoidEngine.Engine.Rendering
 {
     public class RenderGraph
     {
-        Dictionary<int, RenderGraphResource> resources = new();
-        Dictionary<string, RGResource> nameLookup = new();
-
         List<RenderGraphPass> passes = new();
-
         List<RenderGraphPass> compiledPasses = new();
 
-        int resourceCounter = 0;
+        Dictionary<string, RenderGraphPass> producers = new();
 
         bool compiled = false;
 
-        public RGResource ImportTexture(string name, Texture2D texture)
-        {
-            var id = resourceCounter++;
-
-            var res = new RenderGraphResource()
-            {
-                Name = name,
-                Texture = texture,
-                Imported = true
-            };
-
-            resources[id] = res;
-
-            var handle = new RGResource(id);
-            nameLookup[name] = handle;
-
-            return handle;
-        }
-
-        public void UpdateImported(RGResource handle, Texture2D texture)
-        {
-            resources[handle.Id].Texture = texture;
-        }
-
-        public RGResource CreateResource(string name, TextureDescription desc, RenderGraphPass producer)
-        {
-            var id = resourceCounter++;
-
-            var res = new RenderGraphResource()
-            {
-                Name = name,
-                Description = desc,
-                Imported = false,
-                Producer = producer
-            };
-
-            resources[id] = res;
-
-            var handle = new RGResource(id);
-            nameLookup[name] = handle;
-
-            return handle;
-        }
-
-        public RGResource GetResource(string name)
-        {
-            return nameLookup[name];
-        }
-
-        public Texture2D GetTexture(RGResource handle)
-        {
-            return resources[handle.Id].Texture;
-        }
-
-        public void RegisterProducer(RGResource res, RenderGraphPass pass)
-        {
-            resources[res.Id].Producer = pass;
-        }
-
         public void AddPass(RenderGraphPass pass)
         {
-            var builder = new RenderGraphBuilder(this, pass);
-
-            pass.Setup(builder);
-
+            pass.Setup();
             passes.Add(pass);
 
             compiled = false;
@@ -91,11 +25,22 @@ namespace DevoidEngine.Engine.Rendering
         {
             passes.Clear();
             compiledPasses.Clear();
+            producers.Clear();
             compiled = false;
         }
 
         public void Compile()
         {
+            producers.Clear();
+
+            foreach (var pass in passes)
+            {
+                foreach (var write in pass.Writes)
+                {
+                    producers[write] = pass;
+                }
+            }
+
             compiledPasses = ResolvePassOrder();
             compiled = true;
         }
@@ -103,28 +48,13 @@ namespace DevoidEngine.Engine.Rendering
         public void Execute()
         {
             if (!compiled)
-                throw new Exception("RenderGraph must be compiled before execution.");
+                Compile();
 
-            AllocateResources();
-
-            var ctx = new RenderGraphContext(resources);
+            var ctx = new RenderGraphContext();
 
             foreach (var pass in compiledPasses)
-                pass.Execute(ctx);
-        }
-
-        void AllocateResources()
-        {
-            foreach (var res in resources.Values)
             {
-                if (res.Imported)
-                    continue;
-
-                if (!res.Allocated)
-                {
-                    res.Texture = new Texture2D(res.Description);
-                    res.Allocated = true;
-                }
+                pass.Execute(ctx);
             }
         }
 
@@ -135,7 +65,7 @@ namespace DevoidEngine.Engine.Rendering
 
             foreach (var pass in passes)
             {
-                edges[pass] = new();
+                edges[pass] = new List<RenderGraphPass>();
                 incoming[pass] = 0;
             }
 
@@ -143,9 +73,10 @@ namespace DevoidEngine.Engine.Rendering
             {
                 foreach (var read in pass.Reads)
                 {
-                    var producer = resources[read.Id].Producer;
+                    if (!producers.TryGetValue(read, out var producer))
+                        continue;
 
-                    if (producer == null || producer == pass)
+                    if (producer == pass)
                         continue;
 
                     edges[producer].Add(pass);
@@ -156,8 +87,10 @@ namespace DevoidEngine.Engine.Rendering
             Queue<RenderGraphPass> ready = new();
 
             foreach (var pass in passes)
+            {
                 if (incoming[pass] == 0)
                     ready.Enqueue(pass);
+            }
 
             List<RenderGraphPass> result = new();
 

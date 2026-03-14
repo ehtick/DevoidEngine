@@ -8,11 +8,20 @@ namespace DevoidEngine.Engine.Rendering
 {
     public abstract class RenderGraphPass
     {
-        public List<RGResource> Reads = new();
-        public List<RGResource> Writes = new();
+        internal List<string> Reads = new();
+        internal List<string> Writes = new();
 
-        public abstract void Setup(RenderGraphBuilder builder);
+        protected void Read(string resource)
+        {
+            Reads.Add(resource);
+        }
 
+        protected void Write(string resource)
+        {
+            Writes.Add(resource);
+        }
+
+        public abstract void Setup();
         public abstract void Execute(RenderGraphContext ctx);
     }
 }

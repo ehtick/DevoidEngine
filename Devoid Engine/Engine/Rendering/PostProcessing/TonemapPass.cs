@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-using DevoidGPU;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,75 +6,29 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering.PostProcessing
 {
-    public class ToneMapPass : RenderGraphPass
+    public class TonemapPass : RenderGraphPass
     {
-        public RGResource Input;
-        public RGResource Output;
-
+        Texture2D input;
         Framebuffer framebuffer;
-        Texture2D outputTexture;
 
-        int width;
-        int height;
+        public Texture2D Output;
 
-        public ToneMapPass(int width, int height)
+        public TonemapPass(Texture2D input, Texture2D output, Framebuffer framebuffer)
         {
-            this.width = width;
-            this.height = height;
-
-            framebuffer = new Framebuffer();
-
-            framebuffer.AttachRenderTexture(
-                new Texture2D(new TextureDescription()
-                {
-                    Width = width,
-                    Height = height,
-                    GenerateMipmaps = false,
-                    MipLevels = 1,
-                    IsRenderTarget = true,
-                    Type = TextureType.Texture2D,
-                    Format = TextureFormat.RGBA8_UNorm
-                })
-            );
-
-            outputTexture = framebuffer.GetRenderTexture(0);
+            this.input = input;
+            this.Output = output;
+            this.framebuffer = framebuffer;
         }
 
-        public override void Setup(RenderGraphBuilder builder)
+        public override void Setup()
         {
-            builder.Read(Input);
-
-            Output = builder.Create(
-                "ToneMapped",
-                new TextureDescription
-                {
-                    Width = width,
-                    Height = height,
-                    Format = TextureFormat.RGBA8_UNorm,
-                    IsRenderTarget = true
-                });
-
-            builder.Write(Output);
+            Read("SceneColor");
+            Write("ToneMapped");
         }
 
         public override void Execute(RenderGraphContext ctx)
         {
-            Texture2D input = ctx.GetTexture(Input);
-
-            framebuffer.Bind();
-            framebuffer.Clear();
-
             RenderAPI.RenderToBuffer(input, framebuffer);
-
-            // override graph texture with framebuffer output
-            ctx.SetTexture(Output, outputTexture);
-        }
-
-        public void Resize(int width, int height)
-        {
-            this.width = width;
-            this.height = height;
         }
     }
 }
-

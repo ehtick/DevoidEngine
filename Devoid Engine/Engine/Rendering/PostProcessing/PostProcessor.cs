@@ -9,58 +9,26 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
 {
     public class PostProcessor
     {
-        List<IPostProcessEffect> effects = new();
+        List<RenderGraphPass> passes = new();
+        RenderGraph graph = new();
 
-        RenderGraph graph = new RenderGraph();
-
-        bool dirty = true;
-
-        RGResource sceneColorResource;
-        RGResource finalResource;
-
-        public PostProcessor()
+        public void AddPass(RenderGraphPass pass)
         {
-            sceneColorResource = graph.ImportTexture("SceneColor", null);
-        }
-
-        public void AddEffect(IPostProcessEffect effect)
-        {
-            effects.Add(effect);
-            dirty = true;
-        }
-
-        public void RemoveEffect(IPostProcessEffect effect)
-        {
-            effects.Remove(effect);
-            dirty = true;
-        }
-
-        void Rebuild()
-        {
-            graph.Clear();
-
-            RGResource current = sceneColorResource;
-
-            foreach (var effect in effects)
-                effect.Build(graph, current, out current);
-
-            finalResource = current;
-
-            graph.Compile();
-
-            dirty = false;
+            passes.Add(pass);
         }
 
         public Texture2D Run(Texture2D sceneColor)
         {
-            graph.UpdateImported(sceneColorResource, sceneColor);
+            graph.Clear();
 
-            if (dirty)
-                Rebuild();
+            foreach (var pass in passes)
+            {
+                graph.AddPass(pass);
+            }
 
             graph.Execute();
 
-            return graph.GetTexture(finalResource);
+            return sceneColor;
         }
     }
 }
