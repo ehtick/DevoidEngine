@@ -59,10 +59,20 @@ namespace DevoidEngine.Engine.Rendering
 
             ctx.SetTexture("SceneColor", sceneColor);
 
+            string lastWritten = null;
+
             foreach (var pass in compiledPasses)
+            {
                 pass.Execute(ctx);
 
-            return ctx.GetTexture("Final") ?? sceneColor;
+                if (pass.Writes.Count > 0)
+                    lastWritten = pass.Writes[pass.Writes.Count - 1];
+            }
+
+            if (lastWritten != null)
+                return ctx.GetTexture(lastWritten);
+
+            return sceneColor;
         }
 
         List<RenderGraphPass> ResolvePassOrder()

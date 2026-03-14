@@ -9,10 +9,15 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
         Texture2D output;
         Framebuffer framebuffer;
 
+        MaterialInstance material;
+
         public override Texture2D OutputTexture => output;
 
         public TonemapPass(int width, int height)
         {
+            material = new MaterialInstance(new Material(new Shader("Engine/Content/Shaders/Testing/tonemap")));
+
+
             output = new Texture2D(new TextureDescription()
             {
                 Width = width,
@@ -33,12 +38,13 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
 
         public override void Execute(RenderGraphContext ctx)
         {
-            Texture2D input = ctx.GetTexture("SceneColor");
+            var input = ctx.GetTexture("SceneColor");
 
-            RenderAPI.RenderToBuffer(input, framebuffer);
+            material.SetTexture("MAT_SceneColor", input);
+            RenderAPI.RenderToBuffer(material, framebuffer);
+            //RenderAPI.RenderToBuffer(input, framebuffer);
 
             ctx.SetTexture("ToneMapped", output);
-            //ctx.SetTexture("Final", output); // optional if this is last pass
         }
     }
 }
