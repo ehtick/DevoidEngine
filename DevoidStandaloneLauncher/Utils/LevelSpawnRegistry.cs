@@ -25,6 +25,11 @@ namespace DevoidStandaloneLauncher.Utils
             _lightHooks.Add(action);
         }
 
+        public static void RegisterFallBack(Action<Node, Scene> action)
+        {
+
+        }
+
         public static void Execute(string key, Node node, Scene scene)
         {
             string normalized = ExtractSpawnKey(key);

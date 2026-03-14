@@ -1,31 +1,72 @@
-﻿namespace DevoidEngine.Engine.Rendering
-{
-    public static class RenderGraph
-    {
-        public enum SSBOBindIndex
-        {
-            PointLightBuffer = 0,
-            SpotLightBuffer = 1,
-            DirLightBuffer = 2,
-            LightGridBuffer = 3,
-            ClusterBuffer = 4,
-            GlobalLightIndexCount = 5,
-            GlobalLightIndexList = 6,
-            ScreenInfoBuffer = 7
-            // VOLUMETRIC FOG TEXTURES
-            // 8, 9, 10
+﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Rendering.GPUResource;
 
+namespace DevoidEngine.Engine.Rendering
+{
+    public class RenderGraph
+    {
+        Dictionary<int, RenderGraphResource> resources = new();
+        Dictionary<string, RGResource> nameLookup = new();
+
+        List<RenderGraphPass> passes = new();
+
+        int resourceCounter = 0;
+
+        public RGResource ImportTexture(string name, Texture2D texture)
+        {
+            var id = resourceCounter++;
+
+            var res = new RenderGraphResource()
+            {
+                Name = name,
+                Texture = texture,
+                Imported = true
+            };
+
+            resources[id] = res;
+
+            var handle = new RGResource(id);
+            nameLookup[name] = handle;
+
+            return handle;
         }
 
-        public static int MAX_MESH_COUNT = 1000000;
+        public RGResource CreateResource(string name, RenderGraphPass producer)
+        {
+            var id = resourceCounter++;
 
-        public static int CURRENT_MESH_COUNT = 0;
+            var res = new RenderGraphResource()
+            {
+                Name = name,
+                Imported = false,
+                Producer = producer
+            };
 
-        public static int MAX_POINT_LIGHTS = 4096;
-        public static int MAX_DIR_LIGHTS = 1;
-        public static int MAX_SPOT_LIGHTS = 1024;
+            resources[id] = res;
 
-        public static int MAX_MATERIALS = 10000;
+            var handle = new RGResource(id);
+            nameLookup[name] = handle;
 
+            return handle;
+        }
+
+        public RGResource GetResource(string name)
+        {
+            return nameLookup[name];
+        }
+
+        public void RegisterProducer(RGResource res, RenderGraphPass pass)
+        {
+            resources[res.Id].Producer = pass;
+        }
+
+        public void AddPass(RenderGraphPass pass)
+        {
+            var builder = new RenderGraphBuilder(this, pass);
+
+            pass.Setup(builder);
+
+            passes.Add(pass);
+        }
     }
 }

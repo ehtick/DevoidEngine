@@ -246,7 +246,10 @@ namespace DevoidEngine.Engine.Core
             const int updatesPerFrame = 4;
 
             foreach (var wrs in windows)
+            {
                 wrs.window.Load();
+            }
+
 
             _running = true;
 
@@ -325,6 +328,90 @@ namespace DevoidEngine.Engine.Core
 
             _running = false;
             updateStart.Set();   // release update thread if waiting
+            updateThread.Join();
+        }
+
+        public void RunTickedParallel()
+        {
+            const int ticksPerRender = 4;
+
+            foreach (var wrs in windows)
+            {
+                wrs.window.Load();
+                wrs.window.Update(0);
+            }
+
+            _running = true;
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            // ---------------- UPDATE THREAD ----------------
+            Thread updateThread = new Thread(() =>
+            {
+                double lastTime = timer.Elapsed.TotalSeconds;
+
+                while (_running)
+                {
+                    double now = timer.Elapsed.TotalSeconds;
+                    double dt = now - lastTime;
+                    lastTime = now;
+
+                    if (dt > 0.25)
+                        dt = 0.25;
+
+                    double step = dt / ticksPerRender;
+
+                    for (int u = 0; u < ticksPerRender; u++)
+                    {
+                        for (int i = windows.Count - 1; i >= 0; i--)
+                            windows[i].window.Update(step);
+                    }
+
+                    // publish render snapshot
+                    FramePipeline.ExecuteUpdateThread((float)dt);
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "Update Thread"
+            };
+
+            updateThread.Start();
+
+            // ---------------- RENDER THREAD ----------------
+            double lastRenderTime = timer.Elapsed.TotalSeconds;
+
+            while (_running)
+            {
+                if (windows.Count == 0)
+                    break;
+
+                double now = timer.Elapsed.TotalSeconds;
+                double dt = now - lastRenderTime;
+                lastRenderTime = now;
+
+                for (int i = windows.Count - 1; i >= 0; i--)
+                {
+                    var window = windows[i].window;
+
+                    window.ProcessEvents();
+
+                    if (window.IsExiting)
+                    {
+                        window.Close();
+                        windows.RemoveAt(i);
+                        continue;
+                    }
+
+                    window.Render(dt);
+                }
+
+                FramePipeline.ExecuteRenderThread((float)dt);
+
+                _running = windows.Count > 0;
+            }
+
+            _running = false;
             updateThread.Join();
         }
 

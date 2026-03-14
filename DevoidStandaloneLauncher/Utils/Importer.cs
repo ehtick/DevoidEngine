@@ -1,5 +1,7 @@
 ﻿using Assimp;
 using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Rendering;
+using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
 using System.Numerics;
 
@@ -169,6 +171,150 @@ namespace DevoidStandaloneLauncher.Utils
             mesh.SetIndices(indices.ToArray());
 
             return mesh;
+        }
+
+        public static DevoidEngine.Engine.Core.MaterialInstance ConvertMaterial(Node node, Assimp.Scene scene, string baseModelPath)
+        {
+            Assimp.Material assimpMat = GetMaterial(node, scene);
+            if (assimpMat == null) { return null; }
+
+            DevoidEngine.Engine.Core.MaterialInstance devoidMaterial = RenderingDefaults.GetMaterial();
+
+            Texture2D diffuseTexture = GetTexture(assimpMat, Assimp.TextureType.Diffuse, baseModelPath);
+            Texture2D roughnessTexture = GetTexture(assimpMat, Assimp.TextureType.Shininess, baseModelPath);
+            Texture2D normalTexture = GetTexture(assimpMat, Assimp.TextureType.Normals, baseModelPath);
+            
+            if (diffuseTexture != null)
+            {
+                devoidMaterial.SetTexture("MAT_AlbedoMap", diffuseTexture);
+            }
+
+            if (normalTexture != null)
+            {
+                devoidMaterial.SetInt("useNormalMap", 1);
+                devoidMaterial.SetFloat("NormalStrength", 1f);
+                devoidMaterial.SetTexture("MAT_NormalMap", normalTexture);
+            }
+
+            if (roughnessTexture != null)
+            {
+                devoidMaterial.SetTexture("MAT_RoughnessMap", roughnessTexture);
+            }
+
+            if (assimpMat.HasColorDiffuse)
+            {
+                var c = assimpMat.ColorDiffuse;
+                devoidMaterial.SetVector4("Albedo", new Vector4(c.R, c.G, c.B, 1f));
+            }
+            else
+            {
+                devoidMaterial.SetVector4("Albedo", new Vector4(1, 1, 1, 1));
+            }
+
+            if (assimpMat.HasShininess)
+            {
+                // convert phong shininess → roughness
+                float shininess = assimpMat.ShininessStrength;
+                shininess = 1 - (shininess / 100);
+                devoidMaterial.SetFloat("Roughness", 1 - (shininess / 100));
+            }
+            else
+            {
+                devoidMaterial.SetFloat("Roughness", 0.5f);
+            }
+
+            if (assimpMat.HasColorSpecular)
+            {
+                var c = assimpMat.ColorSpecular;
+                devoidMaterial.SetVector3("SpecularColor", new Vector3(c.R, c.G, c.B));
+            }
+            //devoidMaterial.SetVector3("SpecularColor", new Vector3(1, 1, 1));
+
+            //if (assimpMat.HasShininess)
+            //    devoidMaterial.SetFloat("Metallic", assimpMat.Shininess);
+            //else
+            //    devoidMaterial.SetFloat("Metallic", 0f);
+
+            devoidMaterial.SetFloat("AO", 1f);
+
+            Vector3 emissiveColor = Vector3.Zero;
+            float emissiveStrength = 1.0f;
+
+            if (assimpMat.HasColorEmissive)
+            {
+                var e = assimpMat.ColorEmissive;
+
+                emissiveColor = new Vector3(e.R, e.G, e.B);
+
+                // optional: normalize color and extract strength
+                emissiveStrength = MathF.Max(e.R, MathF.Max(e.G, e.B));
+
+                if (emissiveStrength > 0)
+                    emissiveColor /= emissiveStrength;
+            }
+
+            devoidMaterial.SetVector3("EmissiveColor", emissiveColor);
+            devoidMaterial.SetFloat("EmissiveStrength", emissiveStrength);
+
+            return devoidMaterial;
+        }
+
+        static void SetWrap(Assimp.TextureWrapMode U, Assimp.TextureWrapMode V, Texture texture)
+        {
+            if (U == Assimp.TextureWrapMode.Wrap && V == Assimp.TextureWrapMode.Wrap)
+            {
+                texture.SetWrapMode(DevoidGPU.TextureWrapMode.Repeat, DevoidGPU.TextureWrapMode.Repeat);
+            }
+            else if (U == Assimp.TextureWrapMode.Wrap && V == Assimp.TextureWrapMode.Clamp)
+            {
+                texture.SetWrapMode(DevoidGPU.TextureWrapMode.Repeat, DevoidGPU.TextureWrapMode.ClampToEdge);
+            }
+            else if (U == Assimp.TextureWrapMode.Clamp && V == Assimp.TextureWrapMode.Wrap)
+            {
+                texture.SetWrapMode(DevoidGPU.TextureWrapMode.ClampToEdge, DevoidGPU.TextureWrapMode.Repeat);
+            }
+        }
+
+        public static Texture2D GetTexture(Assimp.Material mat, Assimp.TextureType type, string basePath)
+        {
+            if (mat.GetMaterialTextureCount(type) > 0)
+            {
+                mat.GetMaterialTexture(type, 0, out TextureSlot slot);
+                if (!Path.IsPathFullyQualified(basePath))
+                {
+                    return null;
+                }
+
+                string modelDirectory = Path.GetDirectoryName(basePath);
+                string fullPath = Path.Combine(modelDirectory, slot.FilePath);
+
+                Texture2D tex;
+                if (type == Assimp.TextureType.Normals)
+                {
+                    tex = Helper.loadNormalMap(fullPath, TextureFilter.Linear);
+                } else
+                {
+                    tex = Helper.loadImageAsTex(fullPath, TextureFilter.Linear);
+                }
+                    SetWrap(slot.WrapModeU, slot.WrapModeV, tex);
+
+                return tex;
+            }
+
+            return null;
+        }
+
+        public static Assimp.Material GetMaterial(Node node, Assimp.Scene scene)
+        {
+            if (node.MeshIndices.Count == 0)
+                return null;
+
+            var mesh = scene.Meshes[node.MeshIndices[0]];
+
+            if (mesh.MaterialIndex < 0 || mesh.MaterialIndex >= scene.MaterialCount)
+                return null;
+
+            return scene.Materials[mesh.MaterialIndex];
         }
 
         public static void ApplyTransform(GameObject go, Node node)

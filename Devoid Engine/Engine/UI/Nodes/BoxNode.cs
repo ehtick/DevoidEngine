@@ -62,6 +62,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             final.W *= _opacity;
 
             Material.SetVector4("COLOR", final);
+            Material.SetVector2("RECT_SIZE", Rect?.size ?? Vector2.One);
         }
 
         //protected override Vector2 MeasureCore(Vector2 availableSize)

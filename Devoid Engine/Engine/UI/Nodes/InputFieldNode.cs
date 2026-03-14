@@ -12,23 +12,23 @@ namespace DevoidEngine.Engine.UI.Nodes
 
         public Vector2 Padding = new Vector2(6, 4);
 
-        public Vector4 BackgroundColor = new Vector4(0, 0, 0, 0.9f);
+        public Vector4 BackgroundColor = new Vector4(0.2f, 0.2f, 0.2f, 0.9f);
         public Vector4 CaretColor = new Vector4(1, 1, 1, 1);
 
         LabelNode label;
         BoxNode caret;
         BoxNode background;
-        BoxNode foreground;
 
         FontInternal font;
 
         public Action<string>? OnSubmit;
 
-
         float caretTimer;
         bool caretVisible = true;
 
         const float fontSize = 16f;
+
+        string lastText = "";
 
         public InputFieldNode(FontInternal font)
         {
@@ -41,12 +41,6 @@ namespace DevoidEngine.Engine.UI.Nodes
             background = new BoxNode()
             {
                 Color = BackgroundColor,
-                ParticipatesInLayout = false
-            };
-
-            foreground = new BoxNode()
-            {
-                Color = new Vector4(1, 0, 0, 1),
                 ParticipatesInLayout = false
             };
 
@@ -70,21 +64,16 @@ namespace DevoidEngine.Engine.UI.Nodes
             Add(background);
             Add(label);
             Add(caret);
-            //Add(foreground);
         }
 
         protected override Vector2 MeasureCore(Vector2 availableSize)
         {
-            label.Text = Text;
-
             float availableWidth = availableSize.X;
             float textMaxWidth = availableWidth - (Padding.X * 2);
             if (textMaxWidth < 0) textMaxWidth = 0;
 
-            // 1. Tell the label to measure itself using the constrained width
             label.Measure(new Vector2(textMaxWidth, float.PositiveInfinity));
 
-            // 2. The label now knows its own height (including your empty-text line-height logic!)
             float requiredHeight = label.DesiredSize.Y + (Padding.Y * 2);
 
             return new Vector2(availableWidth, requiredHeight);
@@ -97,28 +86,21 @@ namespace DevoidEngine.Engine.UI.Nodes
             float textMaxWidth = finalRect.size.X - (Padding.X * 2);
             if (textMaxWidth < 0) textMaxWidth = 0;
 
-            // 1. We might need to re-measure the label if the Arrange width is 
-            // strictly different from the Measure width.
-            label.Measure(new Vector2(textMaxWidth, float.PositiveInfinity));
-
             float requiredHeight = label.DesiredSize.Y + (Padding.Y * 2);
 
-            // 2. Arrange Background (Width of container, Height of Label + Padding)
             background.Color = BackgroundColor;
             background.Arrange(new UITransform(
                 finalRect.position,
                 new Vector2(finalRect.size.X, requiredHeight)
             ));
 
-            // 3. Arrange Label
             Vector2 contentPos = finalRect.position + Padding;
+
             label.Arrange(new UITransform(
                 contentPos,
-                // Give it the full textMaxWidth, NOT the shrink-wrapped label.DesiredSize.X!
                 new Vector2(textMaxWidth, label.DesiredSize.Y)
             ));
 
-            // 4. Arrange Caret (Using our new cleanly encapsulated method!)
             Vector2 caretOffset = label.GetCursorPosition(CaretIndex, textMaxWidth);
 
             caret.Color = CaretColor;
@@ -144,6 +126,14 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
         }
 
+        void UpdateLabel()
+        {
+            if (lastText == Text) return;
+
+            label.Text = Text;
+            lastText = Text;
+        }
+
         public override void OnMouseDown(Vector2 position)
         {
             UISystem.SetFocus(this);
@@ -153,6 +143,8 @@ namespace DevoidEngine.Engine.UI.Nodes
         {
             Text = Text.Insert(CaretIndex, c.ToString());
             CaretIndex++;
+
+            UpdateLabel();
         }
 
         public override void OnKeyDown(Keys key)
@@ -163,12 +155,15 @@ namespace DevoidEngine.Engine.UI.Nodes
                     OnSubmit?.Invoke(Text);
                     Text = "";
                     CaretIndex = 0;
+                    UpdateLabel();
                     break;
+
                 case Keys.Backspace:
                     if (CaretIndex > 0)
                     {
                         Text = Text.Remove(CaretIndex - 1, 1);
                         CaretIndex--;
+                        UpdateLabel();
                     }
                     break;
 
@@ -176,6 +171,7 @@ namespace DevoidEngine.Engine.UI.Nodes
                     if (CaretIndex < Text.Length)
                     {
                         Text = Text.Remove(CaretIndex, 1);
+                        UpdateLabel();
                     }
                     break;
 

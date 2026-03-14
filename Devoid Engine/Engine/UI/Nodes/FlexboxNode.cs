@@ -25,7 +25,10 @@ namespace DevoidEngine.Engine.UI.Nodes
                 if (!child.Visible || !child.Interactable)
                     continue;
 
-                Vector2 childAvailableSize = availableSize;
+                Vector2 childAvailableSize = new Vector2(
+                    Math.Max(0, availableSize.X - Padding.Horizontal),
+                    Math.Max(0, availableSize.Y - Padding.Vertical)
+                );
 
                 Vector2 childSize = child.Measure(childAvailableSize);
 
@@ -58,8 +61,8 @@ namespace DevoidEngine.Engine.UI.Nodes
             );
 
             Vector2 contentSize = new Vector2(
-                finalRect.size.X - Padding.Left - Padding.Right,
-                finalRect.size.Y - Padding.Top - Padding.Bottom
+                Math.Max(0, finalRect.size.X - Padding.Left - Padding.Right),
+                Math.Max(0, finalRect.size.Y - Padding.Top - Padding.Bottom)
             );
 
             float containerMain = FlexboxTools.Main(contentSize, Direction);
@@ -81,7 +84,10 @@ namespace DevoidEngine.Engine.UI.Nodes
                 float intrinsic = Math.Clamp(
                     FlexboxTools.Main(child.DesiredSize, Direction),
                     FlexboxTools.Main(child.MinSize, Direction),
-                    FlexboxTools.Main(child.MaxSize, Direction)
+                    Math.Min(
+                        FlexboxTools.Main(child.MaxSize, Direction),
+                        containerMain
+                    )
                 );
 
                 resolvedMainSizes[i] = intrinsic;
@@ -197,11 +203,16 @@ namespace DevoidEngine.Engine.UI.Nodes
                 var child = children[i];
 
                 float mainSize = resolvedMainSizes[i];
-                float crossSize = Align == AlignItems.Stretch ? containerCross : FlexboxTools.Cross(child.DesiredSize, Direction);
+                float crossSize = Align == AlignItems.Stretch
+                    ? containerCross
+                    : Math.Min(
+                        FlexboxTools.Cross(child.DesiredSize, Direction),
+                        containerCross
+                    );
 
                 float crossOffset = FlexboxTools.ComputeCrossOffset(Align, containerCross, crossSize);
 
-                Vector2 pos = finalRect.position + FlexboxTools.FromMainCross(cursor, crossOffset, Direction);
+                Vector2 pos = contentPos + FlexboxTools.FromMainCross(cursor, crossOffset, Direction);
                 Vector2 size = FlexboxTools.FromMainCross(mainSize, crossSize, Direction);
 
                 child.Arrange(new UITransform(pos, size));
@@ -215,7 +226,7 @@ namespace DevoidEngine.Engine.UI.Nodes
                     var child = _children[i];
                     Vector2 size = child.Size ?? child.DesiredSize;
 
-                    Vector2 pos = finalRect.position + child.Offset;
+                    Vector2 pos = contentPos + child.Offset;
 
                     child.Arrange(new UITransform(pos, size));
                 }

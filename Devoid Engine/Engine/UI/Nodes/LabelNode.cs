@@ -21,34 +21,16 @@ namespace DevoidEngine.Engine.UI.Nodes
                 _text = value;
                 _meshDirty = true;
             }
-            //set
-            //{
-            //    _text = value;
+        }
 
-            //    UpdateMesh(LayoutOptions.MaxWidth);
-
-            //    if (string.IsNullOrEmpty(_text))
-            //    {
-            //        Size = new Vector2(
-            //            0,
-            //            TextMeshGenerator.Measure(
-            //                Font,
-            //                " ",
-            //                Font.GetScaleForFontSize(Scale),
-            //                LayoutOptions
-            //            ).Y
-            //        );
-            //    }
-            //    else
-            //    {
-            //        Size = TextMeshGenerator.Measure(
-            //            Font,
-            //            _text,
-            //            Font.GetScaleForFontSize(Scale),
-            //            LayoutOptions
-            //        );
-            //    }
-            //}
+        public Vector4 Color
+        {
+            get => _color;
+            set
+            {
+                _color = value;
+                UpdateMaterial();
+            }
         }
 
         public FontInternal Font;
@@ -57,6 +39,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         private Vector2 _measuredTextSize;
         private Mesh _mesh;
         private string _text;
+        private Vector4 _color = new Vector4(1, 1, 1, 1);
         bool _meshDirty = true;
 
         private float _lastWidthConstraint = float.PositiveInfinity;
@@ -195,12 +178,45 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected override void InitializeCore()
         {
             Material = UISystem.TextMaterial;
-            Material.SetTexture("MAT_fontSDFAtlas", Font.Atlas.GPUTexture);
+            UpdateMaterial();
         }
 
+        void UpdateMaterial()
+        {
+            Material?.SetTexture("MAT_fontSDFAtlas", Font.Atlas.GPUTexture);
+            Material?.SetVector4("COLOR", Color);
+        }
+        //float rainbowTime = 0f;
         protected override void UpdateCore(float deltaTime)
         {
+            //rainbowTime += deltaTime * 0.15f; // speed of rainbow
 
+            //float hue = rainbowTime % 1f; // keep hue in [0,1]
+
+            //Color = HSVtoRGB(hue, 1f, 1f);
+        }
+
+        Vector4 HSVtoRGB(float h, float s, float v)
+        {
+            float r = 0, g = 0, b = 0;
+
+            float i = MathF.Floor(h * 6f);
+            float f = h * 6f - i;
+            float p = v * (1f - s);
+            float q = v * (1f - f * s);
+            float t = v * (1f - (1f - f) * s);
+
+            switch ((int)i % 6)
+            {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
+            }
+
+            return new Vector4(r, g, b, 1f);
         }
 
         public override void Dispose()

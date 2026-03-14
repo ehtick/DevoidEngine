@@ -42,6 +42,7 @@ namespace DevoidEngine.Engine.Components
                 Height = (int)Screen.Size.Y,
                 Format = DevoidGPU.TextureFormat.RGBA16_Float,
                 GenerateMipmaps = true,
+                MipLevels = 0,
                 IsDepthStencil = false,
                 IsRenderTarget = true,
                 IsMutable = false,

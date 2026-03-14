@@ -47,7 +47,7 @@ namespace DevoidEngine.Engine.Core
             UpdateBuffer();
 
             if (BaseMaterial.MaterialBufferBindSlot != -1)
-                gpuBuffer.Bind(BaseMaterial.MaterialBufferBindSlot);
+                gpuBuffer.Bind(BaseMaterial.MaterialBufferBindSlot, ShaderStage.Fragment | ShaderStage.Vertex);
             BaseMaterial.Shader.Use();
 
             foreach (var texName in BaseMaterial.GetTextureNames())

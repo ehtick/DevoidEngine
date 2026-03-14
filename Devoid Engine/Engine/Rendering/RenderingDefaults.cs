@@ -17,6 +17,8 @@ namespace DevoidEngine.Engine.Rendering
             DefaultMaterial.SetVector4("Albedo", new System.Numerics.Vector4(1, 1, 1, 1));
             DefaultMaterial.SetFloat("Roughness", 1f);
             DefaultMaterial.SetFloat("AO", 1);
+            //DefaultMaterial.SetVector3("EmissiveColor", new System.Numerics.Vector3(1, 1, 1));
+            //DefaultMaterial.SetFloat("EmissiveStrength", 1);
             DefaultMaterial.SetVector3("SpecularColor", new System.Numerics.Vector3(0.04f));
         }
 

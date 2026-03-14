@@ -11,13 +11,35 @@ struct PSInput
 #include "../Common/render_constants.hlsl"
 #include "../Common/light_constructs.hlsl"
 
+//cbuffer Material : register(b3)
+//{
+//    float4 Albedo; // base color multiplier
+//    float Metallic;
+//    float Roughness;
+//    float AO;
+//    float3 SpecularColor; // dielectric F0 override (usually 0.04)
+    
+//    float3 EmissiveColor;
+//    float EmissiveStrength;
+//    uint useNormalMap;
+//    float _padding;
+    
+//};
+
 cbuffer Material : register(b3)
 {
-    float4 Albedo; // base color multiplier
+    float4 Albedo;
+
     float Metallic;
     float Roughness;
     float AO;
-    float3 SpecularColor; // dielectric F0 override (usually 0.04)
+    float EmissiveStrength;
+
+    float3 SpecularColor;
+    int useNormalMap;
+
+    float3 EmissiveColor;
+    float NormalStrength;
 };
 
 Texture2D MAT_AlbedoMap : register(t0);
@@ -26,6 +48,7 @@ Texture2D MAT_MetallicMap : register(t2);
 Texture2D MAT_RoughnessMap : register(t3);
 Texture2D MAT_AOMap : register(t4);
 Texture2D MAT_SpecularMap : register(t5);
+Texture2D MAT_EmissiveMap : register(t6);
 
 SamplerState MAT_AlbedoSampler : register(s0);
 SamplerState MAT_NormalSampler : register(s1);
@@ -33,49 +56,52 @@ SamplerState MAT_MetallicSampler : register(s2);
 SamplerState MAT_RoughnessSampler : register(s3);
 SamplerState MAT_AOSampler : register(s4);
 SamplerState MAT_SpecularSampler : register(s5);
+SamplerState MAT_EmissiveSampler : register(s6);
 
 #include "./pbr_methods.hlsl"
 
-//float3 GetNormalFromMap(PSInput input)
-//{
-//    float3 N = normalize(input.Normal);
-
-//    float3 T = normalize(input.Tangent.xyz - N * dot(input.Tangent.xyz, N));
-//    float3 B = cross(N, T);
-
-//    // CRITICAL: re-orthogonalize
-//    //T = normalize(T - N * dot(N, T));
-
-//    //float3 B = normalize(cross(N, T) * input.Tangent.w);
-
-//    float3 normalTex = MAT_NormalMap.Sample(MAT_NormalSampler, input.UV0).xyz;
-//    normalTex = normalTex * 2.0 - 1.0;
-
-//    float3x3 TBN = float3x3(T, B, N);
-
-//    return normalize(mul(normalTex, TBN));
-//}
-
 float3 GetNormalFromMap(PSInput input)
 {
-    return normalize(input.Normal);
+    float3 N = normalize(input.Normal);
+    if (useNormalMap == 0)
+        return N;
+
+    float3 T = normalize(input.Tangent.xyz);
+    T = normalize(T - N * dot(N, T));
+    float3 B = cross(N, T) * input.Tangent.w;
+
+    float3 normalTex = MAT_NormalMap.Sample(MAT_NormalSampler, input.UV0).xyz;
+    normalTex = normalTex * 2.0 - 1.0;
+    normalTex.xy *= NormalStrength;
+    normalTex = normalize(normalTex);
+
+    float3x3 TBN = float3x3(T, B, N);
+
+    return normalize(mul(normalTex, TBN));
 }
+
+//float3 GetNormalFromMap(PSInput input)
+//{
+//    return normalize(input.Normal);
+//}
 
 float4 PSMain(PSInput input) : SV_TARGET
 {
     float2 uv = input.UV0;
     
     float3 albedoTex = MAT_AlbedoMap.Sample(MAT_AlbedoSampler, uv).rgb;
-    float metallicTex = MAT_MetallicMap.Sample(MAT_MetallicSampler, uv).r;
-    float roughnessTex = MAT_RoughnessMap.Sample(MAT_RoughnessSampler, uv).r;
+    float metallicTex = MAT_MetallicMap.Sample(MAT_RoughnessSampler, uv).b;
+    float roughnessTex = MAT_RoughnessMap.Sample(MAT_RoughnessSampler, uv).g;
     float aoTex = MAT_AOMap.Sample(MAT_AOSampler, uv).r;
     float3 specTex = MAT_SpecularMap.Sample(MAT_SpecularSampler, uv).rgb;
+    float3 emissiveTex = MAT_EmissiveMap.Sample(MAT_EmissiveSampler, uv).rgb;
     
     float3 albedo = albedoTex * Albedo.rgb;
     float metallic = saturate(metallicTex * Metallic);
     float roughness = saturate(roughnessTex * Roughness);
     float ao = aoTex * AO;
     float3 specColor = specTex * SpecularColor;
+    float3 emission = emissiveTex * EmissiveColor * EmissiveStrength;
     
     roughness = max(roughness, 0.04); // avoid zero roughness
     
@@ -122,7 +148,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     
     float3 ambient = 0.03 * albedo * ao;
 
-    float3 color = ambient + Lo;
+    float3 color = ambient + Lo + emission;
 
     //return float4(input.Tangent.xyz * 0.5 + 0.5, 1);
     //return float4(N, 1.0);

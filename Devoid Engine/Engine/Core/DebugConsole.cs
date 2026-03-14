@@ -37,9 +37,9 @@ namespace DevoidEngine.Engine.Core
         ContainerNode logAreaContainer;
 
         InputFieldNode inputLabel;
-        BoxNode background;
+        ContainerNode logAreaBackground;
 
-        List<string> logs = new();
+        public List<string> logs = new();
         string currentInput = "";
 
         Dictionary<string, Action<string[]>> commands = new();
@@ -64,19 +64,28 @@ namespace DevoidEngine.Engine.Core
             };
 
             // background
-            background = new BoxNode()
+            logAreaBackground = new ContainerNode()
             {
                 Size = new Vector2(600, 350),
-                Color = new Vector4(0, 0, 0, 0.2f)
+                Color = new Vector4(0, 0, 0, 1f),
+                Padding = new Padding()
+                {
+                    Top = 5,
+                    Left = 5,
+                    Right = 5,
+                    Bottom = 5
+                },
             };
 
             logAreaContainer = new ContainerNode()
             {
-                Color = new Vector4(1, 0, 0, 0f),
+                Color = new Vector4(0, 0.188f, 0.286f, 0.8f),
                 Padding = new Padding()
                 {
-                    Top = 50,
-                    Left = 5
+                    Top = 7,
+                    Left = 7,
+                    Right = 7,
+                    Bottom = 7
                 }
             };
 
@@ -93,62 +102,26 @@ namespace DevoidEngine.Engine.Core
                 
             };
 
-            consolePanel.Add(background);
+            consolePanel.Add(logAreaBackground);
             consolePanel.Add(inputLabel);
-            background.Add(logAreaContainer);
+            logAreaBackground.Add(logAreaContainer);
             logAreaContainer.Add(logArea);
 
             rootNode.Add(consolePanel);
 
             inputLabel.OnSubmit += ExecuteCommand;
+
+            rootNode.Visible = false;
         }
 
         void RegisterCommands()
         {
-            commands["help"] = args =>
+            var registry = ConsoleCommands.Build();
+
+            foreach (var c in registry)
             {
-                Log("Available commands:");
-                foreach (var cmd in commands.Keys)
-                    Log(" - " + cmd);
-            };
-
-            commands["list"] = args =>
-            {
-                List<GameObject> gameObjects = SceneManager.CurrentScene.GameObjects;
-                Log($"GameObjects ({gameObjects.Count}):");
-                foreach (GameObject go in gameObjects)
-                    Log(" " + go.Name);
-
-            };
-
-            commands["spawnCube"] = args =>
-            {
-                Mesh mesh = new Mesh();
-                mesh.SetVertices(Primitives.GetCubeVertex());
-
-                GameObject go = SceneManager.CurrentScene.addGameObject("CubeObject-Console");
-                MeshRenderer mr = go.AddComponent<MeshRenderer>();
-                mr.AddMesh(mesh);
-
-                if (args.Length == 3)
-                {
-                    go.transform.Position = new Vector3(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]));
-                }
-
-
-                Log("Successfully Added GameObject Cube");
-            };
-
-            commands["clear"] = args =>
-            {
-                logs.Clear();
-                RefreshLogs();
-            };
-
-            commands["echo"] = args =>
-            {
-                Log(string.Join(" ", args));
-            };
+                commands[c.Key] = args => c.Value(args, this);
+            }
         }
 
         void ExecuteCommand(string input)
@@ -174,19 +147,22 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-        void Log(string text)
+        public void Log(string text)
         {
             logs.Add(text);
             RefreshLogs();
         }
 
-        void RefreshLogs()
+        public void RefreshLogs()
         {
             logArea.Clear();
 
             foreach (var log in logs)
             {
-                logArea.Add(new LabelNode(log, font, 16));
+                logArea.Add(new LabelNode(log, font, 14)
+                {
+                    Color = new Vector4(1, 0.8f, 0, 1)
+                });
             }
 
             logArea.ScrollToBottom();
@@ -197,9 +173,28 @@ namespace DevoidEngine.Engine.Core
 
         }
 
+        CursorState prevCursorState;
+
+
         public override void OnUpdate(float deltaTime)
         {
-            
+            if (Input.GetKeyDown(Keys.F7))
+            {
+                rootNode.Visible = !rootNode.Visible;
+
+                if (rootNode.Visible)
+                {
+                    prevCursorState = Cursor.GetCursorState();
+
+                    Console.WriteLine(prevCursorState);
+                    Cursor.SetCursorState(CursorState.Normal);
+                }
+                else
+                {
+                    Console.WriteLine(prevCursorState);
+                    Cursor.SetCursorState(prevCursorState);
+                }
+            }
         }
 
         public override void OnRender(float deltaTime)

@@ -38,11 +38,23 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
         }
 
+        public Vector4 BorderRadius
+        {
+            get => _borderRadius;
+            set
+            {
+                _borderRadius = value;
+                UpdateMaterial();
+            }
+        }
+
+
         public float BorderThickness = 0f;
         public Vector4 BorderColor = new Vector4(0, 0, 0, 1);
 
         private Vector4 _color = new Vector4(1, 1, 1, 1);
         private float _opacity = 1f;
+        private Vector4 _borderRadius = new Vector4(0, 0, 0, 0);
 
         protected override void InitializeCore()
         {
@@ -62,6 +74,9 @@ namespace DevoidEngine.Engine.UI.Nodes
             final.W *= _opacity;
 
             Material.SetVector4("COLOR", final);
+            Material.SetVector2("RECT_SIZE", Rect?.size ?? Vector2.One);
+            Material.SetVector4("CORNER_RADIUS", _borderRadius);
+            
         }
 
         //protected override Vector2 MeasureCore(Vector2 availableSize)

@@ -13,9 +13,19 @@ struct PSInput
     float4 Position : SV_POSITION;
     float2 NDC : TEXCOORD4;
     float2 UV0 : TEXCOORD0;
+    float2 LocalPos : TEXCOORD1;
 };
 
 #include "../Common/render_constants.hlsl"
+
+cbuffer MATERIAL : register(b3)
+{
+    float4 COLOR;
+    float4 CORNER_RADIUS; // TL TR BR BL (pixels)
+    float2 RECT_SIZE;
+    int useTexture;
+    int _pad;
+};
 
  
 PSInput VSMain(VSInput input)
@@ -31,6 +41,9 @@ PSInput VSMain(VSInput input)
     output.Position = clip;
     output.NDC = clip.xy / clip.w;
     output.UV0 = input.UV0;
+
+    // convert quad (-0.5..0.5) or (0..1) to rect space
+    output.LocalPos = input.UV0 * RECT_SIZE - RECT_SIZE * 0.5;
 
     return output;
 }

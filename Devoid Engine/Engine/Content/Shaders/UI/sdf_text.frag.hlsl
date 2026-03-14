@@ -7,6 +7,15 @@
 
 #include "../Common/render_constants.hlsl"
 
+cbuffer MATERIAL : register(b3)
+{
+    float4 COLOR;
+    float4 CORNER_RADIUS; // TL TR BR BL (pixels)
+    float2 RECT_SIZE;
+    int useTexture;
+    int _pad;
+};
+
 Texture2D MAT_fontSDFAtlas : register(t0);
 SamplerState MAT_fontSDFAtlasSampler : register(s0);
 
@@ -36,5 +45,5 @@ float4 PSMain(PSInput input) : SV_TARGET
     if (alpha <= 0.01)
         discard;
 
-    return float4(1, 1, 1, alpha);
+    return float4(COLOR.rgb, alpha * COLOR.a);
 }

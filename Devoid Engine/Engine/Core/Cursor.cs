@@ -17,5 +17,10 @@ namespace DevoidEngine.Engine.Core
             isDirty = true;
         }
 
+        public static CursorState GetCursorState()
+        {
+            return cursorState;
+        }
+
     }
 }

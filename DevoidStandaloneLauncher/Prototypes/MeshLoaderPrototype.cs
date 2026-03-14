@@ -39,8 +39,8 @@ namespace DevoidStandaloneLauncher.Prototypes
             });
             LoadLevel();
 
-            Cursor.SetCursorState(CursorState.Normal);
-            scene.Pause();
+            //Cursor.SetCursorState(CursorState.Normal);
+            //scene.Pause();
 
         }
 
@@ -49,6 +49,19 @@ namespace DevoidStandaloneLauncher.Prototypes
             this.scene = new Scene();
             SceneManager.LoadScene(scene);
             loader.CurrentScene = scene;
+
+
+            GameObject cube = scene.addGameObject("Glowy");
+            MeshRenderer mr = cube.AddComponent<MeshRenderer>();
+            Mesh mesh = new Mesh();
+            mesh.SetVertices(Primitives.GetCubeVertex());
+            mr.AddMesh(mesh);
+            cube.transform.Position = new Vector3(0, 10, 0);
+            RenderThread.Enqueue(() =>
+            {
+                mr.material.SetVector3("EmissiveColor", new Vector3(1, 1, 1));
+                mr.material.SetFloat("EmissiveStrength", 1);
+            });
 
             Importer.LoadModel(levelPath);
             scene.Play();
@@ -140,6 +153,11 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
                 MeshRenderer mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                });
                 //RenderThread.Enqueue(() =>
                 //{
                 //    mr.material = celMaterial;
@@ -157,7 +175,8 @@ namespace DevoidStandaloneLauncher.Prototypes
                 mr.AddMesh(mesh);
                 RenderThread.Enqueue(() =>
                 {
-                    mr.material.SetTexture("MAT_AlbedoMap", gridTexture);
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
                 });
 
                 var rb = go.AddComponent<StaticCollider>();
@@ -263,10 +282,11 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
                 MeshRenderer mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
-                //RenderThread.Enqueue(() =>
-                //{
-                //    mr.material = celMaterial;
-                //});
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                });
 
                 var rb = go.AddComponent<RigidBodyComponent>();
                 rb.Mass = 20;
@@ -455,7 +475,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                     1f);
 
                 lightComponent.Radius = 200f;
-                lightComponent.Intensity = 200f; // your scale
+                lightComponent.Intensity = 150f; // your scale
             });
         }
 

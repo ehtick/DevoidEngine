@@ -39,6 +39,50 @@ namespace DevoidEngine.Engine.Utilities
             return texture;
         }
 
+        public static Texture2D loadNormalMap(string file, TextureFilter textureFilter)
+        {
+            Image image = new Image();
+            image.LoadPNGAsFloat(file);
+
+            Texture2D texture = new Texture2D(new TextureDescription()
+            {
+                Width = image.Width,
+                Height = image.Height,
+                Format = TextureFormat.RGBA8_UNorm,
+                GenerateMipmaps = true,
+                MipLevels = 0,
+                IsDepthStencil = false,
+                IsRenderTarget = true,
+                IsMutable = false
+            });
+
+            texture.SetFilter(textureFilter, textureFilter);
+            texture.SetAnisotropy(8);
+            texture.SetWrapMode(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
+
+            float[] floatPixels = image.PixelHP;
+
+            byte[] bytePixels = new byte[floatPixels.Length];
+
+            for (int i = 0; i < floatPixels.Length; i++)
+            {
+                float v = floatPixels[i];
+
+                if (v < 0f) v = 0f;
+                if (v > 1f) v = 1f;
+
+                bytePixels[i] = (byte)(v * 255.0f);
+            }
+
+            texture.SetData<byte>(bytePixels);
+
+            texture.GenerateMipmaps();
+
+            image.PixelHP = [];
+
+            return texture;
+        }
+
 
     }
 }
