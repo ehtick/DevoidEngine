@@ -38,7 +38,7 @@ namespace Elemental.Editor
 
             SceneManager.LoadScene(new Scene());
 
-            SceneManager.MainScene.Play();
+            SceneManager.CurrentScene.Play();
 
             AddPanel<ViewportPanel>();
             AddPanel<InspectorPanel>();
@@ -56,7 +56,7 @@ namespace Elemental.Editor
 
         void SetupSandbox()
         {
-            GameObject gameObject = SceneManager.MainScene.addGameObject("SandboxObj#1");
+            GameObject gameObject = SceneManager.CurrentScene.addGameObject("SandboxObj#1");
             CameraComponent3D camera = gameObject.AddComponent<CameraComponent3D>();
             camera.IsDefault = true;
         }
@@ -85,6 +85,31 @@ namespace Elemental.Editor
             {
                 panel.OnGUI();
             }
+        }
+
+        public override void OnMouseMove(MouseMoveEvent e)
+        {
+            Input.OnMouseMove(e);
+        }
+
+        public override void OnMouseButton(MouseButtonEvent e)
+        {
+            Input.OnMouseButton(e);
+        }
+
+        public override void OnMouseWheel(MouseWheelEvent e)
+        {
+            Input.OnMouseWheel(e);
+        }
+
+        public override void OnKeyDown(KeyboardEvent e)
+        {
+            Input.OnKeyDown(e.Key);
+        }
+
+        public override void OnKeyUp(KeyboardEvent e)
+        {
+            Input.OnKeyUp(e.Key);
         }
 
     }

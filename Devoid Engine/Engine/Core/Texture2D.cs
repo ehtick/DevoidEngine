@@ -79,7 +79,7 @@ namespace DevoidEngine.Engine.Core
             Graphics.ResourceManager.TextureManager.GenerateMipmaps(_textureInternal);
         }
 
-        internal ITexture2D GetDeviceTexture()
+        public ITexture2D GetDeviceTexture()
         {
             return (ITexture2D)Graphics.ResourceManager.TextureManager.GetDeviceTexture(_textureInternal);
         }

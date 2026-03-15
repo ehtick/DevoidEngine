@@ -26,7 +26,7 @@ namespace Elemental.Editor.Panels
                     Renderer.Resize(resolution.width, resolution.height);
                     Screen.Size.X = resolution.width;
                     Screen.Size.Y = resolution.height;
-                    SceneManager.MainScene.OnResize(resolution.width, resolution.height);
+                    SceneManager.CurrentScene.OnResize(resolution.width, resolution.height);
                 }
             }
 
@@ -48,8 +48,8 @@ namespace Elemental.Editor.Panels
                                     Renderer.Resize(res.width, res.height);
                                     Screen.Size.X = res.width;
                                     Screen.Size.Y = res.height;
-                                    SceneManager.MainScene.OnResize(res.width, res.height);
-                                    SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.Resize(res.width, res.height);
+                                    SceneManager.CurrentScene.OnResize(res.width, res.height);
+                                    SceneManager.CurrentScene.GetMainCamera().Camera.RenderTarget.Resize(res.width, res.height);
                                 });
                                 //DebugLogPanel.Log("RESIZED RENDERER", DebugLogPanel.DebugMessageSeverity.Information, "Viewport Change");
                             }
@@ -104,9 +104,9 @@ namespace Elemental.Editor.Panels
             {
                 ViewportUtil.DrawViewportTools(60, controls);
 
-                if (SceneManager.MainScene.GetMainCamera() != null)
+                if (SceneManager.CurrentScene.GetMainCamera() != null)
                 {
-                    ImGui.Image(SceneManager.MainScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0).GetDeviceTexture().GetHandle(), new System.Numerics.Vector2(500, 281));
+                    ImGui.Image(SceneManager.CurrentScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0).GetDeviceTexture().GetHandle(), new System.Numerics.Vector2(500, 281));
                 }
             }
 

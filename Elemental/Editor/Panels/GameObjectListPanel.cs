@@ -33,7 +33,7 @@ namespace Elemental.Editor.Panels
 
                 if (ImGui.BeginChild("gameobject_hierarchy_scroll", ImGui.GetContentRegionAvail(), ImGuiChildFlags.AlwaysUseWindowPadding, ImGuiWindowFlags.ChildWindow))
                 {
-                    var roots = SceneManager.MainScene.GameObjects;
+                    var roots = SceneManager.CurrentScene.GameObjects;
                     int rowIndex = 0;
                     for (int i = 0; i < roots.Count; i++)
                     {
@@ -93,10 +93,10 @@ namespace Elemental.Editor.Panels
                             {
                                 // Get the target sibling list (same parent as dropTarget)
                                 var newParent = dropTarget.parentObject;
-                                var targetList = newParent?.children ?? SceneManager.MainScene.GameObjects;
+                                var targetList = newParent?.children ?? SceneManager.CurrentScene.GameObjects;
 
                                 // Remove from old parent
-                                var oldList = DraggedObject.parentObject?.children ?? SceneManager.MainScene.GameObjects;
+                                var oldList = DraggedObject.parentObject?.children ?? SceneManager.CurrentScene.GameObjects;
                                 oldList.Remove(DraggedObject);
 
                                 // Set new parent
@@ -193,7 +193,7 @@ namespace Elemental.Editor.Panels
                         {
                             DraggedObject.parentObject?.children?.Remove(DraggedObject);
                             if (DraggedObject.parentObject == null)
-                                SceneManager.MainScene.GameObjects.Remove(DraggedObject);
+                                SceneManager.CurrentScene.GameObjects.Remove(DraggedObject);
 
                             DraggedObject.parentObject = gameObject;
                             gameObject.children ??= new List<GameObject>();
@@ -252,7 +252,7 @@ namespace Elemental.Editor.Panels
                     {
                         UpdateThreadDispatcher.QueueLatest("GameObjectList_AddGameObject", () =>
                         {
-                            SelectedObject = SceneManager.MainScene.addGameObject("DevoidObject");
+                            SelectedObject = SceneManager.CurrentScene.addGameObject("DevoidObject");
                         });
                     }
 
