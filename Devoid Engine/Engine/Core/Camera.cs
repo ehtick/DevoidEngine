@@ -68,7 +68,37 @@ namespace DevoidEngine.Engine.Core
 
             _viewMatrix = Matrix4x4.CreateLookAt(Position, Position + Front, Up);
 
+            //Frustum = Frustum.FromMatrix(_projectionMatrix * _viewMatrix);
             Frustum = Frustum.FromMatrix(_viewMatrix * _projectionMatrix);
+        }
+
+        public bool IntersectsAABB(Vector3 min, Vector3 max)
+        {
+            var planes = Frustum.Planes;
+
+            for (int i = 0; i < 6; i++)
+            {
+                var plane = planes[i];
+
+                Vector3 normal = plane.Normal;
+
+                Vector3 positive;
+
+                positive.X = normal.X >= 0 ? max.X : min.X;
+                positive.Y = normal.Y >= 0 ? max.Y : min.Y;
+                positive.Z = normal.Z >= 0 ? max.Z : min.Z;
+
+                float distance =
+                    normal.X * positive.X +
+                    normal.Y * positive.Y +
+                    normal.Z * positive.Z +
+                    plane.D;
+
+                if (distance < 0)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace DevoidEngine.Engine.Core
         public bool IsRenderable { get; set; } = true;
         public bool IsHighlighted { get; set; } = false;
         public bool IsStatic { get; private set; } = true;
-        public BoundingBox LocalBounds { get; private set; } = BoundingBox.Empty;
+        public BoundingBox LocalBounds { get; set; } = BoundingBox.Empty;
 
         private bool isDisposed = false;
 
@@ -67,10 +67,14 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-        public void SetVertices(Vertex[] vertexArray)
+        public void SetVertices(Vertex[] vertexArray, bool computeBounds = true)
         {
             vertices = vertexArray;
-            ComputeLocalBounds(vertexArray);
+            
+            if (computeBounds)
+            {
+                ComputeLocalBounds(vertexArray);
+            }
 
 
             VertexBuffer = new VertexBuffer(

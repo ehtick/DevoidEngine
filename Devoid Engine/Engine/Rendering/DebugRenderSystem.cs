@@ -82,6 +82,23 @@ namespace DevoidEngine.Engine.Rendering
             });
         }
 
+        public static void DrawCube(Vector3 min, Vector3 max, Matrix4x4 model)
+        {
+            Vector3 size = max - min;
+            Vector3 center = (min + max) * 0.5f;
+
+            Matrix4x4 localBox =
+                Matrix4x4.CreateScale(size) *
+                Matrix4x4.CreateTranslation(center);
+
+            Matrix4x4 world = localBox * model;
+
+            cubes.Add(new DebugCube
+            {
+                Model = world,
+            });
+        }
+
         public static void DrawRectUI(Matrix4x4 model)
         {
             rects.Add(new DebugRect()

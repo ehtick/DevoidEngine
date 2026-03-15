@@ -126,7 +126,6 @@ namespace DevoidEngine.Engine.Core
 
         void ExecuteCommand(string input)
         {
-            Console.WriteLine(input);
             Log("> " + input);
 
             if (string.IsNullOrWhiteSpace(input))
@@ -186,12 +185,10 @@ namespace DevoidEngine.Engine.Core
                 {
                     prevCursorState = Cursor.GetCursorState();
 
-                    Console.WriteLine(prevCursorState);
                     Cursor.SetCursorState(CursorState.Normal);
                 }
                 else
                 {
-                    Console.WriteLine(prevCursorState);
                     Cursor.SetCursorState(prevCursorState);
                 }
             }

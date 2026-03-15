@@ -52,10 +52,8 @@ namespace DevoidEngine.Engine.Utilities
         /// </summary>
         public bool Intersects(BoundingBox box)
         {
-            return true;
             foreach (var plane in Planes)
             {
-                // compute positive vertex
                 Vector3 positive = box.min;
 
                 if (plane.Normal.X >= 0) positive.X = box.max.X;
@@ -63,10 +61,10 @@ namespace DevoidEngine.Engine.Utilities
                 if (plane.Normal.Z >= 0) positive.Z = box.max.Z;
 
                 if (Vector3.Dot(plane.Normal, positive) + plane.D < 0)
-                    return false; // outside this plane
+                    return false;
             }
 
-            return true; // inside all planes
+            return true;
         }
     }
 
@@ -83,8 +81,11 @@ namespace DevoidEngine.Engine.Utilities
 
         public Plane(float a, float b, float c, float d)
         {
-            Normal = Vector3.Normalize(new Vector3(a, b, c));
-            D = d / Normal.Length();
+            Vector3 n = new Vector3(a, b, c);
+            float length = n.Length();
+
+            Normal = n / length;
+            D = d / length;
         }
 
         public static Plane Normalize(Plane plane)

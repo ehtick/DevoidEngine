@@ -192,7 +192,6 @@ namespace DevoidStandaloneLauncher.Prototypes
                     Friction = 2f
                 };
 
-                Console.WriteLine("Collideable Added");
             });
 
 
@@ -244,9 +243,6 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Gun", (assimpNode, assimpScene) =>
             {
-                Console.WriteLine("Loaded gun");
-
-                Console.WriteLine(CameraObject);
 
                 GameObject gun = scene.addGameObject("Gun");
 
@@ -447,6 +443,28 @@ namespace DevoidStandaloneLauncher.Prototypes
                 go.AddComponent<PortalCubeComponent>();
             });
 
+            LevelSpawnRegistry.RegisterFallBack((assimpNode, assimpScene) =>
+            {
+                if (!assimpNode.HasMeshes)
+                    return;
+
+                var go = scene.addGameObject(assimpNode.Name);
+
+                Importer.ApplyTransform(go, assimpNode);
+
+                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
+
+                var mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+
+                RenderThread.Enqueue(() =>
+                {
+                    var material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                });
+            });
+
+
             LevelSpawnRegistry.RegisterLight((assimpNode, assimpLight) =>
             {
                 GameObject lightGO = scene.addGameObject(assimpNode.Name);
@@ -468,11 +486,8 @@ namespace DevoidStandaloneLauncher.Prototypes
                         break;
                 }
 
-                lightComponent.Color = new Vector4(
-                    assimpLight.ColorDiffuse.R,
-                    assimpLight.ColorDiffuse.G,
-                    assimpLight.ColorDiffuse.B,
-                    1f);
+                //lightComponent.Color = new Vector4(assimpLight.ColorDiffuse.R, assimpLight.ColorDiffuse.G, assimpLight.ColorDiffuse.B, 1f);
+                lightComponent.Color = new Vector4(assimpLight.ColorDiffuse, 1f);
 
                 lightComponent.Radius = 200f;
                 lightComponent.Intensity = 150f; // your scale

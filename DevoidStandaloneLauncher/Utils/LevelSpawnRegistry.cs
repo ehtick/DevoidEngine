@@ -9,11 +9,10 @@ namespace DevoidStandaloneLauncher.Utils
 {
     public static class LevelSpawnRegistry
     {
-        private static readonly Dictionary<string, Action<Node, Scene>> _registry
-                = new();
+        private static readonly Dictionary<string, Action<Node, Scene>> _registry = new();
+        private static readonly List<Action<Node, Assimp.Light>> _lightHooks = new();
 
-        private static readonly List<Action<Node, Assimp.Light>> _lightHooks
-            = new();
+        private static Action<Node, Scene> _fallback;
 
         public static void Register(string key, Action<Node, Scene> action)
         {
@@ -27,7 +26,7 @@ namespace DevoidStandaloneLauncher.Utils
 
         public static void RegisterFallBack(Action<Node, Scene> action)
         {
-
+            _fallback = action;
         }
 
         public static void Execute(string key, Node node, Scene scene)
@@ -35,7 +34,13 @@ namespace DevoidStandaloneLauncher.Utils
             string normalized = ExtractSpawnKey(key);
 
             if (_registry.TryGetValue(normalized, out var action))
+            {
                 action(node, scene);
+                return;
+            }
+
+            // fallback
+            _fallback?.Invoke(node, scene);
         }
 
         public static void ExecuteLight(string key, Node node, Assimp.Light light)
@@ -46,7 +51,6 @@ namespace DevoidStandaloneLauncher.Utils
 
         private static string ExtractSpawnKey(string name)
         {
-            // Remove Blender numeric suffix (.001, .002 etc.)
             int dotIndex = name.LastIndexOf('.');
             if (dotIndex > 0)
             {
@@ -55,14 +59,13 @@ namespace DevoidStandaloneLauncher.Utils
                     name = name.Substring(0, dotIndex);
             }
 
-            // Extract everything AFTER ':'
             int colonIndex = name.IndexOf(':');
             if (colonIndex >= 0 && colonIndex < name.Length - 1)
             {
                 return name.Substring(colonIndex + 1);
             }
 
-            return name; // fallback if no colon
+            return name;
         }
     }
 }

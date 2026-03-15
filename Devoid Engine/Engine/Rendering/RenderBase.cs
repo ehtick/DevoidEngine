@@ -83,12 +83,14 @@ namespace DevoidEngine.Engine.Rendering
         {
             if (ActiveRenderTechnique == null)
                 Console.WriteLine("[Renderer]: Render technique was not set. No Object rendered.");
-            Output = ActiveRenderTechnique?.Render(ctx);
+            Framebuffer activeFrameBuffer = ActiveRenderTechnique?.Render(ctx);
             Renderer.graphicsDevice.UnbindAllShaderResources();
-            
+            DebugRenderSystem.Render(ctx.cameraData, activeFrameBuffer);
+
+            Output = activeFrameBuffer.GetRenderTexture(0);
+
             Texture2D finalColor = PostProcessor.Run(Output);
             RenderAPI.RenderToBuffer(finalColor, ctx.cameraTargetSurface);
-            DebugRenderSystem.Render(ctx.cameraData, ctx.cameraTargetSurface);
         }
 
         public static IInputLayout GetInputLayout(Mesh mesh, Shader shader)

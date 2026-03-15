@@ -6,7 +6,7 @@ namespace DevoidEngine.Engine.Rendering
     {
         void Initialize(int width, int height);
         void Resize(int width, int height);
-        Texture2D Render(CameraRenderContext ctx);
+        Framebuffer Render(CameraRenderContext ctx);
         void Dispose();
     }
 }

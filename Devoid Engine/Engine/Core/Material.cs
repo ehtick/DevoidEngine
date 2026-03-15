@@ -7,6 +7,7 @@ namespace DevoidEngine.Engine.Core
     public class Material
     {
         public Shader Shader { get; }
+        public BlendMode BlendMode { get; set; } = BlendMode.Opaque;
         public int MaterialBufferSize => materialBufferSize;
         public int MaterialBufferBindSlot => materialBufferBindSlot;
 

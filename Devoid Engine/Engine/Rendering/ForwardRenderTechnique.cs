@@ -28,7 +28,6 @@ namespace DevoidEngine.Engine.Rendering
 
         public unsafe void Initialize(int width, int height)
         {
-            Console.WriteLine($"{width}:{height}");
             pointLightBuffer = new StorageBuffer<GPUPointLight>(MAX_POINTLIGHTS, DevoidGPU.BufferUsage.Dynamic, false);
             sceneDataBuffer = new UniformBuffer(Unsafe.SizeOf<SceneData>(), DevoidGPU.BufferUsage.Dynamic);
 
@@ -58,7 +57,7 @@ namespace DevoidEngine.Engine.Rendering
             UIRenderer.CreateCameraData(width, height);
         }
 
-        public Texture2D Render(CameraRenderContext ctx)
+        public Framebuffer Render(CameraRenderContext ctx)
         {
 
             finalOutputBuffer.Bind();
@@ -78,7 +77,7 @@ namespace DevoidEngine.Engine.Rendering
             RenderBase.Execute(ctx.renderItemsUI, UIRenderer.renderState);
 
 
-            return finalOutputBuffer.GetRenderTexture(0);
+            return finalOutputBuffer;
         }
 
         void UploadSceneData(CameraRenderContext ctx)

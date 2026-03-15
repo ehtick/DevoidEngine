@@ -27,10 +27,32 @@ namespace DevoidEngine.Engine.Components
             return mesh;
         }
 
+        public override void OnRender(float dt)
+        {
+            DebugRenderSystem.DrawCube(mesh.LocalBounds.min, mesh.LocalBounds.max, gameObject.transform.WorldMatrix);
+        }
+
         public void Collect(CameraComponent3D camera, CameraRenderContext viewData)
         {
             if (mesh == null || !gameObject.Enabled)
                 return;
+
+            Vector3 worldMin, worldMax;
+
+            BoundingBox.TransformAABB(
+                mesh.LocalBounds.min,
+                mesh.LocalBounds.max,
+                gameObject.transform.WorldMatrix,
+                out worldMin,
+                out worldMax
+            );
+
+            if (!camera.Camera.IntersectsAABB(worldMin, worldMax))
+            {
+                return;
+            }
+
+            bool isTransparent = material.BaseMaterial.BlendMode == DevoidGPU.BlendMode.AlphaBlend;
 
             viewData.renderItems3D.Add(new RenderItem()
             {
@@ -38,6 +60,19 @@ namespace DevoidEngine.Engine.Components
                 Mesh = mesh,
                 Model = gameObject.transform.WorldMatrix
             });
+
+            //if (isTransparent)
+            //{
+
+            //} else
+            //{
+            //    viewData.renderItems3D.Add(new RenderItem()
+            //    {
+            //        Material = material,
+            //        Mesh = mesh,
+            //        Model = gameObject.transform.WorldMatrix
+            //    });
+            //}
         }
     }
 }

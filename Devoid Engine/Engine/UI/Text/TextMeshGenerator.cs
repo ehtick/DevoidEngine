@@ -12,7 +12,6 @@ namespace DevoidEngine.Engine.UI.Text
 
         public static Mesh Generate(FontInternal font, string text, float scale, TextLayoutOptions options)
         {
-            Console.WriteLine("WOAH");
             vertices.Clear();
             indices.Clear();
 

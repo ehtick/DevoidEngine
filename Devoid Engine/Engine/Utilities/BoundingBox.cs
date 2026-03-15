@@ -15,23 +15,29 @@ namespace DevoidEngine.Engine.Utilities
             this.max = max;
         }
 
-        public BoundingBox Transform(Matrix4x4 worldMatrix)
+        public static void TransformAABB(
+            Vector3 min,
+            Vector3 max,
+            Matrix4x4 model,
+            out Vector3 worldMin,
+            out Vector3 worldMax)
         {
-            // Compute center and half-extents
             Vector3 center = (min + max) * 0.5f;
             Vector3 extents = (max - min) * 0.5f;
 
-            // Transform center
-            Vector3 newCenter = Vector3.Transform(center, worldMatrix);
+            Vector3 worldCenter = Vector3.Transform(center, model);
 
-            // Extract absolute rotation/scale from the matrix
-            Vector3 newExtents = new Vector3(
-                Math.Abs(worldMatrix.M11) * extents.X + Math.Abs(worldMatrix.M21) * extents.Y + Math.Abs(worldMatrix.M31) * extents.Z,
-                Math.Abs(worldMatrix.M12) * extents.X + Math.Abs(worldMatrix.M22) * extents.Y + Math.Abs(worldMatrix.M32) * extents.Z,
-                Math.Abs(worldMatrix.M13) * extents.X + Math.Abs(worldMatrix.M23) * extents.Y + Math.Abs(worldMatrix.M33) * extents.Z
-            );
+            Vector3 right = new Vector3(model.M11, model.M12, model.M13) * extents.X;
+            Vector3 up = new Vector3(model.M21, model.M22, model.M23) * extents.Y;
+            Vector3 forward = new Vector3(model.M31, model.M32, model.M33) * extents.Z;
 
-            return new BoundingBox(newCenter - newExtents, newCenter + newExtents);
+            Vector3 worldExtents =
+                new Vector3(MathF.Abs(right.X), MathF.Abs(right.Y), MathF.Abs(right.Z)) +
+                new Vector3(MathF.Abs(up.X), MathF.Abs(up.Y), MathF.Abs(up.Z)) +
+                new Vector3(MathF.Abs(forward.X), MathF.Abs(forward.Y), MathF.Abs(forward.Z));
+
+            worldMin = worldCenter - worldExtents;
+            worldMax = worldCenter + worldExtents;
         }
 
     }
