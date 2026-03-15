@@ -4,16 +4,9 @@ using DevoidGPU;
 
 namespace DevoidEngine.Engine.Rendering
 {
-    public class RenderBatch
-    {
-        public Camera camera;
-        public List<RenderInstance> instances;
-    }
 
     public static class RenderAPI
     {
-        private static Pool<RenderBatch> RenderBatchPool = new Pool<RenderBatch>();
-        private static List<RenderBatch> RenderBatches = new List<RenderBatch>();
 
 
         //public static List<RenderBatch> BuildRenderBatches(List<IRenderCommand> commands)
