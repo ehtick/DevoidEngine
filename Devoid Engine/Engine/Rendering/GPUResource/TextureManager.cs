@@ -68,16 +68,16 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
         {
             Debug.Assert(RenderThread.IsRenderThread());
             if (mode == BindMode.ReadOnly)
-                _textures[handle.Id].Bind(slot);
+                Renderer.graphicsDevice.BindTexture(_textures[handle.Id], slot, stage);
             else
-                _textures[handle.Id].BindMutable(slot);
+                Renderer.graphicsDevice.BindTextureMutable(_textures[handle.Id], slot);
 
         }
 
         public void UnBindTexture(TextureHandle handle, int slot, ShaderStage stage = ShaderStage.Fragment, BindMode mode = BindMode.ReadOnly)
         {
             Debug.Assert(RenderThread.IsRenderThread());
-            _textures[handle.Id].UnBind(slot);
+            //_textures[handle.Id].UnBind(slot);
         }
 
 

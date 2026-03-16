@@ -387,7 +387,7 @@ namespace DevoidEngine.Engine.Imgui
                     graphicsDevice.SetScissorRectangle(x1, y1, x2 - x1, y2 - y1);
 
                     var texture = (ITexture2D)graphicsDevice.GetTexture(pcmd.TextureId);
-                    texture.Bind();
+                    Renderer.graphicsDevice.BindTexture(texture, 0, ShaderStage.Fragment);
                     _defaultSampler.Bind();
 
                     graphicsDevice.DrawIndexed((int)pcmd.ElemCount, (int)pcmd.IdxOffset, (int)pcmd.VtxOffset);

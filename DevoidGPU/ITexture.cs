@@ -16,9 +16,9 @@
         public bool IsRenderTarget { get; }
         public bool IsDepthStencil { get; }
         public IntPtr GetHandle();
-        public void Bind(int slot = 0);
-        public void UnBind(int slot = 0);
-        public void BindMutable(int slot = 0);
+        //public void Bind(int slot = 0);
+        //public void UnBind(int slot = 0);
+        //public void BindMutable(int slot = 0);
         public void GenerateMipmaps();
     }
 

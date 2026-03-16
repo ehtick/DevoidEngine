@@ -59,7 +59,7 @@ namespace DevoidEngine.Engine.Core
 
         public override void UnBind(int slot)
         {
-            Graphics.ResourceManager.TextureManager.UnBindTexture(_textureInternal, slot);
+            //Graphics.ResourceManager.TextureManager.UnBindTexture(_textureInternal, slot);
         }
 
         public void SetData(byte[] data)

@@ -26,6 +26,7 @@ namespace DevoidGPU.DX11
         public DepthStencilView DepthStencilView { get; set; }
         public ShaderResourceView ShaderResourceView { get; private set; }
         public UnorderedAccessView UnorderedAccessView { get; private set; }
+        public ResourceBindState CurrentResourceBindState { get; internal set; }
 
         public bool AllowUnorderedView { get; set; }
 
@@ -177,20 +178,20 @@ namespace DevoidGPU.DX11
             handle = IntPtr.Zero;
         }
 
-        public void Bind(int slot)
-        {
-            deviceContext.PixelShader.SetShaderResource(slot, ShaderResourceView);
-        }
+        //public void Bind(int slot)
+        //{
+        //    deviceContext.PixelShader.SetShaderResource(slot, ShaderResourceView);
+        //}
 
-        public void BindMutable(int slot)
-        {
-            deviceContext.ComputeShader.SetUnorderedAccessView(slot, UnorderedAccessView);
-        }
+        //public void BindMutable(int slot)
+        //{
+        //    deviceContext.ComputeShader.SetUnorderedAccessView(slot, UnorderedAccessView);
+        //}
 
-        public void UnBind(int slot)
-        {
-            deviceContext.PixelShader.SetShaderResource(slot, null);
-        }
+        //public void UnBind(int slot)
+        //{
+        //    deviceContext.PixelShader.SetShaderResource(slot, null);
+        //}
 
 
     }

@@ -92,6 +92,8 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             RenderDownsamples(ctx.GetTexture("SceneColor"));
             RenderUpsamples();
 
+            ctx.SetTexture("BloomOutput", bloomMipList[0].texture);
+
             Renderer.graphicsDevice.SetViewport(ViewportSize.Item1, ViewportSize.Item2, ViewportSize.Item3, ViewportSize.Item4);
         }
 
@@ -103,13 +105,10 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
         {
             BloomUpsampleShader.Use();
 
-            Renderer.graphicsDevice.SetBlendState(DevoidGPU.BlendMode.Additive);
-
             for (int i = bloomMipList.Count - 1; i > 0; i--)
             {
                 BloomMip sourceMip = bloomMipList[i];
                 BloomMip destMip = bloomMipList[i - 1];
-                bloomMipList.Last().texture.UnBind(0);
 
                 Renderer.graphicsDevice.SetViewport(
                     0,
@@ -117,9 +116,10 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
                     (int)destMip.size.X,
                     (int)destMip.size.Y);
 
-                Console.WriteLine("CalledSetRenderTex");
+
                 bloomFrameBuffer.SetRenderTexture(destMip.texture, 0);
-                Console.WriteLine("CalledSetRenderTexEnd");
+                bloomFrameBuffer.Bind();
+                Renderer.graphicsDevice.SetBlendState(DevoidGPU.BlendMode.Additive);
 
                 sourceMip.texture.Bind(0);
 
@@ -134,7 +134,6 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
 
                 RenderAPI.RenderFullScreen(BloomUpsampleShader);
             }
-            bloomMipList.Last().texture.UnBind(0);
         }
 
         void RenderDownsamples(Texture2D inputTexture)
@@ -148,6 +147,7 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
                 Renderer.graphicsDevice.SetViewport(0, 0, (int)bloomMip.size.X, (int)bloomMip.size.Y);
 
                 bloomFrameBuffer.SetRenderTexture(bloomMip.texture, 0);
+                bloomFrameBuffer.Bind();
                 bloomFrameBuffer.Clear();
 
                 Texture2D sourceTexture;

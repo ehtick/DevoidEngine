@@ -32,6 +32,8 @@ namespace DevoidGPU
         void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation);
         void Draw(int vertexCount, int startVertex);
 
+        public void BindTexture(ITexture texture, int slot, ShaderStage stage);
+        public void BindTextureMutable(ITexture texture, int slot);
         public void BindFramebuffer(IFramebuffer fb);
 
         // Optionally move this to its own factory when similar items are added.
