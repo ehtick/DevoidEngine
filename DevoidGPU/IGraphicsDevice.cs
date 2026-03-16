@@ -15,6 +15,7 @@ namespace DevoidGPU
         void Initialize(nint hwnd, PresentationParameters parameters);
 
         void SetViewport(int x, int y, int width, int height);
+        (int,int,int,int) GetViewport();
 
         void UnbindAllShaderResources();
 

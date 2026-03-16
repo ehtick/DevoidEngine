@@ -48,6 +48,7 @@ namespace DevoidEngine.Engine.Rendering
 
             compiledPasses = ResolvePassOrder();
             dirty = false;
+            PrintExecutionOrder();
         }
 
         public Texture2D Execute(Texture2D sceneColor)
@@ -135,6 +136,27 @@ namespace DevoidEngine.Engine.Rendering
                 throw new Exception("RenderGraph contains a cycle.");
 
             return result;
+        }
+
+        public void PrintExecutionOrder()
+        {
+
+            Console.WriteLine("=== RenderGraph Execution Order ===");
+
+            for (int i = 0; i < compiledPasses.Count; i++)
+            {
+                var pass = compiledPasses[i];
+
+                Console.WriteLine($"{i}: {pass.GetType().Name}");
+
+                if (pass.Reads.Count > 0)
+                    Console.WriteLine($"   Reads : {string.Join(", ", pass.Reads)}");
+
+                if (pass.Writes.Count > 0)
+                    Console.WriteLine($"   Writes: {string.Join(", ", pass.Writes)}");
+            }
+
+            Console.WriteLine("===================================");
         }
     }
 }

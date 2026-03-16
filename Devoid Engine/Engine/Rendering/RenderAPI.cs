@@ -79,9 +79,12 @@ namespace DevoidEngine.Engine.Rendering
         {
             mesh = new Mesh();
             mesh.SetVertices(Primitives.GetScreenQuadVertex());
+
+            layout = Renderer.GetInputLayout(mesh, ShaderLibrary.GetShader("Screen/RENDER_SCREEN"));
         }
 
         static Mesh mesh;
+        static IInputLayout layout;
 
 
         // This method should only be called at the end of the render stage
@@ -93,9 +96,7 @@ namespace DevoidEngine.Engine.Rendering
             Renderer.graphicsDevice.SetRasterizerState(CullMode.None);
             Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
 
-            IInputLayout inputLayout = Renderer.GetInputLayout(mesh, ShaderLibrary.GetShader("Screen/RENDER_SCREEN"));
-
-            inputLayout.Bind();
+            layout.Bind();
             mesh.Bind();
 
             ShaderLibrary.GetShader("Screen/RENDER_SCREEN").Use();
@@ -118,9 +119,7 @@ namespace DevoidEngine.Engine.Rendering
             Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
             Renderer.graphicsDevice.SetDepthState(DepthTest.Disabled, false);
 
-            IInputLayout inputLayout = Renderer.GetInputLayout(mesh, ShaderLibrary.GetShader("Screen/RENDER_SCREEN"));
-
-            inputLayout.Bind();
+            layout.Bind();
             mesh.Bind();
 
             ShaderLibrary.GetShader("Screen/RENDER_SCREEN").Use();
@@ -142,7 +141,7 @@ namespace DevoidEngine.Engine.Rendering
             Renderer.graphicsDevice.SetRasterizerState(CullMode.None);
             Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
 
-            IInputLayout inputLayout = Renderer.GetInputLayout(mesh, ShaderLibrary.GetShader("Screen/RENDER_SCREEN"));
+            IInputLayout inputLayout = Renderer.GetInputLayout(mesh, material.BaseMaterial.Shader);
 
             inputLayout.Bind();
             mesh.Bind();
@@ -153,6 +152,21 @@ namespace DevoidEngine.Engine.Rendering
 
             Renderer.graphicsDevice.UnbindAllShaderResources();
 
+        }
+
+        // Assumes you have shader already bound before calling this function.
+        public static void RenderFullScreen(Shader shader)
+        {
+            if (shader == null) return;
+            Renderer.graphicsDevice.SetRasterizerState(CullMode.None);
+            Renderer.graphicsDevice.SetPrimitiveType(PrimitiveType.Triangles);
+
+            IInputLayout inputLayout = Renderer.GetInputLayout(mesh, shader);
+
+            inputLayout.Bind();
+            mesh.Bind();
+
+            Renderer.graphicsDevice.Draw(mesh.GetVertices().Length, 0);
         }
 
     }

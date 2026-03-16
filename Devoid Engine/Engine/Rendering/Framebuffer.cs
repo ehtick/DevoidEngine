@@ -65,6 +65,18 @@ namespace DevoidEngine.Engine.Rendering
             RenderTextures.Add(texture);
         }
 
+        public void SetRenderTexture(Texture2D texture, int index = 0)
+        {
+            Graphics.ResourceManager.FramebufferManager.AttachRenderTexture(_frameBuffer, texture.GetRendererHandle(), index);
+            if (index >=  RenderTextures.Count)
+            {
+                RenderTextures.Add(texture);
+            } else
+            {
+                RenderTextures[index] = texture;
+            }
+        }
+
         public void AttachDepthTexture(Texture2D texture)
         {
             Graphics.ResourceManager.FramebufferManager.AttachDepthTexture(_frameBuffer, texture.GetRendererHandle());

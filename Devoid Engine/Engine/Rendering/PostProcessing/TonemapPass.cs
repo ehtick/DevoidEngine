@@ -35,6 +35,7 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
         public override void Setup()
         {
             Read("SceneColor");
+            Read("BloomOutput");
             Write("ToneMapped");
         }
 

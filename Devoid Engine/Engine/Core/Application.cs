@@ -202,11 +202,11 @@ namespace DevoidEngine.Engine.Core
 
             Input.Update();
 
-            ImGuiRenderer.UpdateInput();
-
             LayerHandler.UpdateLayers((float)deltaTime);
 
             UISystem.Update((float)deltaTime);
+
+            ImGuiRenderer.UpdateInput();
 
             FramePipeline.ExecuteUpdateThread((float)deltaTime);
 

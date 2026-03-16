@@ -35,12 +35,13 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
             });
         }
 
-        public void AttachRenderTexture(FrameBufferHandle handle, TextureHandle texture)
+        public void AttachRenderTexture(FrameBufferHandle handle, TextureHandle texture, int index = 0)
         {
             RenderThread.Enqueue(() =>
             {
                 _frameBuffers[handle.Id].AddColorAttachment(
-                    (ITexture2D)Graphics.ResourceManager.TextureManager.GetDeviceTexture(texture)
+                    (ITexture2D)Graphics.ResourceManager.TextureManager.GetDeviceTexture(texture),
+                    index
                 );
             });
         }

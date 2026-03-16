@@ -284,11 +284,12 @@ namespace DevoidStandaloneLauncher.Utils
             //}
 
             //MaterialProperty[] mps = assimpMat.GetAllProperties();
-            //foreach (var mp in mps)
+            //if (node.Name == "Glassy:Model")
             //{
-            //    Console.WriteLine(mp.Name);
-            //    if (mp.Name == "$mat.reflectivity")
+            //    Console.WriteLine(node.Name);
+            //    foreach (var mp in mps)
             //    {
+            //        Console.WriteLine(mp.Name);
             //        Console.WriteLine(mp.GetFloatValue());
             //    }
             //}
@@ -320,9 +321,10 @@ namespace DevoidStandaloneLauncher.Utils
             devoidMaterial.SetVector3("EmissiveColor", emissiveColor);
             devoidMaterial.SetFloat("EmissiveStrength", emissiveStrength);
 
-            //if (assimpMat.HasOpacity || assimpMat.BlendMode == Assimp.BlendMode.Additive)
+            //if (assimpMat.HasOpacity)
             //{
-            //    devoidMaterial.BaseMaterial.BlendMode = DevoidGPU.BlendMode.AlphaBlend;
+            //    Console.WriteLine($"{node.Name} Possibly Glass: {assimpMat.Opacity}");
+            //    //devoidMaterial.BaseMaterial.BlendMode = DevoidGPU.BlendMode.AlphaBlend;
             //}
 
             return devoidMaterial;

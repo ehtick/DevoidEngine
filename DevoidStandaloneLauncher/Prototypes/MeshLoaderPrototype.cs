@@ -50,7 +50,21 @@ namespace DevoidStandaloneLauncher.Prototypes
             SceneManager.LoadScene(scene);
             loader.CurrentScene = scene;
 
+            GameObject cube1 = GetGO();
+            GameObject cube2 = GetGO();
+            cube2.transform.Scale = new Vector3(10, 1, 1);
 
+            cube2.SetParent(cube1);
+            cube2.transform.LocalPosition = new Vector3(5.5f, 0, 0);
+
+
+            Importer.LoadModel(levelPath);
+            scene.Play();
+        }
+
+
+        GameObject GetGO()
+        {
             GameObject cube = scene.addGameObject("Glowy");
             MeshRenderer mr = cube.AddComponent<MeshRenderer>();
             Mesh mesh = new Mesh();
@@ -63,8 +77,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 mr.material.SetFloat("EmissiveStrength", 1);
             });
 
-            Importer.LoadModel(levelPath);
-            scene.Play();
+            return cube;
         }
 
         int mode = 0;
@@ -281,6 +294,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 RenderThread.Enqueue(() =>
                 {
                     MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    //material.SetTexture("MAT_AlbedoMap", SceneManager.CurrentScene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0));
                     mr.material = material;
                 });
 

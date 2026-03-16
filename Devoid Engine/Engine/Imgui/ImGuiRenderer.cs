@@ -254,13 +254,12 @@ namespace DevoidEngine.Engine.Imgui
         {
             ImGuiIOPtr io = ImGui.GetIO();
 
-            io.MousePos = InternalInputState.MousePosition;
-            io.MouseDown[0] = InternalInputState.GetMouseButton((int)MouseButton.Left);
-            io.MouseDown[1] = InternalInputState.GetMouseButton((int)MouseButton.Right);
-            io.MouseDown[2] = InternalInputState.GetMouseButton((int)MouseButton.Middle);
-            io.MouseWheel = InternalInputState.MouseScroll.Y;
-
-            io.MouseWheelH = InternalInputState.MouseScroll.X;
+            io.MousePos = Input.MousePosition;
+            io.MouseDown[0] = Input.GetMouse(MouseButton.Left);
+            io.MouseDown[1] = Input.GetMouse(MouseButton.Right);
+            io.MouseDown[2] = Input.GetMouse(MouseButton.Middle);
+            io.MouseWheel = Input.MouseScrollDelta.Y;
+            io.MouseWheelH = Input.MouseScrollDelta.X;
 
 
         }
