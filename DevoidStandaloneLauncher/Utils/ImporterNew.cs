@@ -9,6 +9,8 @@ namespace DevoidStandaloneLauncher.Utils
 {
     public static class Importer
     {
+        static Dictionary<int, DevoidEngine.Engine.Core.Mesh> meshCache = new();
+        static Dictionary<int, MaterialInstance> materialCache = new();
         public static void LoadModel(string filePath)
         {
             Assimp.AssimpContext importer = new AssimpContext();
@@ -51,64 +53,9 @@ namespace DevoidStandaloneLauncher.Utils
                 LevelSpawnRegistry.ExecuteLight(node.Name, node, light);
             }
 
-            foreach (int meshIndex in node.MeshIndices)
-            {
-                var mesh = scene.Meshes[meshIndex];
-                ProcessMesh(mesh);
-            }
-
             foreach (var child in node.Children)
                 ProcessNode(child, scene, lightLookup);
         }
-
-        static void ProcessMesh(Assimp.Mesh mesh)
-        {
-
-            List<Vector3> vertices = new();
-            List<Vector3> normals = new();
-            List<Vector2> uvs = new();
-            List<uint> indices = new();
-
-            Vector3 min = new Vector3(
-                    mesh.Vertices[0].X,
-                    mesh.Vertices[0].Y,
-                    mesh.Vertices[0].Z);
-            Vector3 max = new Vector3(
-                    mesh.Vertices[0].X,
-                    mesh.Vertices[0].Y,
-                    mesh.Vertices[0].Z);
-
-            for (int i = 0; i < mesh.VertexCount; i++)
-            {
-                vertices.Add(new Vector3(
-                    mesh.Vertices[i].X,
-                    mesh.Vertices[i].Y,
-                    mesh.Vertices[i].Z));
-
-                if (mesh.HasNormals)
-                {
-                    normals.Add(new Vector3(
-                        mesh.Normals[i].X,
-                        mesh.Normals[i].Y,
-                        mesh.Normals[i].Z));
-                }
-
-                if (mesh.TextureCoordinateChannelCount > 0)
-                {
-                    var tex = mesh.TextureCoordinateChannels[0][i];
-                    uvs.Add(new Vector2(tex.X, tex.Y));
-                }
-                min = Vector3.Min(min, vertices[i]);
-                max = Vector3.Max(max, vertices[i]);
-            }
-
-            foreach (var face in mesh.Faces)
-            {
-                foreach (var index in face.Indices)
-                    indices.Add((uint)index);
-            }
-        }
-
         public static (Vector3, Quaternion, Vector3) GetTransform(Node node)
         {
             Matrix4x4 matrix = Matrix4x4.Transpose(node.Transform);
@@ -123,10 +70,25 @@ namespace DevoidStandaloneLauncher.Utils
 
         public static DevoidEngine.Engine.Core.Mesh ConvertMesh(Node node, Assimp.Scene scene)
         {
-            var assimpMesh = scene.Meshes[node.MeshIndices[0]];
+            int meshIndex = node.MeshIndices[0];
 
-            Vertex[] vertices = new Vertex[assimpMesh.VertexCount];
-            List<int> indices = new();
+            if (meshCache.TryGetValue(meshIndex, out var cachedMesh))
+                return cachedMesh;
+
+            var assimpMesh = scene.Meshes[meshIndex];
+
+            if (assimpMesh.VertexCount == 0 || assimpMesh.FaceCount == 0)
+                return null;
+
+            int vertexCount = assimpMesh.VertexCount;
+            Vertex[] vertices = new Vertex[vertexCount];
+            int indexCount = assimpMesh.FaceCount * 3;
+            int[] indices = new int[indexCount];
+
+            bool hasNormals = assimpMesh.HasNormals;
+            bool hasUVs = assimpMesh.TextureCoordinateChannelCount > 0;
+            bool uvIs1D = hasUVs && assimpMesh.UVComponentCount[0] == 1;
+            bool hasTangents = assimpMesh.HasTangentBasis;
 
             Vector3 min = new Vector3(
                 assimpMesh.Vertices[0].X,
@@ -147,7 +109,7 @@ namespace DevoidStandaloneLauncher.Utils
                 min = Vector3.Min(min, position);
                 max = Vector3.Max(max, position);
 
-                Vector3 normal = assimpMesh.HasNormals
+                Vector3 normal = hasNormals
                     ? new Vector3(
                         assimpMesh.Normals[i].X,
                         assimpMesh.Normals[i].Y,
@@ -155,25 +117,21 @@ namespace DevoidStandaloneLauncher.Utils
                     : Vector3.Zero;
 
                 Vector2 uv = Vector2.Zero;
-                if (assimpMesh.TextureCoordinateChannelCount > 0)
+                if (hasUVs)
                 {
                     var tex = assimpMesh.TextureCoordinateChannels[0][i];
 
-                    uv = new Vector2(tex.X, tex.Y);
-
-                    // if only 1 component (rare but happens)
-                    if (assimpMesh.UVComponentCount[0] == 1)
-                        uv = new Vector2(tex.X, 0);
+                    uv = uvIs1D ? new Vector2(tex.X, 0) : new Vector2(tex.X, tex.Y);
                 }
 
-                Vector3 tangent = assimpMesh.HasTangentBasis
+                Vector3 tangent = hasTangents
                     ? new Vector3(
                         assimpMesh.Tangents[i].X,
                         assimpMesh.Tangents[i].Y,
                         assimpMesh.Tangents[i].Z)
                     : Vector3.Zero;
 
-                Vector3 bitangent = assimpMesh.HasTangentBasis
+                Vector3 bitangent = hasTangents
                     ? new Vector3(
                         assimpMesh.BiTangents[i].X,
                         assimpMesh.BiTangents[i].Y,
@@ -183,26 +141,34 @@ namespace DevoidStandaloneLauncher.Utils
                 vertices[i] = new DevoidGPU.Vertex(position, normal, uv, tangent, bitangent);
             }
 
+            int idx = 0;
             foreach (var face in assimpMesh.Faces)
             {
-                // Triangulate flag ensures 3 indices
-                indices.Add(face.Indices[0]);
-                indices.Add(face.Indices[1]);
-                indices.Add(face.Indices[2]);
+                indices[idx++] = face.Indices[0];
+                indices[idx++] = face.Indices[1];
+                indices[idx++] = face.Indices[2];
             }
 
             var mesh = new DevoidEngine.Engine.Core.Mesh();
             mesh.LocalBounds = new DevoidEngine.Engine.Utilities.BoundingBox(min, max);
             mesh.SetVertices(vertices, false);
-            mesh.SetIndices(indices.ToArray());
+            mesh.SetIndices(indices);
 
+            meshCache[meshIndex] = mesh;
             return mesh;
         }
 
         public static DevoidEngine.Engine.Core.MaterialInstance ConvertMaterial(Node node, Assimp.Scene scene, string baseModelPath)
         {
-            Assimp.Material assimpMat = GetMaterial(node, scene);
-            if (assimpMat == null) { return null; }
+            var assimpMat = GetMaterial(node, scene);
+            if (assimpMat == null) return null;
+
+            int meshIndex = node.MeshIndices[0];
+            var mesh = scene.Meshes[meshIndex];
+            int matIndex = mesh.MaterialIndex;
+
+            if (materialCache.TryGetValue(matIndex, out var cachedMat))
+                return cachedMat;
 
             DevoidEngine.Engine.Core.MaterialInstance devoidMaterial = RenderingDefaults.GetMaterial();
 
@@ -326,7 +292,7 @@ namespace DevoidStandaloneLauncher.Utils
             //    Console.WriteLine($"{node.Name} Possibly Glass: {assimpMat.Opacity}");
             //    //devoidMaterial.BaseMaterial.BlendMode = DevoidGPU.BlendMode.AlphaBlend;
             //}
-
+            materialCache[matIndex] = devoidMaterial;
             return devoidMaterial;
         }
 
@@ -346,38 +312,48 @@ namespace DevoidStandaloneLauncher.Utils
             }
         }
 
+        static Dictionary<string, Texture2D> textureCache = new();
         public static Texture2D GetTexture(Assimp.Material mat, Assimp.TextureType type, string basePath)
         {
-            if (mat.GetMaterialTextureCount(type) > 0)
+            if (mat.GetMaterialTextureCount(type) == 0)
+                return null;
+
+            mat.GetMaterialTexture(type, 0, out TextureSlot slot);
+
+            if (!Path.IsPathFullyQualified(basePath))
+                return null;
+
+            string modelDirectory = Path.GetDirectoryName(basePath);
+            string fullPath = Path.Combine(modelDirectory, slot.FilePath);
+
+            // Normalize path (important for cache hits)
+            fullPath = Path.GetFullPath(fullPath);
+
+            // 🔥 CACHE CHECK
+            if (textureCache.TryGetValue(fullPath, out var cached))
+                return cached;
+
+            Texture2D tex;
+
+            if (type == Assimp.TextureType.Normals)
             {
-                mat.GetMaterialTexture(type, 0, out TextureSlot slot);
-                if (!Path.IsPathFullyQualified(basePath))
-                {
-                    return null;
-                }
-
-                string modelDirectory = Path.GetDirectoryName(basePath);
-                string fullPath = Path.Combine(modelDirectory, slot.FilePath);
-
-                Texture2D tex;
-                if (type == Assimp.TextureType.Normals)
-                {
-                    tex = Helper.LoadNormalMap(fullPath, TextureFilter.Linear);
-                }
-                else if (type != Assimp.TextureType.Diffuse)
-                {
-                    tex = Helper.LoadImageAsDataTex(fullPath, TextureFilter.Linear);
-                }
-                else
-                {
-                    tex = Helper.LoadImageAsTex(fullPath, TextureFilter.Linear);
-                }
-                SetWrap(slot.WrapModeU, slot.WrapModeV, tex);
-
-                return tex;
+                tex = Helper.LoadNormalMap(fullPath, TextureFilter.Linear);
+            }
+            else if (type != Assimp.TextureType.Diffuse)
+            {
+                tex = Helper.LoadImageAsDataTex(fullPath, TextureFilter.Linear);
+            }
+            else
+            {
+                tex = Helper.LoadImageAsTex(fullPath, TextureFilter.Linear);
             }
 
-            return null;
+            SetWrap(slot.WrapModeU, slot.WrapModeV, tex);
+
+            // 🔥 STORE IN CACHE
+            textureCache[fullPath] = tex;
+
+            return tex;
         }
 
         public static Assimp.Material GetMaterial(Node node, Assimp.Scene scene)

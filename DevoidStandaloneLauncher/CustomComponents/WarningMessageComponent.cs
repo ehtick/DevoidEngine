@@ -23,10 +23,10 @@ namespace DevoidEngine.Engine.Components
             font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 48);
 
             // Create canvas object
-            GameObject canvasGO = gameObject.Scene.addGameObject("WarningCanvas");
+            GameObject canvasGO = gameObject;// gameObject.Scene.addGameObject("WarningCanvas");
 
             canvas = canvasGO.AddComponent<CanvasComponent>();
-            canvas.RenderMode = CanvasRenderMode.ScreenSpace;
+            canvas.RenderMode = CanvasRenderMode.WorldSpace;
             canvas.PixelsPerUnit = 300;
 
             // Centered container
@@ -46,17 +46,21 @@ namespace DevoidEngine.Engine.Components
 
             container.Add(label);
             canvas.Canvas.Add(container);
+
+            
         }
 
         public override void OnUpdate(float dt)
         {
             timer += dt;
 
-            if (timer >= Duration)
-            {
-                canvas.gameObject.OnDestroy();
-                gameObject.OnDestroy(); // remove this component holder
-            }
+            gameObject.transform.Position = new Vector3(0, (float)Math.Sin(timer) * 5, 0);
+
+            //if (timer >= Duration)
+            //{
+            //    canvas.gameObject.OnDestroy();
+            //    gameObject.OnDestroy(); // remove this component holder
+            //}
         }
     }
 }

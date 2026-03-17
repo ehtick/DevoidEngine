@@ -51,7 +51,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             loader.CurrentScene = scene;
 
             GameObject go = scene.addGameObject("Warning");
-            //go.AddComponent<WarningMessageComponent>();
+            go.AddComponent<WarningMessageComponent>();
             //go.AddComponent<AudioSourceComponent>();
 
 
@@ -598,11 +598,27 @@ namespace DevoidStandaloneLauncher.Prototypes
                         break;
                 }
 
+                Vector3 diffuse = new Vector3(assimpLight.ColorDiffuse.X, assimpLight.ColorDiffuse.Y, assimpLight.ColorDiffuse.Z);
+                float intensity = MathF.Max(diffuse.X, MathF.Max(diffuse.Y, diffuse.Z));
+                Vector3 color = intensity > 0.0f ? diffuse / intensity : Vector3.Zero;
+
                 //lightComponent.Color = new Vector4(assimpLight.ColorDiffuse.R, assimpLight.ColorDiffuse.G, assimpLight.ColorDiffuse.B, 1f);
-                lightComponent.Color = new Vector4(assimpLight.ColorDiffuse, 1f);
+                lightComponent.Color = new Vector4(color, 1f) * 5;
 
                 lightComponent.Radius = 200f;
-                lightComponent.Intensity = 150f; // your scale
+                lightComponent.Intensity = intensity * 15; // your scale
+
+
+                //Console.WriteLine(lightComponent.Intensity);
+                //Console.WriteLine(color);
+
+                ////lightComponent.Color = new Vector4(assimpLight.ColorDiffuse.R, assimpLight.ColorDiffuse.G, assimpLight.ColorDiffuse.B, 1f);
+                //lightComponent.Color = new Vector4(assimpLight.ColorDiffuse, 1f);
+
+                //lightComponent.Radius = 200f;
+                //lightComponent.Intensity = 150f; // your scale
+
+
 
                 if (assimpNode.Name == "Point:Flicker")
                 {
