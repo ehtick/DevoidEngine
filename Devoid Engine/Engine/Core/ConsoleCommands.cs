@@ -75,6 +75,12 @@ namespace DevoidEngine.Engine.Core
                     c.Log(go.Name);
             };
 
+            //cmds["reloadscene"] = (args, c) =>
+            //{
+            //    Scene currScene = SceneManager.CurrentScene;
+            //    SceneManager.LoadScene(currScene);
+            //};
+
             cmds["count"] = (args, c) =>
             {
                 int count = SceneManager.CurrentScene.GameObjects.Count;

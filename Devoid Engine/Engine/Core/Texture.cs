@@ -4,13 +4,15 @@ using DevoidGPU;
 
 namespace DevoidEngine.Engine.Core
 {
-    public abstract class Texture
+    public abstract class Texture : IDisposable
     {
         protected SamplerHandle _sampler;
         protected SamplerDescription _samplerDescription = SamplerDescription.Default;
 
         public int Width { get; protected set; }
         public int Height { get; protected set; }
+
+        bool disposed;
 
         public abstract void Bind(int slot = 0,
                                   ShaderStage stage = ShaderStage.Fragment,
@@ -46,6 +48,28 @@ namespace DevoidEngine.Engine.Core
         public void BindSampler(int slot)
         {
             Graphics.ResourceManager.SamplerManager.BindSampler(_sampler, slot);
+        }
+
+        protected abstract void DisposeTexture();
+
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+
+
+            DisposeTexture();
+
+            Graphics.ResourceManager.SamplerManager.DeleteSampler(_sampler);
+
+            disposed = true;
+
+            GC.SuppressFinalize(this);
+        }
+
+        ~Texture()
+        {
+            Dispose();
         }
     }
 }

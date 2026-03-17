@@ -50,17 +50,37 @@ namespace DevoidStandaloneLauncher.Prototypes
             SceneManager.LoadScene(scene);
             loader.CurrentScene = scene;
 
-            GameObject cube1 = GetGO();
-            GameObject cube2 = GetGO();
-            cube2.transform.Scale = new Vector3(10, 1, 1);
-
-            cube2.SetParent(cube1);
-            cube2.transform.LocalPosition = new Vector3(5.5f, 0, 0);
+            GameObject go = scene.addGameObject("Warning");
+            go.AddComponent<WarningMessageComponent>();
 
 
             Importer.LoadModel(levelPath);
             scene.Play();
         }
+
+        //void LoadLevel()
+        //{
+        //    this.scene = new Scene();
+        //    Console.WriteLine("Scene Load Call Start");
+        //    SceneManager.LoadSceneAsync(scene, () =>
+        //    {
+        //        loader.CurrentScene = scene;
+
+        //        //GameObject cube1 = GetGO();
+        //        //GameObject cube2 = GetGO();
+        //        //cube2.transform.Scale = new Vector3(10, 1, 1);
+
+        //        //cube2.SetParent(cube1);
+        //        //cube2.transform.LocalPosition = new Vector3(5.5f, 0, 0);
+
+
+        //        Importer.LoadModel(levelPath);
+        //        scene.Play();
+        //        Console.WriteLine("Scene Loaded!");
+        //    });
+
+        //    Console.WriteLine("Scene Load Call After");
+        //}
 
 
         GameObject GetGO()
@@ -117,6 +137,65 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         public void LoadDCC()
         {
+            LevelSpawnRegistry.Register("CAM_MAIN_MONITOR", (assimpNode, assimpScene) =>
+            {
+                var go = scene.addGameObject(assimpNode.Name);
+
+                Importer.ApplyTransform(go, assimpNode);
+
+                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                    mr.material.SetTexture("MAT_AlbedoMap", scene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0));
+                });
+            });
+
+            LevelSpawnRegistry.Register("CAM_MONITOR", (assimpNode, assimpScene) =>
+            {
+                var go = scene.addGameObject(assimpNode.Name);
+
+                Importer.ApplyTransform(go, assimpNode);
+
+                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+
+                GameObject cameraObject = scene.GetGameObject("CAMERA_SURV");
+                
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                    //mr.material.SetTexture("MAT_AlbedoMap", scene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0));
+                    mr.material.SetTexture("MAT_AlbedoMap", cameraObject.GetComponent<CameraComponent3D>().Camera.RenderTarget.GetRenderTexture(0));
+                });
+            });
+
+            LevelSpawnRegistry.Register("Surv_Cam", (assimpNode, assimpScene) =>
+            {
+                var go = scene.addGameObject(assimpNode.Name);
+
+                Importer.ApplyTransform(go, assimpNode);
+
+                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                });
+
+                CameraComponent3D cam = go.AddComponent<CameraComponent3D>();
+                go.AddComponent<SurveillanceCameraComponent>();
+                go.Name = "CAMERA_SURV";
+            });
+
             LevelSpawnRegistry.Register("Player_Flycam", (assimpNode, assimpScene) =>
             {
                 //Cursor.SetCursorState(CursorState.Grabbed);
@@ -505,6 +584,11 @@ namespace DevoidStandaloneLauncher.Prototypes
 
                 lightComponent.Radius = 200f;
                 lightComponent.Intensity = 150f; // your scale
+
+                if (assimpNode.Name == "Point:Flicker")
+                {
+                    lightGO.AddComponent<LightFlickerComponent>();
+                }
             });
         }
 

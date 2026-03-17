@@ -39,5 +39,15 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
         }
 
 
+        public void DeleteSampler(SamplerHandle handle)
+        {
+            ISampler samplerInternal = _samplers[handle.Id];
+            RenderThread.Enqueue(() =>
+            {
+                samplerInternal.Dispose();
+            });
+        }
+
+
     }
 }

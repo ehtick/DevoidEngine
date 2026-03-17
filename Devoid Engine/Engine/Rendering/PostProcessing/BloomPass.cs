@@ -41,41 +41,14 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             screenSize = new Vector2(width, height);
             bloomMipList = new List<BloomMip>();
 
-            Vector2 currentMipSize = screenSize; 
-
-            for (int i = 0; i < BloomMipCount; i++)
-            {
-                BloomMip bloomMip = new BloomMip();
-                currentMipSize *= 0.5f;
-                if (currentMipSize.X <= 1 || currentMipSize.Y <= 1)
-                {
-                    continue;
-                }
-
-                bloomMip.size = currentMipSize;
-
-                Texture2D mipTexture = new Texture2D(new DevoidGPU.TextureDescription()
-                {
-                    Format = DevoidGPU.TextureFormat.RGBA16_Float,
-                    Width = (int)currentMipSize.X,
-                    Height = (int)currentMipSize.Y,
-                    GenerateMipmaps = false,
-                    IsRenderTarget = true,
-                    MipLevels = 1,
-                    Type = DevoidGPU.TextureType.Texture2D
-                });
-
-                mipTexture.SetFilter(DevoidGPU.TextureFilter.Linear, DevoidGPU.TextureFilter.Linear);
-                mipTexture.SetWrapMode(DevoidGPU.TextureWrapMode.ClampToEdge, DevoidGPU.TextureWrapMode.ClampToEdge);
-
-                bloomMip.texture = mipTexture;
-                bloomMipList.Add(bloomMip);
-            }
+            BuildMipChain();
 
             bloomFrameBuffer = new Framebuffer();
 
-            mipShaderDataBuffer = new UniformBuffer(Marshal.SizeOf<BloomMipShaderData>(), DevoidGPU.BufferUsage.Dynamic);
-
+            mipShaderDataBuffer = new UniformBuffer(
+                Marshal.SizeOf<BloomMipShaderData>(),
+                DevoidGPU.BufferUsage.Dynamic
+            );
         }
         public override void Setup()
         {
@@ -95,10 +68,62 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             ctx.SetTexture("BloomOutput", bloomMipList[0].texture);
 
             Renderer.graphicsDevice.SetViewport(ViewportSize.Item1, ViewportSize.Item2, ViewportSize.Item3, ViewportSize.Item4);
+            Renderer.graphicsDevice.SetBlendState(DevoidGPU.BlendMode.Opaque);
+        }
+
+        void BuildMipChain()
+        {
+            Vector2 currentMipSize = screenSize;
+
+            for (int i = 0; i < BloomMipCount; i++)
+            {
+                currentMipSize *= 0.5f;
+
+                if (currentMipSize.X <= 1 || currentMipSize.Y <= 1)
+                    break;
+
+                BloomMip bloomMip = new BloomMip();
+                bloomMip.size = currentMipSize;
+
+                Texture2D mipTexture = new Texture2D(new DevoidGPU.TextureDescription()
+                {
+                    Format = DevoidGPU.TextureFormat.RGBA16_Float,
+                    Width = (int)currentMipSize.X,
+                    Height = (int)currentMipSize.Y,
+                    GenerateMipmaps = false,
+                    IsRenderTarget = true,
+                    MipLevels = 1,
+                    Type = DevoidGPU.TextureType.Texture2D
+                });
+
+                mipTexture.SetFilter(
+                    DevoidGPU.TextureFilter.Linear,
+                    DevoidGPU.TextureFilter.Linear
+                );
+
+                mipTexture.SetWrapMode(
+                    DevoidGPU.TextureWrapMode.ClampToEdge,
+                    DevoidGPU.TextureWrapMode.ClampToEdge
+                );
+
+                bloomMip.texture = mipTexture;
+
+                bloomMipList.Add(bloomMip);
+            }
         }
 
         public override void Resize(int width, int height)
         {
+            screenSize = new Vector2(width, height);
+
+            foreach (var mip in bloomMipList)
+            {
+                mip.texture.Dispose();
+            }
+
+            bloomMipList.Clear();
+
+            BuildMipChain();
         }
 
         void RenderUpsamples()
@@ -148,7 +173,7 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
 
                 bloomFrameBuffer.SetRenderTexture(bloomMip.texture, 0);
                 bloomFrameBuffer.Bind();
-                bloomFrameBuffer.Clear();
+                //bloomFrameBuffer.Clear();
 
                 Texture2D sourceTexture;
                 Vector2 sourceSize;

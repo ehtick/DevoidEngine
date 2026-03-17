@@ -16,8 +16,10 @@ cbuffer Material : register(b2)
 };
 
 Texture2D MAT_SceneColor : register(t0);
-SamplerState MAT_SceneColorSampler : register(s0);
+Texture2D MAT_BloomColor : register(t1);
 
+SamplerState MAT_SceneColorSampler : register(s0);
+SamplerState MAT_BloomColorSampler : register(s1);
 
 static const float3x3 ACESInputMat =
 {
@@ -96,10 +98,14 @@ float3 TonemapAgX(float3 color)
 float4 PSMain(PSInput input) : SV_TARGET
 {
     float3 hdr = MAT_SceneColor.Sample(MAT_SceneColorSampler, input.UV0).rgb;
+    float3 bloom = MAT_BloomColor.Sample(MAT_BloomColorSampler, input.UV0).rgb;
 
     float exposure = 1;
     hdr *= exposure;
 
+    float bloomStrength = 0.04;
+    hdr += bloom * bloomStrength;
+    
     float3 color = ACESFitted(hdr);
     //color = pow(color, 1.0 / 2.2);
 

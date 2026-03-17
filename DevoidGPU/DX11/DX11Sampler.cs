@@ -9,6 +9,8 @@ namespace DevoidGPU.DX11
         private SamplerState native;
         private DeviceContext deviceContext;
 
+        bool disposed;
+
         public DX11Sampler(Device device, DeviceContext context, SamplerDescription description)
         {
             deviceContext = context;
@@ -34,6 +36,24 @@ namespace DevoidGPU.DX11
         public void Bind(int slot)
         {
             deviceContext.PixelShader.SetSampler(slot, native);
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+
+            native?.Dispose();
+            native = null;
+
+            disposed = true;
+
+            GC.SuppressFinalize(this);
+        }
+
+        ~DX11Sampler()
+        {
+            Dispose();
         }
     }
 }

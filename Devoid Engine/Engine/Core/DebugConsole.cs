@@ -209,7 +209,12 @@ namespace DevoidEngine.Engine.Core
             List<RenderItem> renderItems = new List<RenderItem>();
             rootNode.Render(renderItems, Matrix4x4.Identity);
 
-            Framebuffer surface = SceneManager.CurrentScene.GetMainCamera().Camera.RenderTarget;
+            Framebuffer surface = SceneManager.CurrentScene?.GetMainCamera()?.Camera.RenderTarget;
+
+            if (surface == null)
+            {
+                return;
+            }
 
             surface.Bind();
             RenderBase.SetupCamera(UIRenderer.ScreenData);

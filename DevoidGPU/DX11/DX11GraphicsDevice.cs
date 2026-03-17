@@ -125,40 +125,7 @@ namespace DevoidGPU.DX11
                 _boundCS_SRVs[slot] = texture;
         }
 
-        private void ResolveTextureHazard(DX11Texture2D texture)
-        {
-            for (int i = 0; i < 16; i++)
-            {
-                if (_boundPS_SRVs[i] == texture)
-                {
-                    deviceContext.PixelShader.SetShaderResource(i, null);
-                    _boundPS_SRVs[i] = null;
-                }
-
-                if (_boundVS_SRVs[i] == texture)
-                {
-                    deviceContext.VertexShader.SetShaderResource(i, null);
-                    _boundVS_SRVs[i] = null;
-                }
-
-                if (_boundCS_SRVs[i] == texture)
-                {
-                    deviceContext.ComputeShader.SetShaderResource(i, null);
-                    _boundCS_SRVs[i] = null;
-                }
-            }
-
-            for (int i = 0; i < 8; i++)
-            {
-                if (_boundCS_UAVs[i] == texture)
-                {
-                    deviceContext.ComputeShader.SetUnorderedAccessView(i, null);
-                    _boundCS_UAVs[i] = null;
-                }
-            }
-        }
-
-        //internal void ResolveSRVRTVHazard(DX11Texture2D texture)
+        //private void ResolveTextureHazard(DX11Texture2D texture)
         //{
         //    for (int i = 0; i < 16; i++)
         //    {
@@ -173,15 +140,99 @@ namespace DevoidGPU.DX11
         //            deviceContext.VertexShader.SetShaderResource(i, null);
         //            _boundVS_SRVs[i] = null;
         //        }
+
+        //        if (_boundCS_SRVs[i] == texture)
+        //        {
+        //            deviceContext.ComputeShader.SetShaderResource(i, null);
+        //            _boundCS_SRVs[i] = null;
+        //        }
+        //    }
+
+        //    for (int i = 0; i < 8; i++)
+        //    {
+        //        if (_boundCS_UAVs[i] == texture)
+        //        {
+        //            deviceContext.ComputeShader.SetUnorderedAccessView(i, null);
+        //            _boundCS_UAVs[i] = null;
+        //        }
         //    }
         //}
+
+        void ResolveForSRV(DX11Texture2D tex)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                if (_boundCS_UAVs[i] == tex)
+                {
+                    deviceContext.ComputeShader.SetUnorderedAccessView(i, null);
+                    _boundCS_UAVs[i] = null;
+                }
+            }
+        }
+
+        void ResolveForUAV(DX11Texture2D tex)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                if (_boundPS_SRVs[i] == tex)
+                {
+                    deviceContext.PixelShader.SetShaderResource(i, null);
+                    _boundPS_SRVs[i] = null;
+                }
+
+                if (_boundVS_SRVs[i] == tex)
+                {
+                    deviceContext.VertexShader.SetShaderResource(i, null);
+                    _boundVS_SRVs[i] = null;
+                }
+
+                if (_boundCS_SRVs[i] == tex)
+                {
+                    deviceContext.ComputeShader.SetShaderResource(i, null);
+                    _boundCS_SRVs[i] = null;
+                }
+            }
+        }
+
+        void ResolveForRTV(DX11Texture2D tex)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                if (_boundPS_SRVs[i] == tex)
+                {
+                    deviceContext.PixelShader.SetShaderResource(i, null);
+                    _boundPS_SRVs[i] = null;
+                }
+
+                if (_boundVS_SRVs[i] == tex)
+                {
+                    deviceContext.VertexShader.SetShaderResource(i, null);
+                    _boundVS_SRVs[i] = null;
+                }
+
+                if (_boundCS_SRVs[i] == tex)
+                {
+                    deviceContext.ComputeShader.SetShaderResource(i, null);
+                    _boundCS_SRVs[i] = null;
+                }
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                if (_boundCS_UAVs[i] == tex)
+                {
+                    deviceContext.ComputeShader.SetUnorderedAccessView(i, null);
+                    _boundCS_UAVs[i] = null;
+                }
+            }
+        }
 
 
         public void BindTexture(ITexture texture, int slot, ShaderStage stage)
         {
             var tex = (DX11Texture2D)texture;
 
-            ResolveTextureHazard(tex);
+            ResolveForSRV(tex);
 
             if ((stage & ShaderStage.Vertex) != 0)
             {
@@ -205,7 +256,7 @@ namespace DevoidGPU.DX11
         {
             var tex = (DX11Texture2D)texture;
 
-            ResolveTextureHazard(tex);
+            ResolveForUAV(tex);
 
             deviceContext.ComputeShader.SetUnorderedAccessView(slot, tex.UnorderedAccessView);
 
@@ -219,7 +270,7 @@ namespace DevoidGPU.DX11
             {
                 if (fb.ColorAttachments[i] is DX11Texture2D tex)
                 {
-                    ResolveTextureHazard(tex);
+                    ResolveForRTV(tex);
                     _boundRTVs[i] = tex;
                 }
             }

@@ -35,15 +35,17 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
         public override void Setup()
         {
             Read("SceneColor");
-            //Read("BloomOutput");
+            Read("BloomOutput");
             Write("ToneMapped");
         }
 
         public override void Execute(RenderGraphContext ctx)
         {
             var input = ctx.GetTexture("SceneColor");
+            var bloomInput = ctx.GetTexture("BloomOutput");
 
             material.SetTexture("MAT_SceneColor", input);
+            material.SetTexture("MAT_BloomColor", bloomInput);
             RenderAPI.RenderToBuffer(material, framebuffer);
             //RenderAPI.RenderToBuffer(input, framebuffer);
 

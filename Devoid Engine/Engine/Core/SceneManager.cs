@@ -34,6 +34,23 @@ namespace DevoidEngine.Engine.Core
             //}
         }
 
+        public static Task LoadSceneAsync(Scene newScene, Action onSceneLoad)
+        {
+            return Task.Run(() =>
+            {
+                if (CurrentScene != null)
+                {
+                    CurrentScene.Destroy();
+                    CurrentScene.Dispose();
+                }
+
+                CurrentScene = newScene;
+                CurrentScene.Initialize();
+
+                onSceneLoad?.Invoke();
+            });
+        }
+
         public static bool IsSceneLoaded()
         {
             return CurrentScene != null;

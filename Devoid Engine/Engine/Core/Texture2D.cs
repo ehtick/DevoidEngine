@@ -105,5 +105,10 @@ namespace DevoidEngine.Engine.Core
 
             Description = desc;
         }
+
+        protected override void DisposeTexture()
+        {
+            Graphics.ResourceManager.TextureManager.DeleteTexture(_textureInternal);
+        }
     }
 }
