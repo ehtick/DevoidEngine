@@ -26,12 +26,6 @@ namespace DevoidEngine.Engine.Core
 
             // 3. Initialize (this may enqueue GPU commands)
             CurrentScene.Initialize();
-
-            //if (RenderThread.MainThreadStarted)
-            //{
-            //    var fence = Graphics.ResourceManager.CreateFence();
-            //    fence.Wait();
-            //}
         }
 
         public static Task LoadSceneAsync(Scene newScene, Action onSceneLoad)

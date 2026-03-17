@@ -17,6 +17,10 @@ namespace DevoidEngine.Engine.Core
         private static ConcurrentQueue<Action> _queueFrameEnd = new ConcurrentQueue<Action>();
 
 
+        private static int uploadBudgetPerFrame = 7;
+        private static ConcurrentQueue<Action> _gpuUploadQueue = new();
+
+
         // We add atleast a 3 frame buffer to ensure objects are not being used after queueing for deletion. 
         private static readonly int DeleteDelayFrames = 3;
         private static readonly Queue<Action>[] _deleteBuckets = new Queue<Action>[DeleteDelayFrames];
@@ -56,11 +60,30 @@ namespace DevoidEngine.Engine.Core
             _queueFrameEnd.Enqueue(action);
         }
 
+        public static void EnqueueUpload(Action action)
+        {
+            if (IsRenderThread())
+            {
+                action();
+                return;
+            }
+            _gpuUploadQueue.Enqueue(action);
+        }
+
 
         public static void Execute() 
         { 
             while (_queue.TryDequeue(out var action)) 
-                action(); 
+                action();
+
+            for (int i = 0; i < uploadBudgetPerFrame; i++)
+            {
+                if (_gpuUploadQueue.TryDequeue(out var job))
+                {
+                    job();
+                }
+                else break;
+            }
 
         }
 

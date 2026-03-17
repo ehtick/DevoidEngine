@@ -39,7 +39,7 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
         public void UploadTextureData2D(TextureHandle handle, byte[] data)
         {
 
-            RenderThread.Enqueue(() =>
+            RenderThread.EnqueueUpload(() =>
             {
                 ITexture2D textureInternal = (ITexture2D)_textures[handle.Id];
                 textureInternal.SetData(data);
@@ -48,18 +48,18 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
 
         public void GenerateMipmaps(TextureHandle handle)
         {
-            ITexture textureInternal = _textures[handle.Id];
             RenderThread.Enqueue(() =>
             {
+                ITexture textureInternal = _textures[handle.Id];
                 textureInternal.GenerateMipmaps();
             });
         }
 
         public void DeleteTexture(TextureHandle handle)
         {
-            ITexture textureInternal = _textures[handle.Id];
             RenderThread.Enqueue(() =>
             {
+                ITexture textureInternal = _textures[handle.Id];
                 textureInternal.Dispose();
             });
         }

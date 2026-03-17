@@ -37,7 +37,7 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
 
         public void SetVertexBufferData<T>(VertexBufferHandle handle, T[] data) where T : struct
         {
-            RenderThread.Enqueue(() =>
+            RenderThread.EnqueueUpload(() =>
             {
                 _vertexBuffers[handle.Id].SetData(data);
             });
