@@ -1,4 +1,6 @@
-﻿using DevoidEngine.Engine.Components;
+﻿using DevoidEngine.Audio;
+using DevoidEngine.Audio.SoLoud;
+using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.Physics.Bepu;
 
@@ -18,6 +20,7 @@ namespace DevoidEngine.Engine.Core
         public List<IRenderComponent> Renderables = new List<IRenderComponent>();
 
         public PhysicsSystem Physics { get; private set; }
+        public AudioSystem Audio { get; private set; }
 
         public bool IsPlaying = false;
         private bool _isStarting = false;
@@ -37,6 +40,7 @@ namespace DevoidEngine.Engine.Core
         public void Initialize()
         {
             Physics = new PhysicsSystem(new BepuPhysicsBackend());
+            Audio = new AudioSystem(new SoLoudAudioBackend());
         }
 
         public GameObject addGameObject(string name)
@@ -209,6 +213,8 @@ namespace DevoidEngine.Engine.Core
         {
             if (!IsPlaying) { return; }
 
+            Audio.Update();
+
             for (int i = 0; i < GameObjects.Count; i++)
             {
                 GameObjects[i].OnUpdate(dt);
@@ -335,7 +341,10 @@ namespace DevoidEngine.Engine.Core
                     }
                     GameObjects.Clear();
                 }
-                // set the bool value to true
+
+                Audio.Dispose();
+                //Physics.Dispose();
+
                 _disposed = true;
             }
         }

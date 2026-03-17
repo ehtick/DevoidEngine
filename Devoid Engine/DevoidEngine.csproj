@@ -16,6 +16,7 @@
 
 
 	<ItemGroup>
+    <None Remove="Engine\Content\Audio\game.wav" />
     <None Remove="Engine\Content\Fonts\JetBrainsMono-Regular.ttf" />
     <None Remove="Engine\Content\Shaders\Clustering\clusterVisualize.frag.hlsl" />
     <None Remove="Engine\Content\Shaders\Clustering\clusterVisualize.vert.hlsl" />
@@ -47,6 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Engine\Content\Audio\game.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Engine\Content\Fonts\JetBrainsMono-Regular.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -168,10 +172,8 @@
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="OpenTK" Version="4.9.4" />
+    <PackageReference Include="Sharploud" Version="2020.2.7" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
-    <PackageReference Include="SoLoud" Version="2020.2.7" />
-    <PackageReference Include="SoLoud-wav" Version="2020.2.7.2" />
-    <PackageReference Include="SoLoud.redist" Version="2020.2.7" />
     <PackageReference Include="StbImageSharp" Version="2.30.15" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />

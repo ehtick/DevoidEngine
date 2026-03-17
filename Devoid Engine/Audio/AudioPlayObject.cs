@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DevoidEngine.Audio
+{
+    public class AudioPlayObject
+    {
+        internal AudioPlayHandle Handle;
+        public AudioClipHandle Clip;
+        public Vector3 Position;
+        public float Volume;
+        public bool Is3D;
+
+        public Action OnFinished;
+    }
+}

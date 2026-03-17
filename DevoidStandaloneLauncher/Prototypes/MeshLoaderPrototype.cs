@@ -51,7 +51,8 @@ namespace DevoidStandaloneLauncher.Prototypes
             loader.CurrentScene = scene;
 
             GameObject go = scene.addGameObject("Warning");
-            go.AddComponent<WarningMessageComponent>();
+            //go.AddComponent<WarningMessageComponent>();
+            //go.AddComponent<AudioSourceComponent>();
 
 
             Importer.LoadModel(levelPath);
@@ -137,6 +138,24 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         public void LoadDCC()
         {
+            LevelSpawnRegistry.Register("INFO_SPEECH", (assimpNode, assimpScene) =>
+            {
+                var go = scene.addGameObject(assimpNode.Name);
+                go.AddComponent<AudioSourceComponent>();
+
+                Importer.ApplyTransform(go, assimpNode);
+
+                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                });
+            });
+
             LevelSpawnRegistry.Register("CAM_MAIN_MONITOR", (assimpNode, assimpScene) =>
             {
                 var go = scene.addGameObject(assimpNode.Name);

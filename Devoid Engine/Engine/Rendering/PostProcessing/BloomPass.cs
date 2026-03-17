@@ -64,7 +64,6 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
             bloomFrameBuffer.Bind();
             RenderDownsamples(ctx.GetTexture("SceneColor"));
             RenderUpsamples();
-
             ctx.SetTexture("BloomOutput", bloomMipList[0].texture);
 
             Renderer.graphicsDevice.SetViewport(ViewportSize.Item1, ViewportSize.Item2, ViewportSize.Item3, ViewportSize.Item4);
@@ -75,21 +74,23 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
         {
             Vector2 currentMipSize = screenSize;
 
+            bloomMipList.Clear();
+
             for (int i = 0; i < BloomMipCount; i++)
             {
                 currentMipSize *= 0.5f;
 
-                if (currentMipSize.X <= 1 || currentMipSize.Y <= 1)
-                    break;
+                int width = Math.Max(1, (int)currentMipSize.X);
+                int height = Math.Max(1, (int)currentMipSize.Y);
 
                 BloomMip bloomMip = new BloomMip();
-                bloomMip.size = currentMipSize;
+                bloomMip.size = new Vector2(width, height);
 
                 Texture2D mipTexture = new Texture2D(new DevoidGPU.TextureDescription()
                 {
                     Format = DevoidGPU.TextureFormat.RGBA16_Float,
-                    Width = (int)currentMipSize.X,
-                    Height = (int)currentMipSize.Y,
+                    Width = width,
+                    Height = height,
                     GenerateMipmaps = false,
                     IsRenderTarget = true,
                     MipLevels = 1,
@@ -107,13 +108,17 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
                 );
 
                 bloomMip.texture = mipTexture;
-
                 bloomMipList.Add(bloomMip);
+
+                // stop AFTER adding at least one mip
+                if (width == 1 || height == 1)
+                    break;
             }
         }
 
         public override void Resize(int width, int height)
         {
+
             screenSize = new Vector2(width, height);
 
             foreach (var mip in bloomMipList)
