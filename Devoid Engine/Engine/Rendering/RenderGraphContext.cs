@@ -18,8 +18,13 @@ namespace DevoidEngine.Engine.Rendering
 
         public Texture2D GetTexture(string name)
         {
-            textures.TryGetValue(name, out var tex);
-            return tex;
+            if (textures.TryGetValue(name, out var tex))
+            {
+                return tex;
+            } else
+            {
+                return Texture2D.BlackTexture;
+            }
         }
     }
 }

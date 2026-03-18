@@ -10,6 +10,7 @@ namespace DevoidEngine.Engine.Core
         private TextureHandle _textureInternal;
 
         public static Texture2D WhiteTexture { get; private set; }
+        public static Texture2D BlackTexture { get; private set; }
         public static ISampler DefaultSampler { get; private set; }
 
         public TextureDescription Description { get; private set; }
@@ -29,11 +30,29 @@ namespace DevoidEngine.Engine.Core
                 IsMutable = false
             });
 
-            float[] pixel = [
+            BlackTexture = new Texture2D(new TextureDescription()
+            {
+                Width = 1,
+                Height = 1,
+                Format = TextureFormat.RGBA32_Float,
+                Type = TextureType.Texture2D,
+                GenerateMipmaps = false,
+                MipLevels = 1,
+                IsDepthStencil = false,
+                IsRenderTarget = true,
+                IsMutable = false
+            });
+
+            float[] blackPixel = [
+                0,0,0,1
+            ];
+
+            float[] whitePixel = [
                 1,1,1,1
             ];
 
-            WhiteTexture.SetData(pixel);
+            WhiteTexture.SetData(whitePixel);
+            BlackTexture.SetData(blackPixel);
             DefaultSampler = Renderer.graphicsDevice.CreateSampler(SamplerDescription.Default);
         }
 

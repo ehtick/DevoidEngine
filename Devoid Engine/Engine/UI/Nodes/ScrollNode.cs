@@ -45,7 +45,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
         }
 
-        public override void Render(List<RenderItem> renderList, Matrix4x4 canvas)
+        public override void Render(List<RenderItem> renderList, Matrix4x4 canvas, int order)
         {
             UIScissorStack.Push(
                 Rect.position.X,
@@ -60,7 +60,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             //    UISystem.BuildModel(Rect)    
             //);
 
-            base.Render(renderList, canvas);
+            base.Render(renderList, canvas, order);
 
             UIScissorStack.Pop();
         }

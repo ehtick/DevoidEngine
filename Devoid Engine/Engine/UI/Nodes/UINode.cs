@@ -33,6 +33,8 @@ namespace DevoidEngine.Engine.UI.Nodes
         public Vector2? Size;
         public Vector2 MinSize = Vector2.Zero;
         public Vector2 MaxSize = new(float.PositiveInfinity);
+        public Vector2 Pivot = Vector2.Zero;
+        public float Rotation = 0f;
 
         public bool ParticipatesInLayout = true;
 
@@ -74,13 +76,13 @@ namespace DevoidEngine.Engine.UI.Nodes
 
             ArrangeCore(finalRect);
         }
-        public virtual void Render(List<RenderItem> renderList, Matrix4x4 model)
+        public virtual void Render(List<RenderItem> renderList, Matrix4x4 model, int order)
         {
             if (!Visible) return;
-            RenderCore(renderList, model);
+            RenderCore(renderList, model, ++order);
             for (int i = 0; i < _children.Count; i++)
             {
-                _children[i].Render(renderList, model);
+                _children[i].Render(renderList, model, order);
             }
         }
 
@@ -97,7 +99,7 @@ namespace DevoidEngine.Engine.UI.Nodes
         protected abstract void InitializeCore();
         protected abstract Vector2 MeasureCore(Vector2 availableSize);
         protected abstract void ArrangeCore(UITransform finalRect);
-        protected abstract void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel);
+        protected abstract void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel, int order);
         protected abstract void UpdateCore(float deltaTime);
 
         // Input handling

@@ -122,7 +122,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
         }
 
-        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
+        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel, int order)
         {
             if (Font == null || string.IsNullOrEmpty(Text) || _mesh == null)
                 return;
@@ -135,7 +135,8 @@ namespace DevoidEngine.Engine.UI.Nodes
             //Matrix4x4 model =
             //    Matrix4x4.CreateTranslation(pos.X, pos.Y, 0);
 
-            Matrix4x4 local = UISystem.BuildTranslationModel(new UITransform(pos, Rect.size));
+            Matrix4x4 local = UISystem.BuildTranslationModel(new UITransform(pos, Rect.size)) * Matrix4x4.CreateTranslation(0, 0, order * 0.001f);
+            local *= Matrix4x4.CreateTranslation(Pivot.X, Pivot.Y, 0) * Matrix4x4.CreateRotationX(Rotation);
             Matrix4x4 final = local * canvasModel;
 
             RenderItem renderItem = new RenderItem()

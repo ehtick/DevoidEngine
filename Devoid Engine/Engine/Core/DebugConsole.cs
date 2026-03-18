@@ -207,7 +207,7 @@ namespace DevoidEngine.Engine.Core
         public override void OnLateRender()
         {
             List<RenderItem> renderItems = new List<RenderItem>();
-            rootNode.Render(renderItems, Matrix4x4.Identity);
+            rootNode.Render(renderItems, Matrix4x4.Identity, 0);
 
             Framebuffer surface = SceneManager.CurrentScene?.GetMainCamera()?.Camera.RenderTarget;
 

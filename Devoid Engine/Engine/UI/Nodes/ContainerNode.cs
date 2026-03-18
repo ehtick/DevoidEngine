@@ -89,14 +89,44 @@ namespace DevoidEngine.Engine.UI.Nodes
         //    Rect = finalRect;
         //}
 
-        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
+        //protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel, int order)
+        //{
+        //    Matrix4x4 local = Matrix4x4.CreateRotationZ(Rotation) * UISystem.BuildModel(Rect) * Matrix4x4.CreateTranslation(0, 0, order * 0.001f);
+        //    Matrix4x4 final = local * canvasModel;
+
+        //    renderList.Add(new RenderItem()
+        //    {
+        //        Mesh = UISystem.QuadMesh,
+        //        Material = Material,
+        //        Model = final
+        //    });
+        //}
+
+        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel, int order)
         {
+            Vector2 size = Rect.size;
+            Vector2 pos = Rect.position;
+
+            // convert pivot (0–1) → pixels
+            Vector2 pivotOffset = (Pivot - new Vector2(0.5f)) * size;
+
+            Vector2 centerPos = pos + size * 0.5f;
+
+            Matrix4x4 model =
+                Matrix4x4.CreateScale(size.X, size.Y, 1f) *
+                Matrix4x4.CreateTranslation(pivotOffset.X, pivotOffset.Y, 0f) *
+                Matrix4x4.CreateRotationZ(Rotation) *
+                Matrix4x4.CreateTranslation(centerPos.X, centerPos.Y, order * 0.001f);
+
+            Matrix4x4 final = model * canvasModel;
+
             renderList.Add(new RenderItem()
             {
                 Mesh = UISystem.QuadMesh,
                 Material = Material,
-                Model = UISystem.BuildModel(Rect)
+                Model = final
             });
+            //DebugRenderSystem.DrawRectUI(model);
         }
 
         protected override void UpdateCore(float deltaTime)

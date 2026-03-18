@@ -167,7 +167,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             }
         }
 
-        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
+        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel, int order)
         {
 
         }

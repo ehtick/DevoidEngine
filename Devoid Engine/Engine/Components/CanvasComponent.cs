@@ -22,6 +22,7 @@ namespace DevoidEngine.Engine.Components
         public CameraComponent3D CameraConstraint;
         public CanvasRenderMode RenderMode = CanvasRenderMode.ScreenSpace;
         public int PixelsPerUnit = 10;
+        public int Order = 0;
 
         public CanvasNode Canvas = new CanvasNode()
         {
@@ -46,7 +47,7 @@ namespace DevoidEngine.Engine.Components
                 if (CameraConstraint != null && CameraConstraint != camera)
                     return;
 
-                Canvas.Render(viewData.renderItemsUI, Matrix4x4.Identity);
+                Canvas.Render(viewData.renderItemsUI, Matrix4x4.Identity, Order);
             }
             else
             {
@@ -67,7 +68,7 @@ namespace DevoidEngine.Engine.Components
                     scale *
                     gameObject.transform.WorldMatrix;
 
-                Canvas.Render(viewData.renderItems3D, world);
+                Canvas.Render(viewData.renderItems3D, world, Order);
             }
         }
 

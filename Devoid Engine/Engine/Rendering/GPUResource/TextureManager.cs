@@ -39,7 +39,7 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
         public void UploadTextureData2D(TextureHandle handle, byte[] data)
         {
 
-            RenderThread.EnqueueUpload(() =>
+            RenderThread.Enqueue(() =>
             {
                 ITexture2D textureInternal = (ITexture2D)_textures[handle.Id];
                 textureInternal.SetData(data);

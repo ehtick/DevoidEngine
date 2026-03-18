@@ -30,9 +30,10 @@ namespace DevoidEngine.Engine.Components
             canvas.PixelsPerUnit = 300;
 
             // Centered container
-            FlexboxNode container = new FlexboxNode()
+            ContainerNode container = new ContainerNode()
             {
                 Size = new Vector2(600, 200),
+                Color = new Vector4(0.5f,0.18f,0,0.2f),
 
                 Direction = FlexDirection.Column,
                 Align = AlignItems.Center,

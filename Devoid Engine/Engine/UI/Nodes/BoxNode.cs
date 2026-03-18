@@ -75,8 +75,11 @@ namespace DevoidEngine.Engine.UI.Nodes
         //    Rect = finalRect;
         //}
 
-        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel)
+        protected override void RenderCore(List<RenderItem> renderList, Matrix4x4 canvasModel, int order)
         {
+            Matrix4x4 local = UISystem.BuildTranslationModel(Rect) * Matrix4x4.CreateTranslation(0, 0, order * 0.001f);
+            Matrix4x4 final = local * canvasModel;
+
             renderList.Add(new RenderItem()
             {
                 Mesh = UISystem.QuadMesh,
