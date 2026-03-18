@@ -3,6 +3,8 @@ using DevoidEngine.Engine.Imgui;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.Utilities;
+using DevoidEngine.InputSystem;
+using DevoidEngine.InputSystem.InputDevices;
 using DevoidGPU;
 using OpenTK.Windowing.Common;
 
@@ -37,7 +39,8 @@ namespace DevoidEngine.Engine.Core
     {
         public WindowManager windowManager;
         public Window MainWindow;
-
+        public InputBackend inputBackend;
+        
         public IGraphicsDevice graphicsDevice;
 
         public LayerHandler LayerHandler;
@@ -78,6 +81,10 @@ namespace DevoidEngine.Engine.Core
             RenderThread.mainThreadID = windowManager.MainThreadID;
 
             MainWindow = new Window(windowSpecification);
+
+            inputBackend = new InputBackend();
+            inputBackend.AddInputDevice(new KeyboardInputHandler(MainWindow.KeyboardState));
+
 
             Screen.Size = new System.Numerics.Vector2(appSpec.Width, appSpec.Height);
 
@@ -181,6 +188,7 @@ namespace DevoidEngine.Engine.Core
         private void OnRenderFrame(double deltaTime)
         {
             UpdateMainWindowState();
+            inputBackend.UpdateInput();
 
             ImGuiRenderer.PerFrame((float)deltaTime);
 

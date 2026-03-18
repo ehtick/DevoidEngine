@@ -17,8 +17,8 @@ namespace DevoidStandaloneLauncher
         private float splashDuration = 0.5f;
         private bool prototypeLoaded = false;
         
-        internal Scene CurrentScene = SplashScene.CreateSplashScene(nameof(MeshLoaderPrototype));
-        internal Prototype GamePrototype = new MeshLoaderPrototype();
+        internal Scene CurrentScene = SplashScene.CreateSplashScene(nameof(CameraAsTexture));
+        internal Prototype GamePrototype = new CameraAsTexture();
 
         public override void OnAttach()
         {

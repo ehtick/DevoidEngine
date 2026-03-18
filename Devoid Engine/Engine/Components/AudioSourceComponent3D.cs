@@ -5,9 +5,9 @@ using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
 {
-    public class AudioSourceComponent : Component
+    public class AudioSourceComponent3D : Component
     {
-        public override string Type => nameof(AudioSourceComponent);
+        public override string Type => nameof(AudioSourceComponent3D);
 
         // --- Config ---
         public string AudioPath;

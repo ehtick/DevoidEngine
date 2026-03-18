@@ -45,6 +45,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             player.transform.Position = new Vector3(0, 2.0f, 0);
 
             var playerBody = player.AddComponent<RigidBodyComponent>();
+            playerBody.Mass = 100;
             playerBody.Shape = new PhysicsShapeDescription()
             {
                 Type = PhysicsShapeType.Capsule,
@@ -165,7 +166,8 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             groundCollider.Material = new PhysicsMaterial()
             {
-                Friction = 1f
+                Friction = 1f,
+                Restitution = 0f
             };
 
             //GameObject camera = scene.addGameObject("Camera");

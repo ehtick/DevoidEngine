@@ -139,7 +139,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             LevelSpawnRegistry.Register("INFO_SPEECH", (assimpNode, assimpScene) =>
             {
                 var go = scene.addGameObject(assimpNode.Name);
-                go.AddComponent<AudioSourceComponent>();
+                go.AddComponent<AudioSourceComponent3D>();
                 go.AddComponent<InfoBubbleComponent>();
 
                 Importer.ApplyTransform(go, assimpNode);

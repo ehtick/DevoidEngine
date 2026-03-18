@@ -16,7 +16,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
         public override string Type => nameof(InfoBubbleComponent);
 
         private ScreenArrowComponent screenArrow;
-        private AudioSourceComponent audioSource;
+        private AudioSourceComponent3D audioSource;
         private AreaComponent playerTriggerArea;
 
         private bool interacted = false;
@@ -39,7 +39,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
             startPos = gameObject.transform.Position;
             startRot = gameObject.transform.EulerAngles;
 
-            audioSource = gameObject.AddComponent<AudioSourceComponent>();
+            audioSource = gameObject.AddComponent<AudioSourceComponent3D>();
             audioSource.PlayOnStart = false;
             audioSource.MaxDistance = 10;
             audioSource.MinDistance = 0;
