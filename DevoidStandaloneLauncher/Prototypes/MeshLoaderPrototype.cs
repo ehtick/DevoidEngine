@@ -6,6 +6,7 @@ using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
+using DevoidStandaloneLauncher.CustomComponents;
 using DevoidStandaloneLauncher.Utils;
 using System.Numerics;
 
@@ -51,9 +52,6 @@ namespace DevoidStandaloneLauncher.Prototypes
             loader.CurrentScene = scene;
             //go.AddComponent<AudioSourceComponent>();
 
-            GameObject go = scene.addGameObject("Warning");
-            sac = go.AddComponent<ScreenArrowComponent>();
-            sac.ArrowTexture = Helper.LoadImageAsTex("D:/Programming/Devoid Engine/Devoid Engine/Engine/Content/Textures/arrow_pointer.png", TextureFilter.Linear);
 
             Importer.LoadModel(levelPath);
             scene.Play();
@@ -142,6 +140,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             {
                 var go = scene.addGameObject(assimpNode.Name);
                 go.AddComponent<AudioSourceComponent>();
+                go.AddComponent<InfoBubbleComponent>();
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -154,8 +153,6 @@ namespace DevoidStandaloneLauncher.Prototypes
                     MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
                     mr.material = material;
                 });
-
-                sac.TargetObject = go;
             });
 
             LevelSpawnRegistry.Register("CAM_MAIN_MONITOR", (assimpNode, assimpScene) =>

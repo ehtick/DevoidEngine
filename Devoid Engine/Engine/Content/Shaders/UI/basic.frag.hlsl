@@ -39,6 +39,8 @@ float4 PSMain(PSInput input) : SV_TARGET
 
     float2 halfSize = RECT_SIZE * 0.5;
     float2 p = input.LocalPos;
+    
+    finalColor.a = finalColor.a * COLOR.a;
 
     // clamp radii so they can't exceed rectangle
     float maxRadius = min(halfSize.x, halfSize.y);

@@ -28,6 +28,16 @@ namespace DevoidEngine.Audio
             return _backend.Play3D(clip, position, loop);
         }
 
+        public void Stop(AudioPlayObject playObject)
+        {
+            _backend.Stop(playObject);
+        }
+
+        public void Pause(AudioPlayObject playObject, bool value = true)
+        {
+            _backend.Pause(playObject, value);
+        }
+
         public void SetListener(Vector3 position, Vector3 forward, Vector3 up)
         {
             _backend.SetListener(position, forward, up);

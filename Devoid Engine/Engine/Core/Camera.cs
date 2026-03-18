@@ -72,22 +72,24 @@ namespace DevoidEngine.Engine.Core
             Frustum = Frustum.FromMatrix(_viewMatrix * _projectionMatrix);
         }
 
-        public Vector2 WorldToScreen(Vector3 worldPos, float screenWidth, float screenHeight)
+        public Vector3 WorldToScreen(Vector3 worldPos, float screenWidth, float screenHeight)
         {
             Matrix4x4 viewProj = _viewMatrix * _projectionMatrix;
+
             Vector4 clip = Vector4.Transform(new Vector4(worldPos, 1.0f), viewProj);
 
-            // behind camera
-            if (clip.W <= 0.0f)
-                return new Vector2(float.NaN, float.NaN);
+            float w = clip.W;
 
-            Vector3 ndc = new Vector3(clip.X, clip.Y, clip.Z) / clip.W;
+            // avoid divide by zero
+            float safeW = MathF.Max(MathF.Abs(w), 0.00001f);
+
+            Vector3 ndc = new Vector3(clip.X, clip.Y, clip.Z) / safeW;
 
             Vector2 screen;
             screen.X = (ndc.X * 0.5f + 0.5f) * screenWidth;
             screen.Y = (1.0f - (ndc.Y * 0.5f + 0.5f)) * screenHeight;
 
-            return screen;
+            return new Vector3(screen, w);
         }
 
         public bool IntersectsAABB(Vector3 min, Vector3 max)

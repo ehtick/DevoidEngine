@@ -213,17 +213,13 @@ namespace DevoidEngine.Engine.Core
         {
             if (!IsPlaying) { return; }
 
-            Audio.Update();
+            UpdateAudio();
 
             for (int i = 0; i < GameObjects.Count; i++)
             {
                 GameObjects[i].OnUpdate(dt);
             }
-
-
-            //Console.WriteLine("Physics Frame Start");
             DoFixedUpdate(dt);
-            //Console.WriteLine("Physics Frame End");
 
             for (int i = 0; i < GameObjects.Count; i++)
             {
@@ -231,6 +227,15 @@ namespace DevoidEngine.Engine.Core
             }
 
             ProcessDestroyQueue();
+        }
+
+        public void UpdateAudio()
+        {
+            Audio.Update();
+
+            CameraComponent3D mainCamera = GetMainCamera();
+            if (mainCamera == null) return;
+            Audio.SetListener(mainCamera.gameObject.transform.Position, mainCamera.gameObject.transform.Forward, mainCamera.gameObject.transform.Up);
         }
 
         public void DoFixedUpdate(float dt)

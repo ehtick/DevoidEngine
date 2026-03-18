@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DevoidEngine.Audio.SoLoud
 {
@@ -37,13 +38,16 @@ namespace DevoidEngine.Audio.SoLoud
                 // Remove if finished
                 if (Soloud.isValidVoiceHandle(obj.Handle.Id) == 0)
                 {
-                    _audioPlayObjects[i].OnFinished.Invoke();
+                    _audioPlayObjects[i].OnFinished?.Invoke();
                     _audioPlayObjects.RemoveAt(i);
                     continue;
                 }
 
                 // Apply volume
+                Soloud.setLooping(obj.Handle.Id, obj.Loop ? 1 : 0);
                 Soloud.setVolume(obj.Handle.Id, obj.Volume);
+                Soloud.set3dSourceMinMaxDistance(obj.Handle.Id, obj.minDistance, obj.maxDistance);
+                Soloud.set3dSourceAttenuation(obj.Handle.Id, (uint)obj.attenuationFunc, 1.0f);
 
                 // Apply position
                 if (obj.Is3D)
@@ -62,9 +66,11 @@ namespace DevoidEngine.Audio.SoLoud
 
         public void SetListener(Vector3 position, Vector3 forward, Vector3 up)
         {
-            Soloud.set3dListenerPosition(position.X, position.Y, position.Z);
-            Soloud.set3dListenerAt(forward.X, forward.Y, forward.Z);
-            Soloud.set3dListenerUp(up.X, up.Y, up.Z);
+            Soloud.set3dListenerParameters(
+                position.X, position.Y, position.Z,
+                forward.X, forward.Y, forward.Z,
+                up.X, up.Y, up.Z
+            );
         }
 
         public AudioClipHandle Load(string path, bool stream)
@@ -92,11 +98,6 @@ namespace DevoidEngine.Audio.SoLoud
 
             uint voice = Soloud.play3d(wav, pos.X, pos.Y, pos.Z);
 
-
-            Soloud.set3dSourceMinMaxDistance(voice, 1.0f, 5.0f);
-            Soloud.set3dSourceAttenuation(voice, 2, 1.0f);
-            Soloud.set3dSourceDopplerFactor(voice, 1.0f);
-
             Soloud.setLooping(voice, loop ? 1 : 0);
             var playObject = new AudioPlayObject
             {
@@ -104,12 +105,27 @@ namespace DevoidEngine.Audio.SoLoud
                 Clip = clip,
                 Position = pos,
                 Volume = 1.0f,
-                Is3D = true
+                Is3D = true,
+                Loop = loop
             };
 
             _audioPlayObjects.Add(playObject);
 
             return playObject;
+        }
+
+        public void Stop(AudioPlayObject playObject)
+        {
+            if (playObject == null) return;
+
+            Soloud.stop(playObject.Handle.Id);
+            _audioPlayObjects.Remove(playObject);
+        }
+
+        public void Pause(AudioPlayObject playObject, bool value = true)
+        {
+            if (playObject == null) return;
+            Soloud.setPause(playObject.Handle.Id, value ? 1 : 0);
         }
 
         public void Dispose()
