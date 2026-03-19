@@ -19,20 +19,72 @@ namespace DevoidStandaloneLauncher.Prototypes
         GameObject PlayerObject;
         GameObject CameraObject;
 
-        Texture2D gridTexture = Helper.LoadImageAsTex("LauncherContents/Textures/grid_lvl_design.png", TextureFilter.Linear);
-        MaterialInstance celMaterial = new MaterialInstance(new Material(new Shader("LauncherContents/Shaders/celtoon")));
         FileReloader reloader;
         string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/devoid_l1.fbx";
+
+        void ConfigureInputSystem()
+        {
+            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
+                Control = (ushort)Keys.W
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Scale = -1,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickY
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Left", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Scale = 1,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickX
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Backward", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
+                Control = (ushort)Keys.S
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Interact", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.West
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Jump", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.South
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Shoot", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.North
+            });
+
+
+            DevoidEngine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickX
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickY
+            });
+        }
+
         public override void OnInit()
         {
-
-
-
-
-
-
-
-            gridTexture.SetWrapMode(TextureWrapMode.Repeat, TextureWrapMode.Repeat);
+            ConfigureInputSystem();
 
             LoadDCC();
 
@@ -40,11 +92,11 @@ namespace DevoidStandaloneLauncher.Prototypes
             mesh.SetVertices(Primitives.GetCubeVertex());
 
 
-            reloader = new FileReloader(levelPath, () =>
-            {
-                Console.WriteLine("FBX changed. Reloading level...");
-                LoadLevel();
-            });
+            //reloader = new FileReloader(levelPath, () =>
+            //{
+            //    Console.WriteLine("FBX changed. Reloading level...");
+            //    LoadLevel();
+            //});
             LoadLevel();
 
             //Cursor.SetCursorState(CursorState.Normal);
@@ -57,8 +109,6 @@ namespace DevoidStandaloneLauncher.Prototypes
             this.scene = new Scene();
             SceneManager.LoadScene(scene);
             loader.CurrentScene = scene;
-            //go.AddComponent<AudioSourceComponent>();
-
 
             Importer.LoadModel(levelPath);
             scene.Play();
@@ -378,10 +428,6 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var gunRenderer = gun.AddComponent<MeshRenderer>();
                 gunRenderer.AddMesh(mesh);
 
-                RenderThread.Enqueue(() =>
-                {
-                    gunRenderer.material = celMaterial;
-                });
                 PlayerObject.GetComponent<FPSController>().SetGunTransform(gun.transform);
             });
 

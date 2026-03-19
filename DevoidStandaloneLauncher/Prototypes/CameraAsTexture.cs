@@ -23,10 +23,42 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         void ConfigureInputSystem()
         {
-            DevoidEngine.InputSystem.Input.Map.Bind("MoveForward", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
             {
                 DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
                 Control = (ushort)Keys.W
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Scale = -1,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickY
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Backward", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
+                Control = (ushort)Keys.S
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("Interact", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.East
+            });
+
+
+            DevoidEngine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickX
+            });
+
+            DevoidEngine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickY
             });
         }
 

@@ -75,7 +75,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
             {
                 UpdateFloating(dt);
 
-                if (distance <= InteractionDistance && Input.GetKeyDown(Keys.E))
+                if (distance <= InteractionDistance && DevoidEngine.InputSystem.Input.GetActionDown("Interact"))
                 {
                     Interact();
                 }

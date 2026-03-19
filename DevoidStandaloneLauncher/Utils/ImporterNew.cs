@@ -25,7 +25,7 @@ namespace DevoidStandaloneLauncher.Utils
                 PostProcessSteps.FlipUVs |
                 PostProcessSteps.FlipWindingOrder;
             //PostProcessSteps.JoinIdenticalVertices;
-
+            filePath = Path.GetFullPath(filePath);
 
             Assimp.Scene scene;
 

@@ -182,23 +182,29 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnUpdate(float dt)
         {
-            lastMouseDelta = Input.MouseDelta;
+            float lookX = InputSystem.Input.GetAction("LookX");
+            float lookY = InputSystem.Input.GetAction("LookY");
+
+            lastMouseDelta = new Vector2(lookX, lookY);
             mouseVelocity = lastMouseDelta / dt;
 
-            totalTime += dt;
-            if (rb == null) return;
+            // movement (assuming you mapped these too)
+            moveInput = new Vector2(
+                InputSystem.Input.GetAction("Left"),
+                InputSystem.Input.GetAction("Forward") - InputSystem.Input.GetAction("Backward")
+            );
 
-            moveInput = Input.MoveAxis;
-            mouseDelta += Input.MouseDelta;
+            mouseDelta += lastMouseDelta;
 
-            if (Input.JumpPressed)
+
+            if (InputSystem.Input.GetActionDown("Jump"))
                 jumpRequested = true;
 
             fireTimer -= dt;
 
             HandleReload(dt);
 
-            if (Input.GetMouseDown(MouseButton.Left))
+            if (InputSystem.Input.GetActionDown("Shoot"))
                 TryShoot();
 
             if (Input.GetKey(Keys.R))
