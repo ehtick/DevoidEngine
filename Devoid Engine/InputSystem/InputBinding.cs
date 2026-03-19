@@ -8,7 +8,7 @@ namespace DevoidEngine.InputSystem
 {
     public class InputBinding
     {
-        public uint DeviceType;   // "Keyboard"
+        public InputDeviceType DeviceType;
         public ushort Control;
 
         public float Scale = 1f;

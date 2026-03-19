@@ -8,8 +8,9 @@ namespace DevoidEngine.InputSystem
 {
     public struct InputEvent
     {
-        public uint DeviceId;     // 0 = keyboard, 1 = mouse, 2+ = gamepads
-        public ushort Control;   // control index
-        public float Value;      // ALWAYS float
+        public uint DeviceId;
+        public InputDeviceType DeviceType; // NOT DeviceId
+        public ushort Control;
+        public float Value;
     }
 }
