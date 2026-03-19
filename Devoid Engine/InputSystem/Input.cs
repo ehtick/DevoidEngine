@@ -20,8 +20,8 @@ namespace DevoidEngine.InputSystem
         public static void Initialize(Window window)
         {
             currentWindow = window;
-            Backend.AddInputDevice(new InputSystem.InputDevices.KeyboardInputHandler(MainWindow.KeyboardState));
-            Backend.AddInputDevice(new InputSystem.InputDevices.GamepadInputHandler(MainWindow.JoystickStates));
+            Backend.AddInputDevice(new InputSystem.InputDevices.KeyboardInputHandler(currentWindow.KeyboardState));
+            Backend.AddInputDevice(new InputSystem.InputDevices.GamepadInputHandler(() => { return currentWindow.JoystickStates; }));
         }
 
         public static void Update()

@@ -370,7 +370,10 @@ namespace DevoidStandaloneLauncher.Prototypes
         float pos = 0;
         public override void OnUpdate(float delta)
         {
-            Console.WriteLine(DevoidEngine.InputSystem.Input.GetAction("MoveForward"));
+            if (DevoidEngine.InputSystem.Input.GetActionDown("MoveForward"))
+            {
+                Console.WriteLine("Mapping works");
+            }
 
             //Monitor.transform.Position = new Vector3(0, pos, 0);
             portalCamera.transform.EulerAngles = new Vector3(0, pos * 5, 0);

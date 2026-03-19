@@ -31,6 +31,7 @@ namespace DevoidEngine.InputSystem.InputDevices
 
         public override void Update(InputBackend backend)
         {
+
             foreach (Keys key in Keys)
             {
                 if (key == InputDevices.Keys.Unknown) continue;

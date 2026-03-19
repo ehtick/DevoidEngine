@@ -146,6 +146,7 @@ namespace DevoidEngine.Engine.Core
 
         private void OnTextInput(OpenTK.Windowing.Common.TextInputEventArgs obj)
         {
+            Console.WriteLine(obj.Unicode);
             LayerHandler.TextInput(obj.Unicode);
 
         }

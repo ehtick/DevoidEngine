@@ -9,9 +9,13 @@ namespace DevoidEngine.InputSystem.InputDevices
 {
     internal class GamepadInputHandler : InputDeviceHandler
     {
-        public GamepadInputHandler(JoystickState joystickState)
-        {
+        private IReadOnlyList<JoystickState> _states;
+        private Func<IReadOnlyList<JoystickState>> getter;
 
+        public GamepadInputHandler(Func<IReadOnlyList<JoystickState>> getter)
+        {
+            this.getter = getter;
+            _states = getter();
         }
 
         public override void Register(InputBackend backend)
@@ -21,7 +25,30 @@ namespace DevoidEngine.InputSystem.InputDevices
 
         public override void Update(InputBackend backend)
         {
+            var states = _states;
 
+            for (int i = 0; i < states.Count; i++)
+            {
+                var state = states[i];
+
+                if (state == null)
+                    continue;
+
+                if (state.AxisCount == 0 && state.ButtonCount == 0)
+                    continue;
+
+                Console.WriteLine($"Joystick {i} connected: {state.Name}");
+                for (int j = 0; j < state.ButtonCount; j++)
+                {
+
+                    Console.WriteLine(state.IsButtonDown(j));
+                }
+
+                for (int j = 0; j < state.AxisCount; j++)
+                {
+                    Console.WriteLine(state.GetAxis(j).ToString());
+                }
+            }
         }
     }
 }
