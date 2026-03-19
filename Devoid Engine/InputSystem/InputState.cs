@@ -40,5 +40,12 @@ namespace DevoidEngine.InputSystem
             _pressed.Clear();
             _released.Clear();
         }
+
+        public void Clear()
+        {
+            _values.Clear();
+            _pressed.Clear();
+            _released.Clear();
+        }
     }
 }

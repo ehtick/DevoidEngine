@@ -21,6 +21,7 @@
 
 	<ItemGroup>
     <None Remove="Engine\Content\Audio\game.wav" />
+    <None Remove="Engine\Content\Audio\game1.wav" />
     <None Remove="Engine\Content\Fonts\JetBrainsMono-Regular.ttf" />
     <None Remove="Engine\Content\Shaders\Clustering\clusterVisualize.frag.hlsl" />
     <None Remove="Engine\Content\Shaders\Clustering\clusterVisualize.vert.hlsl" />
@@ -48,11 +49,15 @@
     <None Remove="Engine\Content\Textures\brick.png" />
     <None Remove="Engine\Content\Textures\crosshair.png" />
     <None Remove="Engine\Content\Textures\DevoidLogo.png" />
+    <None Remove="Engine\Content\Textures\E_Key_Dark.png" />
     <None Remove="Engine\Content\Textures\shrk.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Engine\Content\Audio\game.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Engine\Content\Audio\game1.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Engine\Content\Fonts\JetBrainsMono-Regular.ttf">
@@ -164,6 +169,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Engine\Content\Textures\DevoidLogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Engine\Content\Textures\E_Key_Dark.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Engine\Content\Textures\shrk.png">

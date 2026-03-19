@@ -5,6 +5,7 @@ using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
+using DevoidEngine.InputSystem.InputProcessors;
 using DevoidGPU;
 using DevoidStandaloneLauncher.CustomComponents;
 using DevoidStandaloneLauncher.Utils;
@@ -20,7 +21,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         GameObject CameraObject;
 
         FileReloader reloader;
-        string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/devoid_l1.fbx";
+        string levelPath = "LauncherContents/devoid_l1.fbx";
 
         void ConfigureInputSystem()
         {
@@ -34,20 +35,29 @@ namespace DevoidStandaloneLauncher.Prototypes
             {
                 DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
                 Scale = -1,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickY
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickY,
+                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                {
+                    new ScaledDeadzoneProcessor(0.15f)
+                }
             });
 
             DevoidEngine.InputSystem.Input.Map.Bind("Left", new DevoidEngine.InputSystem.InputBinding()
             {
                 DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
                 Scale = 1,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickX
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickX,
+                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                {
+                    new ScaledDeadzoneProcessor(0.15f)
+                }
             });
 
             DevoidEngine.InputSystem.Input.Map.Bind("Backward", new DevoidEngine.InputSystem.InputBinding()
             {
                 DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
-                Control = (ushort)Keys.S
+                Control = (ushort)Keys.S,
+
             });
 
             DevoidEngine.InputSystem.Input.Map.Bind("Interact", new DevoidEngine.InputSystem.InputBinding()
@@ -72,13 +82,21 @@ namespace DevoidStandaloneLauncher.Prototypes
             DevoidEngine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.InputSystem.InputBinding()
             {
                 DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickX
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickX,
+                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                {
+                    new ScaledDeadzoneProcessor(0.15f)
+                }
             });
 
             DevoidEngine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.InputSystem.InputBinding()
             {
                 DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickY
+                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickY,
+                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                {
+                    new ScaledDeadzoneProcessor(0.15f)
+                }
             });
         }
 

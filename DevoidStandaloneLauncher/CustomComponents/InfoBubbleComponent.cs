@@ -32,7 +32,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
         public float ResetDistance = 15f;
         public float BobHeight = 0.5f;
         public float BobSpeed = 2f;
-        public string AudioPath = "D:/Programming/Devoid Engine/Devoid Engine/Engine/Content/Audio/game1.wav";
+        public string AudioPath = "Engine/Content/Audio/game1.wav";
 
         public override void OnStart()
         {
@@ -47,7 +47,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
 
             screenArrow = gameObject.AddComponent<ScreenArrowComponent>();
             screenArrow.ArrowTexture = Helper.LoadImageAsTex(
-                "D:/Programming/Devoid Engine/Devoid Engine/Engine/Content/Textures/E_Key_Dark.png",
+                "Engine/Content/Textures/E_Key_Dark.png",
                 TextureFilter.Linear
             );
             screenArrow.TargetObject = gameObject;
@@ -151,7 +151,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
 
             screenArrow.StopIndicator();
 
-            audioSource.AudioPath = AudioPath;
+            audioSource.AudioPath = Path.GetFullPath(AudioPath);
             audioSource.Play();
         }
     }

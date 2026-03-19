@@ -11,6 +11,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="LauncherContents\devoid_l1.fbx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="LauncherContents\devoid_l1.fbx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AssimpNetter" Version="6.0.2.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
@@ -22,9 +32,6 @@
 
   <ItemGroup>
     <None Update="LauncherContents\companion_cube.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="LauncherContents\devoid_l1.fbx">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="LauncherContents\devoid_l1.glb">

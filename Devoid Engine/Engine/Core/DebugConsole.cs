@@ -4,6 +4,7 @@ using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
+using DevoidEngine.InputSystem;
 using DevoidEngine.InputSystem.InputDevices;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DevoidEngine.Engine.Core
 {
-    public class DebugConsole : Layer
+    public class DebugConsole : Layer, IInputLayer
     {
         public CanvasNode rootNode = new CanvasNode()
         {
@@ -45,8 +45,33 @@ namespace DevoidEngine.Engine.Core
 
         Dictionary<string, Action<string[]>> commands = new();
 
+        public bool Handle(InputEvent e)
+        {
+            if (e.Control == (ushort)InputSystem.InputDevices.Keys.F7 && e.Value == 1f)
+            {
+                rootNode.Visible = !rootNode.Visible;
+
+                if (rootNode.Visible)
+                {
+                    prevCursorState = Cursor.GetCursorState();
+
+                    Cursor.SetCursorState(CursorState.Normal);
+
+                    InputSystem.Input.State.Clear();
+                }
+                else
+                {
+                    Cursor.SetCursorState(prevCursorState);
+                }
+            }
+
+            return rootNode.Visible;
+        }
+
         public override void OnAttach()
         {
+            InputSystem.Input.Router.Push(this);
+
             font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 20);
 
 
@@ -178,21 +203,7 @@ namespace DevoidEngine.Engine.Core
 
         public override void OnUpdate(float deltaTime)
         {
-            if (Input.GetKeyDown(Keys.F7))
-            {
-                rootNode.Visible = !rootNode.Visible;
 
-                if (rootNode.Visible)
-                {
-                    prevCursorState = Cursor.GetCursorState();
-
-                    Cursor.SetCursorState(CursorState.Normal);
-                }
-                else
-                {
-                    Cursor.SetCursorState(prevCursorState);
-                }
-            }
         }
 
         public override void OnRender(float deltaTime)

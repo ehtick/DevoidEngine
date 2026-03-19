@@ -170,6 +170,8 @@ namespace DevoidStandaloneLauncher.Utils
             if (materialCache.TryGetValue(matIndex, out var cachedMat))
                 return cachedMat;
 
+            baseModelPath = Path.GetFullPath(baseModelPath);
+
             DevoidEngine.Engine.Core.MaterialInstance devoidMaterial = RenderingDefaults.GetMaterial();
 
             MaterialProperty roughnessProperty = assimpMat.GetProperty("$mat.roughnessFactor,0,0");
