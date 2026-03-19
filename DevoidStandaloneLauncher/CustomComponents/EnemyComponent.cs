@@ -4,7 +4,6 @@ using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
 using System.Numerics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DevoidEngine.Engine.Components
 {

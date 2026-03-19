@@ -1,5 +1,4 @@
 ﻿using BepuPhysics;
-using DevoidEngine.Engine.Physics;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Physics.Bepu

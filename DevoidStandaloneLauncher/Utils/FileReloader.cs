@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-public class FileReloader : IDisposable
+﻿public class FileReloader : IDisposable
 {
     private readonly FileSystemWatcher watcher;
     private readonly Action onChanged;

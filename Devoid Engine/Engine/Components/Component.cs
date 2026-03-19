@@ -1,5 +1,4 @@
 ﻿using DevoidEngine.Engine.Core;
-using System.Diagnostics;
 
 namespace DevoidEngine.Engine.Components
 {

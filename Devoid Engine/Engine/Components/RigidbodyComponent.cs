@@ -1,5 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Physics;
+﻿using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.Rendering;
 using System.Numerics;
 
@@ -52,7 +51,7 @@ namespace DevoidEngine.Engine.Components
         private PhysicsShapeDescription internalShape = new PhysicsShapeDescription
         {
             Type = PhysicsShapeType.Box,
-            Size = new Vector3(1,1,1)
+            Size = new Vector3(1, 1, 1)
         };
 
         private PhysicsMaterial internalMaterial;

@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
-using System;
+﻿using DevoidEngine.Engine.Rendering;
 
 namespace DevoidEngine.Engine.Components
 {

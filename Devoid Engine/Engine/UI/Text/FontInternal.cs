@@ -1,5 +1,4 @@
 ﻿using MessagePack;
-using OpenTK.Audio.OpenAL;
 using SharpFont;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -100,10 +99,10 @@ namespace DevoidEngine.Engine.UI.Text
             //LineHeight = face.Size.Metrics.Height.ToSingle() * scaleFactor;
 
             LineHeight = (Ascender - Descender);
-            
+
 
             Metrics = new Dictionary<uint, GlyphMetric>();
-            
+
 
 
             ProcessGlyphs();

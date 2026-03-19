@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Physics;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
 {

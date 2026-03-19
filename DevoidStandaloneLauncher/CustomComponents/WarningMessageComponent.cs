@@ -1,5 +1,4 @@
-﻿using DevoidEngine.Engine.Components;
-using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using System.Numerics;
@@ -33,7 +32,7 @@ namespace DevoidEngine.Engine.Components
             ContainerNode container = new ContainerNode()
             {
                 Size = new Vector2(600, 200),
-                Color = new Vector4(0.5f,0.18f,0,0.2f),
+                Color = new Vector4(0.5f, 0.18f, 0, 0.2f),
 
                 Direction = FlexDirection.Column,
                 Align = AlignItems.Center,
@@ -48,7 +47,7 @@ namespace DevoidEngine.Engine.Components
             container.Add(label);
             canvas.Canvas.Add(container);
 
-            
+
         }
 
         public override void OnUpdate(float dt)

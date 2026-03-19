@@ -217,11 +217,11 @@ namespace DevoidStandaloneLauncher.Prototypes
             GameObject canvasObject = scene.addGameObject("Canvas");
             canvasObject.SetParent(Monitor, false);
             canvasObject.transform.LocalPosition = new Vector3(0, 0, 1);
-            
+
             Canvas = canvasObject.AddComponent<CanvasComponent>();
             Canvas.RenderMode = CanvasRenderMode.WorldSpace;
             Canvas.PixelsPerUnit = 300;
-            
+
 
             SetupUI();
             scene.Play();
@@ -314,7 +314,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             //FlexboxNode crossHair = new FlexboxNode()
             //{
-                
+
             //};
 
             //crossHair.Add(new BoxNode()
@@ -339,7 +339,8 @@ namespace DevoidStandaloneLauncher.Prototypes
             if (playerController.isReloading)
             {
                 ammoLabel.Text = "Reloading";
-            } else
+            }
+            else
             {
                 ammoLabel.Text = $"Ammo: {playerController.currentAmmo}/{playerController.MaxAmmo}";
             }
@@ -375,7 +376,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         {
             Scene scene = new Scene();
             scene.addGameObject("Camera").AddComponent<CameraComponent3D>();
-            
+
             CanvasComponent canvas = scene.addGameObject("GameOverObject").AddComponent<CanvasComponent>();
 
             LabelNode label = new LabelNode("Game Over!", font, 64)

@@ -157,7 +157,7 @@ namespace DevoidEngine.Engine.Utilities
         public static Vector3[] VertexToVector3(Vertex[] vertices)
         {
             List<Vector3> verticesList = new List<Vector3>();
-            for (int i = 0; i <vertices.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
                 verticesList.Add(vertices[i].Position);
             }

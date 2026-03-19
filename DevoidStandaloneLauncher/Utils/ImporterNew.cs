@@ -160,6 +160,9 @@ namespace DevoidStandaloneLauncher.Utils
 
         public static DevoidEngine.Engine.Core.MaterialInstance ConvertMaterial(Node node, Assimp.Scene scene, string baseModelPath)
         {
+
+
+
             var assimpMat = GetMaterial(node, scene);
             if (assimpMat == null) return null;
 

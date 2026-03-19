@@ -1,9 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.UI.Nodes;
-using DevoidEngine.Engine.UI.Text;
-using DevoidEngine.Engine.Utilities;
-using SharpFont;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components

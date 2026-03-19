@@ -1,5 +1,7 @@
 ﻿using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.InputSystem;
+using DevoidEngine.Engine.InputSystem.InputDevices;
 using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Nodes;
@@ -23,42 +25,42 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         void ConfigureInputSystem()
         {
-            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
-                Control = (ushort)Keys.W
+                DeviceType = InputDeviceType.Keyboard,
+                Control = (ushort)DevoidEngine.Engine.InputSystem.InputDevices.Keys.W
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                DeviceType = InputDeviceType.Gamepad,
                 Scale = -1,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickY
+                Control = (ushort)GamepadStandardControl.RightStickY
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Backward", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Backward", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
-                Control = (ushort)Keys.S
+                DeviceType = InputDeviceType.Keyboard,
+                Control = (ushort)DevoidEngine.Engine.InputSystem.InputDevices.Keys.S
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Interact", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Interact", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.East
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.East
             });
 
 
-            DevoidEngine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickX
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.LeftStickX
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickY
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.LeftStickY
             });
         }
 
@@ -288,7 +290,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             {
                 portalMeshRenderer.material = new MaterialInstance(new Material(new Shader("Engine/Content/Shaders/Testing/portal_render")));
                 portalMeshRenderer.material.SetTexture("MAT_TEX_OVERRIDE", portalCameraComponent.Camera.RenderTarget.GetRenderTexture(0));
-                portalMeshRenderer.material.SetVector4("Albedo", new Vector4(0,0,0,0));
+                portalMeshRenderer.material.SetVector4("Albedo", new Vector4(0, 0, 0, 0));
             });
 
             portalMeshRenderer.AddMesh(mesh);
@@ -402,7 +404,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         float pos = 0;
         public override void OnUpdate(float delta)
         {
-            if (DevoidEngine.InputSystem.Input.GetActionDown("MoveForward"))
+            if (DevoidEngine.Engine.InputSystem.Input.GetActionDown("MoveForward"))
             {
                 Console.WriteLine("Mapping works");
             }
@@ -422,7 +424,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 ammoLabel.Text = $"Ammo: {playerController.currentAmmo}/{playerController.MaxAmmo}";
             }
 
-            if (Input.GetKeyDown(Keys.R))
+            if (DevoidEngine.Engine.Core.Input.GetKeyDown(DevoidEngine.Engine.Core.Keys.R))
             {
                 renderModeLabel.Text = mode == 0 ? "RenderMode: Solid" : "RenderMode: Wireframe";
                 mode = mode == 0 ? 1 : 0;

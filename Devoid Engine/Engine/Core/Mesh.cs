@@ -58,10 +58,11 @@ namespace DevoidEngine.Engine.Core
 
         public void Draw()
         {
-            if (IndexBuffer  == null)
+            if (IndexBuffer == null)
             {
                 Renderer.graphicsDevice.Draw(vertices.Length, 0);
-            } else
+            }
+            else
             {
                 Renderer.graphicsDevice.DrawIndexed(IndexBuffer.IndexCount, 0, 0);
             }
@@ -70,7 +71,7 @@ namespace DevoidEngine.Engine.Core
         public void SetVertices(Vertex[] vertexArray, bool computeBounds = true)
         {
             vertices = vertexArray;
-            
+
             if (computeBounds)
             {
                 ComputeLocalBounds(vertexArray);

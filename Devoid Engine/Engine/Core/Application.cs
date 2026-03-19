@@ -1,9 +1,6 @@
-﻿using DevoidEngine.Engine.Content.Scenes;
-using DevoidEngine.Engine.Imgui;
+﻿using DevoidEngine.Engine.Imgui;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI;
-using DevoidEngine.Engine.Utilities;
-using DevoidEngine.InputSystem;
 using DevoidGPU;
 using OpenTK.Windowing.Common;
 
@@ -38,7 +35,7 @@ namespace DevoidEngine.Engine.Core
     {
         public WindowManager windowManager;
         public Window MainWindow;
-        
+
         public IGraphicsDevice graphicsDevice;
 
         public LayerHandler LayerHandler;

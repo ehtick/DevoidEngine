@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-
-namespace DevoidEngine.Engine.Components
+﻿namespace DevoidEngine.Engine.Components
 {
     public class GhostFadeComponent : Component
     {

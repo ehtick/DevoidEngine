@@ -1,8 +1,5 @@
 ﻿using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.Utilities;
-using System.Numerics;
 
 namespace DevoidStandaloneLauncher.Prototypes
 {

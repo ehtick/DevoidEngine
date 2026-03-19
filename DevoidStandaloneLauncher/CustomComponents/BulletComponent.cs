@@ -76,7 +76,7 @@ namespace DevoidEngine.Engine.Components
             {
                 Restitution = 0f,
                 Friction = 1f,
-                
+
             };
 
             body.Mass = mass;

@@ -1,6 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering.GPUResource;
-using DevoidGPU;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Rendering
@@ -68,10 +67,11 @@ namespace DevoidEngine.Engine.Rendering
         public void SetRenderTexture(Texture2D texture, int index = 0)
         {
             Graphics.ResourceManager.FramebufferManager.AttachRenderTexture(_frameBuffer, texture.GetRendererHandle(), index);
-            if (index >=  RenderTextures.Count)
+            if (index >= RenderTextures.Count)
             {
                 RenderTextures.Add(texture);
-            } else
+            }
+            else
             {
                 RenderTextures[index] = texture;
             }

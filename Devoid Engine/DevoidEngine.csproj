@@ -11,7 +11,7 @@
 	  
 	  
 	<PublishAot>true</PublishAot>
-	<WarningsAsErrors>$(WarningsAsErrors);IL3050;IL2026</WarningsAsErrors>
+	<WarningsAsErrors>IL2026;IL3050;IL2070;IL2075</WarningsAsErrors>
   </PropertyGroup>
 
 	<ItemGroup>

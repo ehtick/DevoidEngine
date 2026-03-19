@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Rendering;
-
-namespace DevoidEngine.Engine.Core
+﻿namespace DevoidEngine.Engine.Core
 {
     public static class SceneManager
     {

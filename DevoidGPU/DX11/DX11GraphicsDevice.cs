@@ -16,7 +16,7 @@ namespace DevoidGPU.DX11
         private SharpDX.Direct3D11.Device device;
         private DeviceContext deviceContext;
         private SwapChain swapChain;
-        private (int,int,int,int) viewportSize;
+        private (int, int, int, int) viewportSize;
 
         public void Initialize(nint hwnd, PresentationParameters parameters)
         {
@@ -42,9 +42,9 @@ namespace DevoidGPU.DX11
             SharpDX.Direct3D11.Device.CreateWithSwapChain(
                 SharpDX.Direct3D.DriverType.Hardware,
                 DeviceCreationFlags.BgraSupport
-                #if DEBUG 
-                | DeviceCreationFlags.Debug 
-                #endif
+#if DEBUG
+                | DeviceCreationFlags.Debug
+#endif
                 ,
                 swapChainDesc,
                 out device,
@@ -80,10 +80,10 @@ namespace DevoidGPU.DX11
         public void SetViewport(int x, int y, int width, int height)
         {
             deviceContext.Rasterizer.SetViewport(x, y, width, height);
-            viewportSize = (x,y,width,height);
+            viewportSize = (x, y, width, height);
         }
 
-        public (int,int,int,int) GetViewport()
+        public (int, int, int, int) GetViewport()
         {
             return viewportSize;
         }

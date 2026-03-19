@@ -1,6 +1,5 @@
 ﻿using DevoidEngine.Engine.Utilities;
 using System.Numerics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DevoidEngine.Engine.Components
 {

@@ -1,11 +1,6 @@
 ﻿using DevoidEngine.Engine.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering.PostProcessing
 {
@@ -58,7 +53,7 @@ namespace DevoidEngine.Engine.Rendering.PostProcessing
 
         public override void Execute(RenderGraphContext ctx)
         {
-            (int,int,int,int) ViewportSize = Renderer.graphicsDevice.GetViewport();
+            (int, int, int, int) ViewportSize = Renderer.graphicsDevice.GetViewport();
 
             mipShaderDataBuffer.Bind(2);
             bloomFrameBuffer.Bind();

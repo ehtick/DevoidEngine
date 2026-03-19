@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D11;
-using System;
-using System.Runtime.InteropServices;
 
 namespace DevoidGPU.DX11
 {

@@ -1,5 +1,5 @@
-﻿using DevoidEngine.Audio;
-using DevoidEngine.Audio.SoLoud;
+﻿using DevoidEngine.Engine.Audio;
+using DevoidEngine.Engine.Audio.SoLoud;
 using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.Physics.Bepu;
@@ -29,7 +29,7 @@ namespace DevoidEngine.Engine.Core
         public event Action<Component>? OnComponentRemoved;
 
 
-        public  float fixedDeltaTime = 1f / 300f;
+        public float fixedDeltaTime = 1f / 300f;
         private float accumulator = 0f;
 
         public Scene()

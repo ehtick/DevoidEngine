@@ -1,13 +1,7 @@
-﻿using DevoidEngine.Engine.Components;
-using DevoidEngine.Engine.Content.Scenes;
+﻿using DevoidEngine.Engine.Content.Scenes;
 using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering;
 using DevoidStandaloneLauncher.Prototypes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidStandaloneLauncher
 {
@@ -16,7 +10,7 @@ namespace DevoidStandaloneLauncher
         private float splashTimer = 0;
         private float splashDuration = 0.5f;
         private bool prototypeLoaded = false;
-        
+
         internal Scene CurrentScene = SplashScene.CreateSplashScene(nameof(MeshLoaderPrototype));
         internal Prototype GamePrototype = new MeshLoaderPrototype();
 

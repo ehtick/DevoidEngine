@@ -12,7 +12,7 @@ namespace DevoidEngine.Engine.Rendering
         const int MAX_POINTLIGHTS = 100;
         const int MAX_SPOTLIGHTS = 20;
         const int MAX_DIRECTIONALLIGHTS = 1;
-        
+
         StorageBuffer<GPUPointLight> pointLightBuffer;
 
         UniformBuffer sceneDataBuffer;

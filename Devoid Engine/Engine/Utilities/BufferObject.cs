@@ -1,6 +1,5 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidGPU;
-using System;
 using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Utilities

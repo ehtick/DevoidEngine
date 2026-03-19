@@ -1,5 +1,4 @@
-﻿using DevoidEngine.Engine.Components;
-using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Text;
 using System.Numerics;

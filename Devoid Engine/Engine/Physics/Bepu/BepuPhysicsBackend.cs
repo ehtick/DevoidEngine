@@ -1,13 +1,8 @@
 ﻿using BepuPhysics;
 using BepuPhysics.Collidables;
-using BepuPhysics.CollisionDetection;
 using BepuUtilities.Memory;
 using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Physics;
-using SharpDX.DXGI;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Physics.Bepu
 {
@@ -109,7 +104,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
                     ReportCollision(a, b);
                     //Console.WriteLine(a.Id + " " + b.Id + " deltaTime" + DateTime.Now);
                 }
-                    
+
             }
 
 
@@ -369,7 +364,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
                 bodyMaterials.Remove(b.Handle);
                 bodyTriggers.Remove(b.Handle);   // ADD THIS
                 bodyWrappers.Remove(b.Handle);   // also remove wrapper
-            } else
+            }
+            else
             {
                 Console.WriteLine("Removing Static bodies not implemented yet.");
             }
@@ -382,7 +378,8 @@ namespace DevoidEngine.Engine.Physics.Bepu
                 staticWrappers.Remove(b.Handle);
                 staticToGameObject.Remove(b.Handle);
                 staticMaterials.Remove(b.Handle);
-            } else
+            }
+            else
             {
                 Console.WriteLine("Invalid Static body handle passed to remove static function.");
             }

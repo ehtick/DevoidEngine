@@ -76,7 +76,7 @@ namespace DevoidEngine.Engine.UI.Nodes
             Material.SetVector4("COLOR", final);
             Material.SetVector2("RECT_SIZE", Rect?.size ?? Vector2.One);
             Material.SetVector4("CORNER_RADIUS", _borderRadius);
-            
+
         }
 
         //protected override Vector2 MeasureCore(Vector2 availableSize)

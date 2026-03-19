@@ -1,5 +1,4 @@
 ﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.Utilities;
 using System.Numerics;
@@ -65,7 +64,7 @@ namespace DevoidEngine.Engine.UI
 
         public static void Update(float deltaTime)
         {
-            
+
 
             Vector2 screen = Screen.Size;
 

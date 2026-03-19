@@ -1,13 +1,7 @@
 ﻿using DevoidEngine.Engine.Components;
-using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidStandaloneLauncher.CustomComponents
 {
@@ -65,7 +59,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
                 cam.transform.Position,
                 gameObject.transform.Position
             );
-            
+
             if (interacted && distance > ResetDistance)
             {
                 ResetState();
@@ -75,7 +69,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
             {
                 UpdateFloating(dt);
 
-                if (distance <= InteractionDistance && DevoidEngine.InputSystem.Input.GetActionDown("Interact"))
+                if (distance <= InteractionDistance && DevoidEngine.Engine.InputSystem.Input.GetActionDown("Interact"))
                 {
                     Interact();
                 }
@@ -137,7 +131,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
 
             if (distance > InteractionDistance) return;
 
-            if (Input.GetKeyDown(Keys.E))
+            if (DevoidEngine.Engine.Core.Input.GetKeyDown(DevoidEngine.Engine.Core.Keys.E))
             {
                 Interact();
             }

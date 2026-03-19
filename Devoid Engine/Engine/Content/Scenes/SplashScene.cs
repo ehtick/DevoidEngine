@@ -3,15 +3,10 @@ using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Content.Scenes
 {
-    public class SplashScene 
+    public class SplashScene
     {
         public static Scene CreateSplashScene(string loadingName = "None")
         {

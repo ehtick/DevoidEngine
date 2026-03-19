@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-
-namespace DevoidStandaloneLauncher.Prototypes
+﻿namespace DevoidStandaloneLauncher.Prototypes
 {
     internal class Prototype
     {

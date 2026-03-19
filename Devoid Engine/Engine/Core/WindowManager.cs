@@ -1,6 +1,4 @@
-﻿using DevoidGPU;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -233,7 +231,7 @@ namespace DevoidEngine.Engine.Core
                     }
                 }
             }
-            _running = false; 
+            _running = false;
             updateThread.Join();
         }
 

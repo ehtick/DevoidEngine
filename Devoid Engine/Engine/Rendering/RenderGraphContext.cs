@@ -1,9 +1,4 @@
 ﻿using DevoidEngine.Engine.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -21,7 +16,8 @@ namespace DevoidEngine.Engine.Rendering
             if (textures.TryGetValue(name, out var tex))
             {
                 return tex;
-            } else
+            }
+            else
             {
                 return Texture2D.BlackTexture;
             }

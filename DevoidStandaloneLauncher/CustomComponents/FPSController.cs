@@ -1,9 +1,7 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.UI.Nodes;
-using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
-using System;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
@@ -136,7 +134,7 @@ namespace DevoidEngine.Engine.Components
 
             FlexboxNode ROOT = new FlexboxNode()
             {
-                Size = new Vector2(200,600),
+                Size = new Vector2(200, 600),
                 Justify = JustifyContent.Center,
                 Align = AlignItems.End
             };

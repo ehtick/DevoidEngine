@@ -1,11 +1,6 @@
 ﻿using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Rendering.GPUResource;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Utilities
 {
@@ -29,7 +24,7 @@ namespace DevoidEngine.Engine.Utilities
 
         public void Bind()
         {
-            Graphics.ResourceManager.VertexBufferManager.BindVertexBuffer( _vertexBuffer );
+            Graphics.ResourceManager.VertexBufferManager.BindVertexBuffer(_vertexBuffer);
         }
 
         public VertexInfo GetVertexInfo()

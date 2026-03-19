@@ -1,12 +1,7 @@
 ﻿using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Rendering
 {
@@ -107,7 +102,7 @@ namespace DevoidEngine.Engine.Rendering
             });
         }
 
-        public static void DrawMesh(Mesh mesh,  Matrix4x4 model)
+        public static void DrawMesh(Mesh mesh, Matrix4x4 model)
         {
             meshes.Add(new DebugMesh
             {
@@ -164,7 +159,7 @@ namespace DevoidEngine.Engine.Rendering
 
             RenderBase.SetupCamera(UIRenderer.ScreenData);
 
-            for (int i = 0;i < rects.Count; i++)
+            for (int i = 0; i < rects.Count; i++)
             {
                 renderItems2D.Add(new RenderItem()
                 {

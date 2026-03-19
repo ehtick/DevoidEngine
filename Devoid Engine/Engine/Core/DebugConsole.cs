@@ -1,17 +1,9 @@
-﻿using DevoidEngine.Engine.Components;
+﻿using DevoidEngine.Engine.InputSystem;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.UI;
 using DevoidEngine.Engine.UI.Nodes;
 using DevoidEngine.Engine.UI.Text;
-using DevoidEngine.Engine.Utilities;
-using DevoidEngine.InputSystem;
-using DevoidEngine.InputSystem.InputDevices;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -19,7 +11,7 @@ namespace DevoidEngine.Engine.Core
     {
         public CanvasNode rootNode = new CanvasNode()
         {
-            
+
         };
         public RenderState debugRenderState = new RenderState()
         {
@@ -125,7 +117,7 @@ namespace DevoidEngine.Engine.Core
             inputLabel = new InputFieldNode(font)
             {
                 Text = "",
-                
+
             };
 
             consolePanel.Add(logAreaBackground);

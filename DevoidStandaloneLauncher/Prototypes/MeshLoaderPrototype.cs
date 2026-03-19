@@ -1,12 +1,11 @@
 ﻿using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.InputSystem;
+using DevoidEngine.Engine.InputSystem.InputDevices;
+using DevoidEngine.Engine.InputSystem.InputProcessors;
 using DevoidEngine.Engine.Physics;
 using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.UI.Nodes;
-using DevoidEngine.Engine.UI.Text;
 using DevoidEngine.Engine.Utilities;
-using DevoidEngine.InputSystem.InputProcessors;
-using DevoidGPU;
 using DevoidStandaloneLauncher.CustomComponents;
 using DevoidStandaloneLauncher.Utils;
 using System.Numerics;
@@ -25,79 +24,89 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         void ConfigureInputSystem()
         {
-            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
-                Control = (ushort)Keys.W
+                DeviceType = InputDeviceType.Keyboard,
+                Control = (ushort)DevoidEngine.Engine.InputSystem.InputDevices.Keys.W
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Forward", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                DeviceType = InputDeviceType.Gamepad,
                 Scale = -1,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickY,
-                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                Control = (ushort)GamepadStandardControl.LeftStickY,
+                Processors = new List<IInputProcessor>()
                 {
                     new ScaledDeadzoneProcessor(0.15f)
                 }
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Left", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Left", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
+                DeviceType = InputDeviceType.Gamepad,
                 Scale = 1,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.LeftStickX,
-                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                Control = (ushort)GamepadStandardControl.LeftStickX,
+                Processors = new List<IInputProcessor>()
                 {
                     new ScaledDeadzoneProcessor(0.15f)
                 }
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Backward", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Backward", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
-                Control = (ushort)Keys.S,
+                DeviceType = InputDeviceType.Keyboard,
+                Control = (ushort)DevoidEngine.Engine.InputSystem.InputDevices.Keys.S,
 
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Interact", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Interact", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.West
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.West
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Jump", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Jump", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.South
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.South
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("Shoot", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("Shoot", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.North
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.North
             });
 
 
-            DevoidEngine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickX,
-                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.RightStickX,
+                Processors = new List<IInputProcessor>()
                 {
                     new ScaledDeadzoneProcessor(0.15f)
                 }
             });
 
-            DevoidEngine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.InputSystem.InputBinding()
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
-                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Gamepad,
-                Control = (ushort)DevoidEngine.InputSystem.InputDevices.GamepadStandardControl.RightStickY,
-                Processors = new List<DevoidEngine.InputSystem.IInputProcessor>()
+                DeviceType = InputDeviceType.Gamepad,
+                Control = (ushort)GamepadStandardControl.RightStickY,
+                Processors = new List<IInputProcessor>()
                 {
                     new ScaledDeadzoneProcessor(0.15f)
                 }
             });
+
+            DevoidEngine.Engine.InputSystem.Input.Backend.OnDeviceDisconnected += (InputDeviceType type, uint deviceId) =>
+            {
+                Console.WriteLine("Device Disconnected: " + type.ToString());
+            };
+
+            DevoidEngine.Engine.InputSystem.Input.Backend.OnDeviceConnected += (InputDeviceType type, uint deviceId) =>
+            {
+                Console.WriteLine("Device Connected: " + type.ToString());
+            };
         }
 
         public override void OnInit()
@@ -182,13 +191,13 @@ namespace DevoidStandaloneLauncher.Prototypes
         {
             reloader?.Consume();
 
-            if (Input.GetKeyDown(Keys.P))
+            if (DevoidEngine.Engine.Core.Input.GetKeyDown(DevoidEngine.Engine.Core.Keys.P))
             {
                 mode1 = mode1 == 0 ? 1 : 0;
                 DebugRenderSystem.AllowDebugDraw = mode1 == 1 ? true : false;
             }
 
-            if (Input.GetKeyDown(Keys.O))
+            if (DevoidEngine.Engine.Core.Input.GetKeyDown(DevoidEngine.Engine.Core.Keys.O))
             {
                 mode = mode == 0 ? 1 : 0;
                 if (mode == 1)
@@ -260,7 +269,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 mr.AddMesh(mesh);
 
                 GameObject cameraObject = scene.GetGameObject("CAMERA_SURV");
-                
+
                 RenderThread.Enqueue(() =>
                 {
                     MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
@@ -344,10 +353,17 @@ namespace DevoidStandaloneLauncher.Prototypes
                     MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
                     mr.material = material;
                 });
-                //RenderThread.Enqueue(() =>
-                //{
-                //    mr.material = celMaterial;
-                //});
+                for (int i = 0; i < assimpScene.AnimationCount; i++)
+                {
+                    for (int j = 0; j < assimpScene.Animations[i].NodeAnimationChannels.Count; j++)
+                    {
+                        var nodeName = assimpScene.Animations[i].NodeAnimationChannels[j].NodeName;
+                        if (nodeName == assimpNode.Name)
+                        {
+                            Console.WriteLine("Has Animations!");
+                        }
+                    }
+                }
             });
 
             LevelSpawnRegistry.Register("Convex_Collision", (assimpNode, assimpScene) =>
@@ -465,7 +481,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
                 var camComponent = CameraObject.AddComponent<CameraComponent3D>();
                 camComponent.IsDefault = true;
-                
+
 
             });
 

@@ -1,6 +1,4 @@
-﻿using DevoidEngine.Engine.Core;
-using DevoidEngine.Engine.Rendering;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace DevoidEngine.Engine.UI
 {

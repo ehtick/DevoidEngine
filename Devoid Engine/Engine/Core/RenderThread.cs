@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -36,12 +30,12 @@ namespace DevoidEngine.Engine.Core
 
         public static void Enqueue(Action action)
         {
-            if (IsRenderThread()) 
-            { 
-                action(); 
-                return; 
-            } 
-            _queue.Enqueue(action); 
+            if (IsRenderThread())
+            {
+                action();
+                return;
+            }
+            _queue.Enqueue(action);
         }
 
         public static void EnqueueDelayedDelete(Action action)
@@ -71,9 +65,9 @@ namespace DevoidEngine.Engine.Core
         }
 
 
-        public static void Execute() 
-        { 
-            while (_queue.TryDequeue(out var action)) 
+        public static void Execute()
+        {
+            while (_queue.TryDequeue(out var action))
                 action();
 
             for (int i = 0; i < uploadBudgetPerFrame; i++)
