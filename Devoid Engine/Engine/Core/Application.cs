@@ -80,7 +80,7 @@ namespace DevoidEngine.Engine.Core
 
             MainWindow = new Window(windowSpecification);
 
-            InputSystem.Input.Backend.AddInputDevice(new InputSystem.InputDevices.KeyboardInputHandler(MainWindow.KeyboardState));
+            InputSystem.Input.Initialize(MainWindow);
 
             Screen.Size = new System.Numerics.Vector2(appSpec.Width, appSpec.Height);
 

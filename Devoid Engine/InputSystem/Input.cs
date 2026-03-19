@@ -1,4 +1,5 @@
-﻿using DevoidEngine.InputSystem.InputDevices;
+﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.InputSystem.InputDevices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,14 @@ namespace DevoidEngine.InputSystem
         public static InputState State = new();
         public static InputMap Map = new();
 
+        private static Window currentWindow;
+
+        public static void Initialize(Window window)
+        {
+            currentWindow = window;
+            Backend.AddInputDevice(new InputSystem.InputDevices.KeyboardInputHandler(MainWindow.KeyboardState));
+            Backend.AddInputDevice(new InputSystem.InputDevices.GamepadInputHandler(MainWindow.JoystickStates));
+        }
 
         public static void Update()
         {
