@@ -8,6 +8,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>AnyCPU;x64</Platforms>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+	  
+	  
+	<PublishAot>true</PublishAot>
+	<WarningsAsErrors>$(WarningsAsErrors);IL3050;IL2026</WarningsAsErrors>
   </PropertyGroup>
 
 	<ItemGroup>

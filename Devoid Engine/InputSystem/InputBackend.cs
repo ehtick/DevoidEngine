@@ -27,6 +27,11 @@ namespace DevoidEngine.InputSystem
             _events.Add(e);
         }
 
+        public List<InputEvent> GetEvents()
+        {
+            return _events;
+        }
+
         public void UpdateInput()
         {
             _events.Clear();

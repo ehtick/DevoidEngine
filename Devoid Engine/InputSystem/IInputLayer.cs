@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DevoidEngine.Engine.Core
+namespace DevoidEngine.InputSystem
 {
-    public enum InputAction
+    public interface IInputLayer
     {
-        Release,
-        Press,
-        Repeat
+        bool Handle(InputEvent e); // true = consume
     }
 }

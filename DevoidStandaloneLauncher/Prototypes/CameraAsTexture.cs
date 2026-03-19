@@ -21,9 +21,18 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         GameObject portalCamera;
 
+        void ConfigureInputSystem()
+        {
+            DevoidEngine.InputSystem.Input.Map.Bind("MoveForward", new DevoidEngine.InputSystem.InputBinding()
+            {
+                DeviceType = DevoidEngine.InputSystem.InputDeviceType.Keyboard,
+                Control = (ushort)Keys.W
+            });
+        }
+
         public override void OnInit()
         {
-
+            ConfigureInputSystem();
             this.scene = new Scene();
             SceneManager.LoadScene(scene);
             loader.CurrentScene = scene;
@@ -361,6 +370,8 @@ namespace DevoidStandaloneLauncher.Prototypes
         float pos = 0;
         public override void OnUpdate(float delta)
         {
+            Console.WriteLine(DevoidEngine.InputSystem.Input.GetAction("MoveForward"));
+
             //Monitor.transform.Position = new Vector3(0, pos, 0);
             portalCamera.transform.EulerAngles = new Vector3(0, pos * 5, 0);
             pos += delta;

@@ -25,6 +25,13 @@ namespace DevoidStandaloneLauncher.Prototypes
         string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/devoid_l1.fbx";
         public override void OnInit()
         {
+
+
+
+
+
+
+
             gridTexture.SetWrapMode(TextureWrapMode.Repeat, TextureWrapMode.Repeat);
 
             LoadDCC();
