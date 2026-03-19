@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace DevoidEngine.InputSystem
 {
-    public enum InputDeviceType
+    public interface IInputProcessor
     {
-        Keyboard,
-        Mouse,
-        Gamepad,
-        Joystick,
-        Other
+
     }
 }

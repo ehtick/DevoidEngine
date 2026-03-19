@@ -9,9 +9,8 @@ namespace DevoidEngine.InputSystem
     public class InputDeviceLayout
     {
         public string Name;
-
+        public InputDeviceType DeviceType;
         public Dictionary<ushort, string> ControlNames = new();
-        public Dictionary<ushort, ControlKind> ControlKinds = new();
     }
 
     public enum ControlKind

@@ -20,7 +20,9 @@ namespace DevoidEngine.InputSystem.InputDevices
 
         public override void Register(InputBackend backend)
         {
-
+            InputDeviceLayout layout = new InputDeviceLayout();
+            layout.Name = "Keyboard0";
+            layout.DeviceType = InputDeviceType.Keyboard;
         }
 
         public override void Update(InputBackend backend)

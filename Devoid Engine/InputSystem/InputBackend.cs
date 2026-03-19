@@ -8,7 +8,7 @@ namespace DevoidEngine.InputSystem
 {
     public class InputBackend
     {
-        public InputDeviceRegistry
+        public InputDeviceRegistry InputDeviceRegistry { get; set; }
         List<InputDeviceHandler> _inputDeviceHandlers;
         List<InputEvent> _events;
 
