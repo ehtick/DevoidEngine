@@ -22,6 +22,13 @@ namespace DevoidEngine.Engine.Rendering
         public Vector4 Color;
     }
 
+    public struct DebugMesh
+    {
+        public Matrix4x4 Model;
+        public Mesh mesh;
+        public Vector4 Color;
+    }
+
     public static class DebugRenderSystem
     {
         static Shader debugShader;
@@ -33,6 +40,7 @@ namespace DevoidEngine.Engine.Rendering
         static Mesh debugCube;
         static Mesh debugQuad;
 
+        static List<DebugMesh> meshes = new();
         static List<DebugCube> cubes = new();
         static List<DebugRect> rects = new();
 
@@ -99,6 +107,15 @@ namespace DevoidEngine.Engine.Rendering
             });
         }
 
+        public static void DrawMesh(Mesh mesh,  Matrix4x4 model)
+        {
+            meshes.Add(new DebugMesh
+            {
+                mesh = mesh,
+                Model = model
+            });
+        }
+
         public static void DrawRectUI(Matrix4x4 model)
         {
             rects.Add(new DebugRect()
@@ -131,6 +148,16 @@ namespace DevoidEngine.Engine.Rendering
                 });
             }
 
+            for (int i = 0; i < meshes.Count; i++)
+            {
+                renderItems3D.Add(new RenderItem()
+                {
+                    Material = debugMaterial,
+                    Mesh = meshes[i].mesh,
+                    Model = meshes[i].Model
+                });
+            }
+
             RenderBase.Execute(renderItems3D, debug3DRenderState);
 
             List<RenderItem> renderItems2D = new List<RenderItem>();
@@ -157,6 +184,7 @@ namespace DevoidEngine.Engine.Rendering
 
         public static void ClearDebugShapes()
         {
+            meshes.Clear();
             cubes.Clear();
             rects.Clear();
         }

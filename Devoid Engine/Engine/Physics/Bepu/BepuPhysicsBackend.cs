@@ -6,6 +6,8 @@ using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Physics;
 using SharpDX.DXGI;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DevoidEngine.Engine.Physics.Bepu
 {
@@ -323,16 +325,33 @@ namespace DevoidEngine.Engine.Physics.Bepu
                         return simulation.Shapes.Add(shape);
                     }
 
-                //case PhysicsShapeType.Mesh:
-                //    {
-                //        var shape = new Mesh(
-                //            shapeDesc.Vertices,
-                //            shapeDesc.Indices,
-                //            bufferPool);
+                case PhysicsShapeType.Mesh:
+                    {
+                        var vertices = shapeDesc.Vertices;
+                        var indices = shapeDesc.Indices;
 
-                //        return simulation.Shapes.Add(shape);
-                //    }
+                        if (vertices == null || indices == null || indices.Length < 3)
+                            throw new Exception("Invalid mesh collider data");
 
+                        int triangleCount = indices.Length / 3;
+
+                        // Allocate triangle buffer
+                        bufferPool.Take<Triangle>(triangleCount, out var triangles);
+
+                        for (int i = 0; i < triangleCount; i++)
+                        {
+                            triangles[i] = new Triangle(
+                                vertices[indices[i * 3 + 0]],
+                                vertices[indices[i * 3 + 1]],
+                                vertices[indices[i * 3 + 2]]
+                            );
+                        }
+
+                        // IMPORTANT: scale handled here
+                        var mesh = new BepuPhysics.Collidables.Mesh(triangles, new Vector3(1, 1, 1), bufferPool);
+
+                        return simulation.Shapes.Add(mesh);
+                    }
                 default:
                     throw new NotSupportedException("Unsupported static shape type");
             }

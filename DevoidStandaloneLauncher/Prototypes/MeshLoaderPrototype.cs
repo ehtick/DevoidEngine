@@ -21,7 +21,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         GameObject CameraObject;
 
         FileReloader reloader;
-        string levelPath = "LauncherContents/devoid_l1.fbx";
+        string levelPath = "D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/devoid_l1.fbx";
 
         void ConfigureInputSystem()
         {
@@ -115,6 +115,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             //    Console.WriteLine("FBX changed. Reloading level...");
             //    LoadLevel();
             //});
+            //DebugRenderSystem.AllowDebugDraw = false;
             LoadLevel();
 
             //Cursor.SetCursorState(CursorState.Normal);
@@ -175,7 +176,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         }
 
         int mode = 0;
-        int mode1 = DebugRenderSystem.AllowDebugDraw ? 1 : 0;
+        int mode1 = 0;
 
         public override void OnUpdate(float delta)
         {
@@ -348,6 +349,49 @@ namespace DevoidStandaloneLauncher.Prototypes
                 //    mr.material = celMaterial;
                 //});
             });
+
+            LevelSpawnRegistry.Register("Convex_Collision", (assimpNode, assimpScene) =>
+            {
+                var go = scene.addGameObject(assimpNode.Name);
+
+                Importer.ApplyTransform(go, assimpNode);
+
+                var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                mr.AddMesh(mesh);
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                });
+
+                var rb = go.AddComponent<StaticCollider>();
+
+                var scale = Importer.GetTransform(assimpNode).Item3;
+
+                var verts = mesh.GetVertices()
+                    .Select(v => v.Position * scale)
+                    .ToArray();
+
+                rb.Shape = new PhysicsShapeDescription()
+                {
+                    Type = PhysicsShapeType.Mesh,
+                    Vertices = verts,
+                    Indices = mesh.GetIndices(),
+                    Size = Importer.GetTransform(assimpNode).Item3 * 2
+                };
+
+                rb.DebugVisualization(mesh);
+
+                rb.Material = new PhysicsMaterial()
+                {
+                    Friction = 2f
+                };
+
+                Console.WriteLine("Convex Collision");
+
+            });
+
 
             LevelSpawnRegistry.Register("Collideable_Static", (assimpNode, assimpScene) =>
             {
@@ -595,18 +639,11 @@ namespace DevoidStandaloneLauncher.Prototypes
                 MeshRenderer mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
 
-                //RenderThread.Enqueue(() =>
-                //{
-                //    mr.material = celMaterial;
-                //});
-
-                //RenderThread.Enqueue(() =>
-                //{
-
-
-                //    Texture2D compCubeTex = Helper.loadImageAsTex("D:/Programming/Devoid Engine/DevoidStandaloneLauncher/LauncherContents/companion_cube.png", DevoidGPU.TextureFilter.Linear);
-                //    mr.material.SetTexture("MAT_AlbedoMap", compCubeTex);
-                //});
+                RenderThread.Enqueue(() =>
+                {
+                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                    mr.material = material;
+                });
 
                 var rb = go.AddComponent<RigidBodyComponent>();
                 rb.Mass = 10f;

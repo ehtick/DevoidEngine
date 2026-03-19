@@ -282,7 +282,7 @@ namespace DevoidEngine.Engine.Components
                     Vector3.Transform(Vector3.UnitZ, cameraPivot.Rotation)
                 );
 
-            if (Input.GetKeyDown(Keys.Q))
+            if (InputSystem.Input.GetActionDown("Interact"))
             {
                 // If holding cube -> drop
                 if (heldCube != null)

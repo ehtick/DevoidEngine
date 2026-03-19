@@ -10,13 +10,35 @@ namespace DevoidEngine.Engine.Components
     {
         public override string Type => nameof(StaticCollider);
 
-        public PhysicsShapeDescription Shape = new PhysicsShapeDescription
+        private PhysicsShapeDescription internalShape = new PhysicsShapeDescription
         {
             Type = PhysicsShapeType.Box,
             Size = new Vector3(1, 1, 1)
         };
 
-        public PhysicsMaterial Material = PhysicsMaterial.Default;
+        public PhysicsShapeDescription Shape
+        {
+            get => internalShape;
+            set
+            {
+                internalShape = value;
+                CreateStatic();
+            }
+        }
+
+        private PhysicsMaterial internalMaterial = PhysicsMaterial.Default;
+
+        public PhysicsMaterial Material
+        {
+            get => internalMaterial;
+            set
+            {
+                internalMaterial = value;
+                CreateStatic();
+            }
+        }
+
+        private IPhysicsStatic internalStatic;
 
         private GameObject _debugObject;
 
@@ -24,19 +46,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnStart()
         {
-            // Create physics static
-            var desc = new PhysicsStaticDescription
-            {
-                Position = gameObject.transform.Position,
-                Rotation = gameObject.transform.Rotation,
-                Shape = Shape,
-                Material = Material
-            };
-
-            gameObject.Scene.Physics.CreateStatic(desc, gameObject);
-
-            //if (DebugDraw)
-            //    CreateDebugVisual();
+            CreateStatic();
         }
 
         //private void CreateDebugVisual()
@@ -63,6 +73,25 @@ namespace DevoidEngine.Engine.Components
         //    // meshRenderer.SetMaterial(DebugMaterial);
         //}
 
+        private void CreateStatic()
+        {
+            if (internalStatic != null)
+            {
+                gameObject.Scene.Physics.RemoveStatic(internalStatic);
+                internalStatic = null;
+            }
+
+            var desc = new PhysicsStaticDescription
+            {
+                Position = gameObject.transform.Position,
+                Rotation = gameObject.transform.Rotation,
+                Shape = internalShape,
+                Material = internalMaterial
+            };
+
+            internalStatic = gameObject.Scene.Physics.CreateStatic(desc, gameObject);
+        }
+
         public override void OnRender(float dt)
         {
             //Matrix4x4 world = gameObject.transform.WorldMatrix;
@@ -73,7 +102,14 @@ namespace DevoidEngine.Engine.Components
                 gameObject.transform.Rotation
             );
 
-            DebugRenderSystem.DrawCube(model);
+            //DebugRenderSystem.DrawCube(model);
+            DebugRenderSystem.DrawMesh(debugView, gameObject.transform.WorldMatrix);
+        }
+
+        Mesh debugView;
+        public void DebugVisualization(Mesh mesh)
+        {
+            debugView = mesh;
         }
 
         public override void OnUpdate(float dt)
