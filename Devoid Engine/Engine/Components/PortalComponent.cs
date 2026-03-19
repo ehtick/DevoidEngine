@@ -6,7 +6,7 @@
 
         public override void OnStart()
         {
-            gameObject.Scene.addGameObject("Camera1");
+            gameObject.Scene.AddGameObject("Camera1");
         }
     }
 }

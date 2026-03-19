@@ -33,7 +33,7 @@ namespace DevoidEngine.Engine.Components
             if (RenderMode == CanvasRenderMode.ScreenSpace)
                 return Matrix4x4.Identity;
 
-            return gameObject.transform.WorldMatrix;
+            return gameObject.Transform.WorldMatrix;
         }
 
         public void Collect(CameraComponent3D camera, CameraRenderContext viewData)
@@ -63,7 +63,7 @@ namespace DevoidEngine.Engine.Components
                     centerOffset *
                     flipY *
                     scale *
-                    gameObject.transform.WorldMatrix;
+                    gameObject.Transform.WorldMatrix;
 
                 Canvas.Render(viewData.renderItems3D, world, Order);
             }

@@ -252,7 +252,7 @@ namespace Elemental.Editor.Panels
                     {
                         UpdateThreadDispatcher.QueueLatest("GameObjectList_AddGameObject", () =>
                         {
-                            SelectedObject = SceneManager.CurrentScene.addGameObject("DevoidObject");
+                            SelectedObject = SceneManager.CurrentScene.AddGameObject("DevoidObject");
                         });
                     }
 

@@ -23,7 +23,7 @@ namespace DevoidEngine.Engine.Components
         public override void OnStart()
         {
             // Store closed state as initial rotation
-            closedRotation = gameObject.transform.Rotation;
+            closedRotation = gameObject.Transform.Rotation;
 
             Quaternion delta =
                 Quaternion.CreateFromAxisAngle(
@@ -49,7 +49,7 @@ namespace DevoidEngine.Engine.Components
             isTurning = true;
             turnProgress = 0f;
 
-            startRotation = gameObject.transform.Rotation;
+            startRotation = gameObject.Transform.Rotation;
             targetRotation = open ? openRotation : closedRotation;
 
             isOpen = open;
@@ -64,7 +64,7 @@ namespace DevoidEngine.Engine.Components
 
             float t = Math.Clamp(turnProgress, 0f, 1f);
 
-            gameObject.transform.Rotation =
+            gameObject.Transform.Rotation =
                 Quaternion.Slerp(startRotation, targetRotation, t);
 
             if (t >= 1f)

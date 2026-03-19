@@ -30,8 +30,8 @@ namespace DevoidStandaloneLauncher.CustomComponents
 
         public override void OnStart()
         {
-            startPos = gameObject.transform.Position;
-            startRot = gameObject.transform.EulerAngles;
+            startPos = gameObject.Transform.Position;
+            startRot = gameObject.Transform.EulerAngles;
 
             audioSource = gameObject.AddComponent<AudioSourceComponent3D>();
             audioSource.PlayOnStart = false;
@@ -56,8 +56,8 @@ namespace DevoidStandaloneLauncher.CustomComponents
             if (cam == null) return;
 
             float distance = Vector3.Distance(
-                cam.transform.Position,
-                gameObject.transform.Position
+                cam.Transform.Position,
+                gameObject.Transform.Position
             );
 
             if (interacted && distance > ResetDistance)
@@ -85,8 +85,8 @@ namespace DevoidStandaloneLauncher.CustomComponents
             interacted = false;
 
             // Reset transform
-            gameObject.transform.Position = startPos;
-            gameObject.transform.EulerAngles = startRot;
+            gameObject.Transform.Position = startPos;
+            gameObject.Transform.EulerAngles = startRot;
 
             // Restart indicator
             screenArrow.StartIndicator();
@@ -99,7 +99,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
         {
             float yOffset = MathF.Sin(bobTimer * BobSpeed) * BobHeight;
 
-            gameObject.transform.Position = new Vector3(
+            gameObject.Transform.Position = new Vector3(
                 startPos.X,
                 startPos.Y + yOffset,
                 startPos.Z
@@ -108,11 +108,11 @@ namespace DevoidStandaloneLauncher.CustomComponents
 
         private void UpdateRotation(float dt)
         {
-            var rot = gameObject.transform.EulerAngles;
+            var rot = gameObject.Transform.EulerAngles;
 
             rot.Y += rotationSpeed * dt;
 
-            gameObject.transform.EulerAngles = new Vector3(
+            gameObject.Transform.EulerAngles = new Vector3(
                 startRot.X,
                 rot.Y,
                 startRot.Z
@@ -125,8 +125,8 @@ namespace DevoidStandaloneLauncher.CustomComponents
             if (cam == null) return;
 
             float distance = Vector3.Distance(
-                cam.transform.Position,
-                gameObject.transform.Position
+                cam.Transform.Position,
+                gameObject.Transform.Position
             );
 
             if (distance > InteractionDistance) return;

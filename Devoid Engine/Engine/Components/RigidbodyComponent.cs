@@ -88,7 +88,7 @@ namespace DevoidEngine.Engine.Components
 
         public Vector3 Position
         {
-            get => internalBody != null ? internalBody.Position : gameObject.transform.Position;
+            get => internalBody != null ? internalBody.Position : gameObject.Transform.Position;
             set
             {
                 if (internalBody != null)
@@ -100,7 +100,7 @@ namespace DevoidEngine.Engine.Components
 
         public Quaternion Rotation
         {
-            get => internalBody != null ? internalBody.Rotation : gameObject.transform.Rotation;
+            get => internalBody != null ? internalBody.Rotation : gameObject.Transform.Rotation;
             set
             {
                 if (internalBody != null)
@@ -167,8 +167,8 @@ namespace DevoidEngine.Engine.Components
 
             var desc = new PhysicsBodyDescription
             {
-                Position = gameObject.transform.Position,
-                Rotation = gameObject.transform.Rotation,
+                Position = gameObject.Transform.Position,
+                Rotation = gameObject.Transform.Rotation,
                 Mass = _mass,
                 IsKinematic = StartKinematic,
                 Shape = Shape,
@@ -186,8 +186,8 @@ namespace DevoidEngine.Engine.Components
 
             if (internalBody.IsKinematic)
             {
-                internalBody.Position = gameObject.transform.Position;
-                internalBody.Rotation = gameObject.transform.Rotation;
+                internalBody.Position = gameObject.Transform.Position;
+                internalBody.Rotation = gameObject.Transform.Rotation;
             }
         }
 
@@ -207,17 +207,17 @@ namespace DevoidEngine.Engine.Components
 
                 internalBody.AngularVelocity = angVel;
 
-                gameObject.transform.Position = internalBody.Position;
-                gameObject.transform.Rotation = internalBody.Rotation;
+                gameObject.Transform.Position = internalBody.Position;
+                gameObject.Transform.Rotation = internalBody.Rotation;
             }
         }
 
         public override void OnRender(float dt)
         {
             Matrix4x4 model = RenderBase.BuildModel(
-                gameObject.transform.Position,
+                gameObject.Transform.Position,
                 Shape.Size,
-                gameObject.transform.Rotation
+                gameObject.Transform.Rotation
             );
 
             DebugRenderSystem.DrawCube(model);

@@ -29,7 +29,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnRender(float dt)
         {
-            DebugRenderSystem.DrawCube(mesh.LocalBounds.min, mesh.LocalBounds.max, gameObject.transform.WorldMatrix);
+            DebugRenderSystem.DrawCube(mesh.LocalBounds.min, mesh.LocalBounds.max, gameObject.Transform.WorldMatrix);
             //DebugRenderSystem.DrawMesh(mesh, gameObject.transform.WorldMatrix);
         }
 
@@ -43,7 +43,7 @@ namespace DevoidEngine.Engine.Components
             BoundingBox.TransformAABB(
                 mesh.LocalBounds.min,
                 mesh.LocalBounds.max,
-                gameObject.transform.WorldMatrix,
+                gameObject.Transform.WorldMatrix,
                 out worldMin,
                 out worldMax
             );
@@ -59,7 +59,7 @@ namespace DevoidEngine.Engine.Components
             {
                 Material = material,
                 Mesh = mesh,
-                Model = gameObject.transform.WorldMatrix
+                Model = gameObject.Transform.WorldMatrix
             });
 
             //if (isTransparent)

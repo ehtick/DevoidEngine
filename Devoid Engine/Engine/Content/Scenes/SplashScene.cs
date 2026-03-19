@@ -13,12 +13,12 @@ namespace DevoidEngine.Engine.Content.Scenes
             Scene scene = new Scene();
 
             // Camera
-            var camera = scene.addGameObject("Camera");
+            var camera = scene.AddGameObject("Camera");
             var cam = camera.AddComponent<CameraComponent3D>();
             cam.IsDefault = true;
 
             // Canvas
-            var canvasObj = scene.addGameObject("Canvas");
+            var canvasObj = scene.AddGameObject("Canvas");
             var canvas = canvasObj.AddComponent<CanvasComponent>();
 
             var font = FontLibrary.LoadFont(

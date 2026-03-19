@@ -101,13 +101,13 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnUpdate(float dt)
         {
-            if (gameObject.transform.hasMoved)
+            if (gameObject.Transform.hasMoved)
                 dirty = true;
         }
 
         private void RebuildGPUData()
         {
-            var transform = gameObject.transform;
+            var transform = gameObject.Transform;
 
             Vector3 position = transform.Position;
 

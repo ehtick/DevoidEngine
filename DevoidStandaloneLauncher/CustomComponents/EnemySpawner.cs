@@ -55,7 +55,7 @@ namespace DevoidEngine.Engine.Components
 
         private void SpawnEnemy()
         {
-            GameObject enemy = gameObject.Scene.addGameObject("Enemy");
+            GameObject enemy = gameObject.Scene.AddGameObject("Enemy");
 
             float groundTop = 0.5f; // since ground height is 1
             float enemyHalfHeight = EnemyScale.Y * 0.5f;
@@ -66,9 +66,9 @@ namespace DevoidEngine.Engine.Components
                 SpawnPosition.Z
             );
 
-            enemy.transform.Position = spawnPos;
+            enemy.Transform.Position = spawnPos;
 
-            enemy.transform.Scale = EnemyScale;
+            enemy.Transform.Scale = EnemyScale;
 
             MeshRenderer enemyMR = enemy.AddComponent<MeshRenderer>();
             enemyMR.AddMesh(enemyMesh);

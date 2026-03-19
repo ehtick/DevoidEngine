@@ -158,6 +158,7 @@ namespace DevoidGPU.DX11
         public void Dispose()
         {
             buffer?.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private static CpuAccessFlags GetCpuAccessFlags(BufferUsage usage)

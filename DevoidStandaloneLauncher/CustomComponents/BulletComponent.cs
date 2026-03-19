@@ -54,11 +54,11 @@ namespace DevoidEngine.Engine.Components
             float speed,
             float mass)
         {
-            GameObject bullet = scene.addGameObject("Projectile");
+            GameObject bullet = scene.AddGameObject("Projectile");
 
-            bullet.transform.Position = position;
-            bullet.transform.Rotation = rotation;
-            bullet.transform.Scale = scale;
+            bullet.Transform.Position = position;
+            bullet.Transform.Rotation = rotation;
+            bullet.Transform.Scale = scale;
 
             // Render
             var renderer = bullet.AddComponent<MeshRenderer>();

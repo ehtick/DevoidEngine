@@ -29,33 +29,33 @@ namespace DevoidStandaloneLauncher.PrototypeSystems
             var front = CreateWall(scene,
                 center + new Vector3(0, 0, halfZ),
                 new Vector3(size.X, 1, size.Y));
-            front.transform.EulerAngles = new Vector3(90, 0, 0);
+            front.Transform.EulerAngles = new Vector3(90, 0, 0);
 
             // Back
             var back = CreateWall(scene,
                 center + new Vector3(0, 0, -halfZ),
                 new Vector3(size.X, 1, size.Y));
-            back.transform.EulerAngles = new Vector3(90, 0, 0);
+            back.Transform.EulerAngles = new Vector3(90, 0, 0);
 
             // Left
             var left = CreateWall(scene,
                 center + new Vector3(-halfX, 0, 0),
                 new Vector3(size.Z, 1, size.Y));
-            left.transform.EulerAngles = new Vector3(90, 0, 90);
+            left.Transform.EulerAngles = new Vector3(90, 0, 90);
 
             // Right
             var right = CreateWall(scene,
                 center + new Vector3(halfX, 0, 0),
                 new Vector3(size.Z, 1, size.Y));
-            right.transform.EulerAngles = new Vector3(90, 0, 90);
+            right.Transform.EulerAngles = new Vector3(90, 0, 90);
         }
 
         public static GameObject CreateWall(Scene scene, Vector3 position, Vector3 scale)
         {
-            var wall = scene.addGameObject("Wall");
+            var wall = scene.AddGameObject("Wall");
 
-            wall.transform.Position = position;
-            wall.transform.Scale = scale;
+            wall.Transform.Position = position;
+            wall.Transform.Scale = scale;
 
             wall.AddComponent<MeshRenderer>().AddMesh(Primitives.Cube);
 

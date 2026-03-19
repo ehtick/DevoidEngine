@@ -43,7 +43,7 @@ namespace DevoidEngine.Engine.Core
             Audio = new AudioSystem(new SoLoudAudioBackend());
         }
 
-        public GameObject addGameObject(string name)
+        public GameObject AddGameObject(string name)
         {
             GameObject gameObject = new GameObject();
             gameObject.Name = name;
@@ -53,7 +53,7 @@ namespace DevoidEngine.Engine.Core
             return gameObject;
         }
 
-        public void addGameObject(GameObject gameObject)
+        public void AddGameObject(GameObject gameObject)
         {
             gameObject.Scene = this;
             GameObjects.Add(gameObject);
@@ -133,7 +133,7 @@ namespace DevoidEngine.Engine.Core
 
 
 
-        public void removeGameObject(GameObject gameObject)
+        public void RemoveGameObject(GameObject gameObject)
         {
             gameObject.OnDestroy();
             GameObjects.Remove(gameObject);
@@ -235,7 +235,7 @@ namespace DevoidEngine.Engine.Core
 
             CameraComponent3D mainCamera = GetMainCamera();
             if (mainCamera == null) return;
-            Audio.SetListener(mainCamera.gameObject.transform.Position, mainCamera.gameObject.transform.Forward, mainCamera.gameObject.transform.Up);
+            Audio.SetListener(mainCamera.gameObject.Transform.Position, mainCamera.gameObject.Transform.Forward, mainCamera.gameObject.Transform.Up);
         }
 
         public void DoFixedUpdate(float dt)

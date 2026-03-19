@@ -14,7 +14,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnStart()
         {
-            baseYaw = gameObject.transform.EulerAngles.Y;
+            baseYaw = gameObject.Transform.EulerAngles.Y;
         }
 
         public override void OnUpdate(float dt)
@@ -23,10 +23,10 @@ namespace DevoidEngine.Engine.Components
 
             float yawOffset = MathF.Sin(time) * SweepAngle;
 
-            Vector3 euler = gameObject.transform.EulerAngles;
+            Vector3 euler = gameObject.Transform.EulerAngles;
             euler.Y = baseYaw + yawOffset;
 
-            gameObject.transform.EulerAngles = euler;
+            gameObject.Transform.EulerAngles = euler;
         }
     }
 }

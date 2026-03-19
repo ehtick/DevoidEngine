@@ -80,8 +80,8 @@ namespace DevoidEngine.Engine.Components
 
             var desc = new PhysicsBodyDescription
             {
-                Position = gameObject.transform.Position,
-                Rotation = gameObject.transform.Rotation,
+                Position = gameObject.Transform.Position,
+                Rotation = gameObject.Transform.Rotation,
                 Mass = 0f,
                 IsKinematic = true,
                 IsTrigger = true,
@@ -98,16 +98,16 @@ namespace DevoidEngine.Engine.Components
             if (internalBody == null)
                 return;
 
-            internalBody.Position = gameObject.transform.Position;
-            internalBody.Rotation = gameObject.transform.Rotation;
+            internalBody.Position = gameObject.Transform.Position;
+            internalBody.Rotation = gameObject.Transform.Rotation;
         }
 
         public override void OnRender(float dt)
         {
             Matrix4x4 model = RenderBase.BuildModel(
-                gameObject.transform.Position,
+                gameObject.Transform.Position,
                 internalShape.Size,
-                gameObject.transform.Rotation
+                gameObject.Transform.Rotation
             );
 
             DebugRenderSystem.DrawCube(model);

@@ -37,7 +37,7 @@ namespace DevoidEngine.Engine.Components
             if (player == null) return;
 
             // update position every frame
-            player.Position = gameObject.transform.Position;
+            player.Position = gameObject.Transform.Position;
         }
 
         public override void OnDestroy()
@@ -56,7 +56,7 @@ namespace DevoidEngine.Engine.Components
 
             player = gameObject.Scene.Audio.Play3D(
                 clip,
-                gameObject.transform.Position,
+                gameObject.Transform.Position,
                 Looping
             );
 

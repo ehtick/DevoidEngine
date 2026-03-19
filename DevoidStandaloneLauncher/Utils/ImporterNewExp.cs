@@ -545,9 +545,9 @@ namespace DevoidStandaloneLauncher.Utils
                 out Quaternion rotation,
                 out Vector3 translation);
 
-            go.transform.Position = translation;
-            go.transform.Rotation = rotation;
-            go.transform.Scale = scale;
+            go.Transform.Position = translation;
+            go.Transform.Rotation = rotation;
+            go.Transform.Scale = scale;
         }
     }
 }

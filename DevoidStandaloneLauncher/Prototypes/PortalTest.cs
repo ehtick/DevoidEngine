@@ -41,12 +41,12 @@ namespace DevoidStandaloneLauncher.Prototypes
             // PLAYER ROOT (Capsule Physics)
             // ===============================
 
-            player = scene.addGameObject("Player");
+            player = scene.AddGameObject("Player");
 
             // Ground top = 0.5 (height 1 centered at 0)
             // Capsule half total height = 1.5
             // So center should be 2.0
-            player.transform.Position = new Vector3(0, 1.5f, -6f);
+            player.Transform.Position = new Vector3(0, 1.5f, -6f);
 
             var playerBody = player.AddComponent<RigidBodyComponent>();
             playerBody.Shape = new PhysicsShapeDescription()
@@ -96,17 +96,17 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             //torch.SetParent(player, false);
 
-            GameObject cameraPivot = scene.addGameObject("CameraPivot");
+            GameObject cameraPivot = scene.AddGameObject("CameraPivot");
             cameraPivot.AddComponent<MeshRenderer>().AddMesh(mesh);
             cameraPivot.SetParent(player, false);
-            playerController.SetCameraPivot(cameraPivot.transform);
+            playerController.SetCameraPivot(cameraPivot.Transform);
 
-            cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
+            cameraPivot.Transform.LocalPosition = new Vector3(0, 1.4f, 0);
 
 
 
-            GameObject light = scene.addGameObject("RoomLight");
-            light.transform.Position = new Vector3(0, 7f, 0);
+            GameObject light = scene.AddGameObject("RoomLight");
+            light.Transform.Position = new Vector3(0, 7f, 0);
 
             var lightComp = light.AddComponent<LightComponent>();
             lightComp.Intensity = 30;
@@ -117,7 +117,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             // CAMERA
             // ===============================
 
-            camera = scene.addGameObject("Camera");
+            camera = scene.AddGameObject("Camera");
             camera.SetParent(cameraPivot, false);
             //camera.transform.LocalPosition = new Vector3(0, 2, -20);
 
@@ -149,24 +149,24 @@ namespace DevoidStandaloneLauncher.Prototypes
             //    Friction = 1f
             //};
 
-            GameObject canvasObject = scene.addGameObject("Canvas");
+            GameObject canvasObject = scene.AddGameObject("Canvas");
             canvasObject.SetParent(Monitor, false);
-            canvasObject.transform.LocalPosition = new Vector3(0, 0, 1);
+            canvasObject.Transform.LocalPosition = new Vector3(0, 0, 1);
             Canvas = canvasObject.AddComponent<CanvasComponent>();
             Canvas.CameraConstraint = camComponent;
             Canvas.RenderMode = CanvasRenderMode.ScreenSpace;
             Canvas.PixelsPerUnit = 300;
 
 
-            portalCamera = scene.addGameObject("Portal Camera");
-            portalCamera.transform.Position = new Vector3(-3, 3, 0);
-            portalCamera.transform.EulerAngles = new Vector3(0, 90, 0);
+            portalCamera = scene.AddGameObject("Portal Camera");
+            portalCamera.Transform.Position = new Vector3(-3, 3, 0);
+            portalCamera.Transform.EulerAngles = new Vector3(0, 90, 0);
             CameraComponent3D portalCameraComponent = portalCamera.AddComponent<CameraComponent3D>();
 
 
-            GameObject portalViewObject = scene.addGameObject("Portal View");
-            portalViewObject.transform.Position = new Vector3(5.998f, 3, 0);
-            portalViewObject.transform.Scale = new Vector3(1, 3, 3);
+            GameObject portalViewObject = scene.AddGameObject("Portal View");
+            portalViewObject.Transform.Position = new Vector3(5.998f, 3, 0);
+            portalViewObject.Transform.Scale = new Vector3(1, 3, 3);
 
             StaticCollider staticCollider = portalViewObject.AddComponent<StaticCollider>();
             staticCollider.Shape = new PhysicsShapeDescription()
@@ -208,10 +208,10 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         void SetupDoor()
         {
-            GameObject hinge = scene.addGameObject("DoorHinge");
+            GameObject hinge = scene.AddGameObject("DoorHinge");
 
             // Position hinge at the hinge edge (left side of door)
-            hinge.transform.Position = new Vector3(-0.5f, 1.5f, 8);
+            hinge.Transform.Position = new Vector3(-0.5f, 1.5f, 8);
             // -0.5 because your door width is 1
 
             // Add kinematic rigidbody to hinge (NOT the mesh)
@@ -230,13 +230,13 @@ namespace DevoidStandaloneLauncher.Prototypes
             };
 
             // Now create the visible door
-            GameObject doorMesh = scene.addGameObject("DoorMesh");
+            GameObject doorMesh = scene.AddGameObject("DoorMesh");
             doorMesh.SetParent(hinge, false);
 
             // Offset door mesh so its left edge aligns with hinge
-            doorMesh.transform.LocalPosition = new Vector3(0.5f, 0f, 0f);
+            doorMesh.Transform.LocalPosition = new Vector3(0.5f, 0f, 0f);
 
-            doorMesh.transform.Scale = new Vector3(1, 3, 0.3f);
+            doorMesh.Transform.Scale = new Vector3(1, 3, 0.3f);
 
             doorMesh.AddComponent<MeshRenderer>().AddMesh(mesh);
 
@@ -344,7 +344,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             //cameraFollower.transform.Position = camera.transform.Position + camera.transform.Forward * 2f;
 
             //Monitor.transform.Position = new Vector3(0, pos, 0);
-            portalCamera.transform.EulerAngles = new Vector3(0, pos * 5, 0);
+            portalCamera.Transform.EulerAngles = new Vector3(0, pos * 5, 0);
             pos += delta;
 
             healthLabel.Text = "Health: " + Math.Round(playerController.Health) + "/" + playerController.MaxHealth;
@@ -387,10 +387,10 @@ namespace DevoidStandaloneLauncher.Prototypes
         public Scene CreateGameOverScene()
         {
             Scene scene = new Scene();
-            CameraComponent3D camera = scene.addGameObject("Camera").AddComponent<CameraComponent3D>();
+            CameraComponent3D camera = scene.AddGameObject("Camera").AddComponent<CameraComponent3D>();
             camera.IsDefault = true;
 
-            CanvasComponent canvas = scene.addGameObject("GameOverObject").AddComponent<CanvasComponent>();
+            CanvasComponent canvas = scene.AddGameObject("GameOverObject").AddComponent<CanvasComponent>();
 
             LabelNode label = new LabelNode("Game Over!", font, 64)
             {

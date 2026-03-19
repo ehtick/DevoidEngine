@@ -22,7 +22,7 @@ namespace DevoidEngine.Engine.Components
         public override void OnStart()
         {
             // Initialize yaw/pitch from current forward
-            Vector3 forward = gameObject.transform.Forward;
+            Vector3 forward = gameObject.Transform.Forward;
 
             yaw = MathHelper.RadToDeg(
                 MathF.Atan2(forward.X, forward.Z)
@@ -50,7 +50,7 @@ namespace DevoidEngine.Engine.Components
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
-            gameObject.transform.Rotation =
+            gameObject.Transform.Rotation =
                 Quaternion.CreateFromYawPitchRoll(
                     MathHelper.DegToRad(yaw),
                     MathHelper.DegToRad(pitch),
@@ -62,7 +62,7 @@ namespace DevoidEngine.Engine.Components
         // =========================================
         private void HandleMovement(float dt)
         {
-            Quaternion rotation = gameObject.transform.Rotation;
+            Quaternion rotation = gameObject.Transform.Rotation;
 
             Vector3 forward =
                 Vector3.Normalize(
@@ -92,7 +92,7 @@ namespace DevoidEngine.Engine.Components
             if (Input.GetKey(Keys.LeftShift))
                 speed *= BoostMultiplier;
 
-            gameObject.transform.Position += move * speed * dt;
+            gameObject.Transform.Position += move * speed * dt;
         }
     }
 }

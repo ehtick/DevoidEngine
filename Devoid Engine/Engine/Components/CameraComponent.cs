@@ -71,7 +71,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnLateUpdate(float dt)
         {
-            var transform = gameObject.transform;
+            var transform = gameObject.Transform;
 
             Vector3 position = transform.Position;
 

@@ -26,20 +26,20 @@ namespace DevoidEngine.Engine.Components
             markerMesh.SetVertices(Primitives.GetCubeVertex());
 
             // Create marker object
-            markerObject = gameObject.Scene.addGameObject("HitMarker");
-            markerObject.transform.Scale = MarkerScale;
+            markerObject = gameObject.Scene.AddGameObject("HitMarker");
+            markerObject.Transform.Scale = MarkerScale;
 
             markerObject.AddComponent<MeshRenderer>().AddMesh(markerMesh);
         }
 
         public override void OnUpdate(float dt)
         {
-            Transform camTransform = gameObject.transform;
+            Transform camTransform = gameObject.Transform;
 
             Vector3 origin = camTransform.Position;
             Vector3 direction = camTransform.Forward;
 
-            markerObject.transform.Position = origin + direction * 2;
+            markerObject.Transform.Position = origin + direction * 2;
 
             if (gameObject.Scene.Physics.Raycast(
                 new Ray(origin + direction, direction),
@@ -47,7 +47,7 @@ namespace DevoidEngine.Engine.Components
                 out RaycastHit hit))
             {
                 // Move marker to hit point
-                markerObject.transform.Position = hit.Point;
+                markerObject.Transform.Position = hit.Point;
 
                 // Optional: Align to surface normal
                 AlignToNormal(hit.Normal);
@@ -72,7 +72,7 @@ namespace DevoidEngine.Engine.Components
                 )
             );
 
-            markerObject.transform.Rotation = rotation;
+            markerObject.Transform.Rotation = rotation;
         }
     }
 }

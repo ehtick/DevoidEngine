@@ -25,7 +25,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnStart()
         {
-            originalPosition = gameObject.transform.LocalPosition;
+            originalPosition = gameObject.Transform.LocalPosition;
         }
 
         public void SetTriggerArea(AreaComponent area)
@@ -41,10 +41,10 @@ namespace DevoidEngine.Engine.Components
 
             currentOffset = MathHelper.Lerp(currentOffset, target, dt * PressSpeed);
 
-            area.gameObject.transform.Position = originalPosition + new Vector3(0, 0.6f, 0);
+            area.gameObject.Transform.Position = originalPosition + new Vector3(0, 0.6f, 0);
 
             // Optional animation
-            gameObject.transform.LocalPosition =
+            gameObject.Transform.LocalPosition =
                 originalPosition + new Vector3(0, currentOffset, 0);
         }
 

@@ -169,12 +169,12 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         GameObject GetGO()
         {
-            GameObject cube = scene.addGameObject("Glowy");
+            GameObject cube = scene.AddGameObject("Glowy");
             MeshRenderer mr = cube.AddComponent<MeshRenderer>();
             Mesh mesh = new Mesh();
             mesh.SetVertices(Primitives.GetCubeVertex());
             mr.AddMesh(mesh);
-            cube.transform.Position = new Vector3(0, 10, 0);
+            cube.Transform.Position = new Vector3(0, 10, 0);
             RenderThread.Enqueue(() =>
             {
                 mr.material.SetVector3("EmissiveColor", new Vector3(1, 1, 1));
@@ -223,7 +223,7 @@ namespace DevoidStandaloneLauncher.Prototypes
         {
             LevelSpawnRegistry.Register("INFO_SPEECH", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
                 go.AddComponent<AudioSourceComponent3D>();
                 go.AddComponent<InfoBubbleComponent>();
 
@@ -242,7 +242,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("CAM_MAIN_MONITOR", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -260,7 +260,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("CAM_MONITOR", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -281,7 +281,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Surv_Cam", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -304,9 +304,9 @@ namespace DevoidStandaloneLauncher.Prototypes
                 //Cursor.SetCursorState(CursorState.Grabbed);
 
                 Console.WriteLine("Added freecam");
-                GameObject camera = scene.addGameObject("Camera");
+                GameObject camera = scene.AddGameObject("Camera");
 
-                camera.transform.Position = Importer.GetTransform(assimpNode).Item1;
+                camera.Transform.Position = Importer.GetTransform(assimpNode).Item1;
 
                 camera.AddComponent<FreeCameraComponent>();
                 var camComponent = camera.AddComponent<CameraComponent3D>();
@@ -316,7 +316,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("AreaTrigger", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -341,7 +341,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Model", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -355,20 +355,27 @@ namespace DevoidStandaloneLauncher.Prototypes
                 });
                 for (int i = 0; i < assimpScene.AnimationCount; i++)
                 {
-                    for (int j = 0; j < assimpScene.Animations[i].NodeAnimationChannels.Count; j++)
+                    var anim = assimpScene.Animations[i];
+
+                    bool affectsNode = anim.NodeAnimationChannels
+                        .Any(c => c.NodeName == assimpNode.Name);
+
+                    if (affectsNode)
                     {
-                        var nodeName = assimpScene.Animations[i].NodeAnimationChannels[j].NodeName;
-                        if (nodeName == assimpNode.Name)
-                        {
-                            Console.WriteLine("Has Animations!");
-                        }
+                        var player = Importer.CreateAnimationPlayer(go, anim);
+
+                        var animComp = go.AddComponent<AnimationComponent>();
+                        animComp.AddPlayer(player);
+
+                        Console.WriteLine($"Animation attached to {go.Name}");
+                        break;
                     }
                 }
             });
 
             LevelSpawnRegistry.Register("Convex_Collision", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -411,7 +418,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Collideable_Static", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -442,8 +449,8 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Player", (assimpNode, assimpScene) =>
             {
-                PlayerObject = scene.addGameObject("Player");
-                PlayerObject.transform.Position = Importer.GetTransform(assimpNode).Item1;
+                PlayerObject = scene.AddGameObject("Player");
+                PlayerObject.Transform.Position = Importer.GetTransform(assimpNode).Item1;
 
                 var playerBody = PlayerObject.AddComponent<RigidBodyComponent>();
                 playerBody.Mass = 1000;
@@ -469,14 +476,14 @@ namespace DevoidStandaloneLauncher.Prototypes
                 Cursor.SetCursorState(CursorState.Grabbed);
 
                 // Camera pivot (for vertical rotation)
-                GameObject cameraPivot = scene.addGameObject("CameraPivot");
+                GameObject cameraPivot = scene.AddGameObject("CameraPivot");
                 cameraPivot.SetParent(PlayerObject, false);
-                playerController.SetCameraPivot(cameraPivot.transform);
+                playerController.SetCameraPivot(cameraPivot.Transform);
 
-                cameraPivot.transform.LocalPosition = new Vector3(0, 1.4f, 0);
+                cameraPivot.Transform.LocalPosition = new Vector3(0, 1.4f, 0);
 
                 // Camera
-                CameraObject = scene.addGameObject("Camera");
+                CameraObject = scene.AddGameObject("Camera");
                 CameraObject.SetParent(cameraPivot, false);
 
                 var camComponent = CameraObject.AddComponent<CameraComponent3D>();
@@ -489,14 +496,14 @@ namespace DevoidStandaloneLauncher.Prototypes
             LevelSpawnRegistry.Register("Gun", (assimpNode, assimpScene) =>
             {
 
-                GameObject gun = scene.addGameObject("Gun");
+                GameObject gun = scene.AddGameObject("Gun");
 
                 Importer.ApplyTransform(gun, assimpNode);
 
                 gun.SetParent(CameraObject, false);
 
                 // Position gun to the right side of the camera
-                gun.transform.LocalPosition = new Vector3(-0.6f, -0.5f, 0.8f);
+                gun.Transform.LocalPosition = new Vector3(-0.6f, -0.5f, 0.8f);
                 //gun.transform.EulerAngles = new Vector3(-90, 90, 0);
                 //gun.transform.LocalScale = new Vector3(0.2f, 0.2f, 0.2f);
 
@@ -506,13 +513,13 @@ namespace DevoidStandaloneLauncher.Prototypes
                 var gunRenderer = gun.AddComponent<MeshRenderer>();
                 gunRenderer.AddMesh(mesh);
 
-                PlayerObject.GetComponent<FPSController>().SetGunTransform(gun.transform);
+                PlayerObject.GetComponent<FPSController>().SetGunTransform(gun.Transform);
             });
 
 
             LevelSpawnRegistry.Register("Collideable_Dynamic", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -546,22 +553,22 @@ namespace DevoidStandaloneLauncher.Prototypes
             LevelSpawnRegistry.Register("Door_Hinged", (assimpNode, assimpScene) =>
             {
                 // 1️⃣ Create hinge pivot
-                GameObject hinge = scene.addGameObject(assimpNode.Name + "_Hinge");
+                GameObject hinge = scene.AddGameObject(assimpNode.Name + "_Hinge");
                 Importer.ApplyTransform(hinge, assimpNode);
 
                 Vector3 size = Importer.GetTransform(assimpNode).Item3 * 2;
                 float halfWidth = size.Z * 0.25f; // adjust axis if needed
 
                 // 🔥 Move hinge to door edge (important)
-                hinge.transform.Position -=
-                    Vector3.Transform(new Vector3(0f, 0f, halfWidth), hinge.transform.Rotation);
+                hinge.Transform.Position -=
+                    Vector3.Transform(new Vector3(0f, 0f, halfWidth), hinge.Transform.Rotation);
 
                 // 2️⃣ Create door body
-                GameObject door = scene.addGameObject(assimpNode.Name + "_Body");
+                GameObject door = scene.AddGameObject(assimpNode.Name + "_Body");
                 door.SetParent(hinge, false);
 
                 // Door sits centered relative to hinge
-                door.transform.LocalPosition = new Vector3(0f, 0f, halfWidth);
+                door.Transform.LocalPosition = new Vector3(0f, 0f, halfWidth);
 
                 // 3️⃣ Collider on door
                 var rb = door.AddComponent<RigidBodyComponent>();
@@ -593,7 +600,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Trigger_Button", (assimpNode, assimpScene) =>
             {
-                GameObject button = scene.addGameObject(assimpNode.Name);
+                GameObject button = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(button, assimpNode);
 
@@ -619,7 +626,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 };
 
 
-                GameObject button_internal = scene.addGameObject(assimpNode.Name + "internal");
+                GameObject button_internal = scene.AddGameObject(assimpNode.Name + "internal");
                 Importer.ApplyTransform(button_internal, assimpNode);
 
                 var collider = button_internal.AddComponent<AreaComponent>();
@@ -647,7 +654,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.Register("Interactable_Cube", (assimpNode, assimpScene) =>
             {
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -683,7 +690,7 @@ namespace DevoidStandaloneLauncher.Prototypes
                 if (!assimpNode.HasMeshes)
                     return;
 
-                var go = scene.addGameObject(assimpNode.Name);
+                var go = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(go, assimpNode);
 
@@ -702,7 +709,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
             LevelSpawnRegistry.RegisterLight((assimpNode, assimpLight) =>
             {
-                GameObject lightGO = scene.addGameObject(assimpNode.Name);
+                GameObject lightGO = scene.AddGameObject(assimpNode.Name);
 
                 Importer.ApplyTransform(lightGO, assimpNode);
 

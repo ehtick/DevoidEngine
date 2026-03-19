@@ -23,7 +23,7 @@ namespace DevoidEngine.Engine.Rendering
         public GPUDirectionalLight internalLight;
         public bool needsUpdate;
 
-        public Vector3 direction
+        public Vector3 Direction
         {
             get => new Vector3(internalLight.Direction.X, internalLight.Direction.Y, internalLight.Direction.Z);
             set
@@ -35,7 +35,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public bool enabled
+        public bool Enabled
         {
             get => internalLight.Direction.W == 1f;
             set
@@ -45,7 +45,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public Vector3 color
+        public Vector3 Color
         {
             get => new Vector3(internalLight.Color.X, internalLight.Color.Y, internalLight.Color.Z);
             set
@@ -57,7 +57,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public float intensity
+        public float Intensity
         {
             get => internalLight.Color.W;
             set
@@ -73,7 +73,7 @@ namespace DevoidEngine.Engine.Rendering
         public GPUPointLight internalLight;
         public bool needsUpdate;
 
-        public Vector3 position
+        public Vector3 Position
         {
             get => new Vector3(internalLight.position.X, internalLight.position.Y, internalLight.position.Z);
             set
@@ -85,7 +85,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public Vector3 color
+        public Vector3 Color
         {
             get => new Vector3(internalLight.color.X, internalLight.color.Y, internalLight.color.Z);
             set
@@ -97,7 +97,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public bool enabled
+        public bool Enabled
         {
             get => internalLight.position.W == 1f;
             set
@@ -107,7 +107,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public float intensity
+        public float Intensity
         {
             get => internalLight.color.W;
             set
@@ -117,7 +117,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public float range
+        public float Range
         {
             get => internalLight.range.X;
             set
@@ -127,7 +127,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public int attenuationType
+        public int AttenuationType
         {
             get => (int)internalLight.range.Y;
             set
@@ -137,7 +137,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public Vector2 attenuationParameters
+        public Vector2 AttenuationParameters
         {
             get => new Vector2(internalLight.range.Z, internalLight.range.W);
             set
@@ -154,7 +154,7 @@ namespace DevoidEngine.Engine.Rendering
         public GPUSpotLight internalLight;
         public bool needsUpdate;
 
-        public Vector3 position
+        public Vector3 Position
         {
             get => new Vector3(internalLight.position.X, internalLight.position.Y, internalLight.position.Z);
             set
@@ -166,7 +166,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public Vector3 color
+        public Vector3 Color
         {
             get => new Vector3(internalLight.color.X, internalLight.color.Y, internalLight.color.Z);
             set
@@ -178,7 +178,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public bool enabled
+        public bool Enabled
         {
             get => internalLight.position.W == 1f;
             set
@@ -188,7 +188,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public float intensity
+        public float Intensity
         {
             get => internalLight.color.W;
             set
@@ -198,7 +198,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public float range
+        public float Range
         {
             get => internalLight.direction.W;
             set
@@ -208,7 +208,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public Vector3 direction
+        public Vector3 Direction
         {
             get => new Vector3(internalLight.direction.X, internalLight.direction.Y, internalLight.direction.Z);
             set
@@ -220,7 +220,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public float innerCutoff
+        public float InnerCutoff
         {
             get => internalLight.innerCutoff;
             set
@@ -230,7 +230,7 @@ namespace DevoidEngine.Engine.Rendering
             }
         }
 
-        public float outerCutoff
+        public float OuterCutoff
         {
             get => internalLight.outerCutoff;
             set

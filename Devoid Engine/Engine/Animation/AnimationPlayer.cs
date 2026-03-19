@@ -1,4 +1,5 @@
 ﻿using DevoidEngine.Engine.Components;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.Animation
 {
@@ -8,35 +9,138 @@ namespace DevoidEngine.Engine.Animation
         public float Time;
         public bool Loop = true;
 
-        private Dictionary<string, Transform> _map;
+        private readonly List<ChannelBinding<Vector3>> _vec3 = new();
+        private readonly List<ChannelBinding<Quaternion>> _quat = new();
+        private readonly List<ChannelBinding<float>> _float = new();
 
-        public void Initialize(Dictionary<string, Transform> nodeMap)
+        // -------------------------
+        // BIND (resolve once)
+        // -------------------------
+        public void Bind(
+            Func<string, Action<Vector3>> vec3Resolver,
+            Func<string, Action<Quaternion>> quatResolver,
+            Func<string, Action<float>> floatResolver)
         {
-            _map = nodeMap;
+            _vec3.Clear();
+            _quat.Clear();
+            _float.Clear();
+
+            if (Clip == null)
+                return;
+
+            // Vector3 channels
+            if (Clip.Vec3Channels != null)
+            {
+                foreach (var ch in Clip.Vec3Channels)
+                {
+                    var setter = vec3Resolver?.Invoke(ch.Path);
+                    if (setter == null)
+                        continue;
+
+                    _vec3.Add(new ChannelBinding<Vector3>
+                    {
+                        Track = ch.Track,
+                        Setter = setter
+                    });
+                }
+            }
+
+            // Quaternion channels
+            if (Clip.QuatChannels != null)
+            {
+                foreach (var ch in Clip.QuatChannels)
+                {
+                    var setter = quatResolver?.Invoke(ch.Path);
+                    if (setter == null)
+                        continue;
+
+                    _quat.Add(new ChannelBinding<Quaternion>
+                    {
+                        Track = ch.Track,
+                        Setter = setter
+                    });
+                }
+            }
+
+            // Float channels
+            if (Clip.FloatChannels != null)
+            {
+                foreach (var ch in Clip.FloatChannels)
+                {
+                    var setter = floatResolver?.Invoke(ch.Path);
+                    if (setter == null)
+                        continue;
+
+                    _float.Add(new ChannelBinding<float>
+                    {
+                        Track = ch.Track,
+                        Setter = setter
+                    });
+                }
+            }
         }
 
-        public void Update(float dt)
+        // -------------------------
+        // UPDATE (hot path)
+        // -------------------------
+        public void Update(float deltaTime)
         {
-            if (Clip == null) return;
+            if (Clip == null)
+                return;
 
-            Time += dt * Clip.TicksPerSecond;
+            Time += deltaTime * Clip.TicksPerSecond;
 
             if (Loop)
-                Time %= Clip.Length;
-
-            foreach (var b in Clip.Bindings)
             {
-                var t = _map[b.NodeName];
-
-                if (b.Position != null)
-                    t.LocalPosition = b.Position.Evaluate(Time);
-
-                if (b.Rotation != null)
-                    t.LocalRotation = b.Rotation.Evaluate(Time);
-
-                if (b.Scale != null)
-                    t.LocalScale = b.Scale.Evaluate(Time);
+                if (Clip.Length > 0f)
+                    Time %= Clip.Length;
             }
+            else
+            {
+                if (Time > Clip.Length)
+                    Time = Clip.Length;
+            }
+
+            // Evaluate Vector3
+            for (int i = 0; i < _vec3.Count; i++)
+            {
+                var ch = _vec3[i];
+                ch.Setter(ch.Track.Evaluate(Time));
+            }
+
+            // Evaluate Quaternion
+            for (int i = 0; i < _quat.Count; i++)
+            {
+                var ch = _quat[i];
+                ch.Setter(ch.Track.Evaluate(Time));
+            }
+
+            // Evaluate float
+            for (int i = 0; i < _float.Count; i++)
+            {
+                var ch = _float[i];
+                ch.Setter(ch.Track.Evaluate(Time));
+            }
+        }
+
+        // -------------------------
+        // CONTROL
+        // -------------------------
+        public void Play(AnimationClip clip, bool loop = true)
+        {
+            Clip = clip;
+            Loop = loop;
+            Time = 0f;
+        }
+
+        public void Stop()
+        {
+            Time = 0f;
+        }
+
+        public void SetTime(float time)
+        {
+            Time = time;
         }
     }
 }

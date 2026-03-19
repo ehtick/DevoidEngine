@@ -20,13 +20,13 @@ namespace DevoidStandaloneLauncher.Prototypes
             //UIButton button = new UIButton();
             //button.Setup();
 
-            canvas = scene.addGameObject("Canvas");
+            canvas = scene.AddGameObject("Canvas");
             CanvasComponent canvasComponent = canvas.AddComponent<CanvasComponent>();
 
 
-            camera = scene.addGameObject("Camera");
+            camera = scene.AddGameObject("Camera");
             CameraComponent3D cameraComponent = camera.AddComponent<CameraComponent3D>();
-            camera.transform.Position = new System.Numerics.Vector3(0, 0, 0);
+            camera.Transform.Position = new System.Numerics.Vector3(0, 0, 0);
 
 
         }

@@ -74,7 +74,7 @@ namespace DevoidGPU.DX11
 
         public void ClearColor(Vector4 color)
         {
-            foreach (DX11Texture2D tex in ColorAttachments)
+            foreach (DX11Texture2D tex in ColorAttachments.Cast<DX11Texture2D>())
             {
                 if (tex.IsRenderTarget)
                 {

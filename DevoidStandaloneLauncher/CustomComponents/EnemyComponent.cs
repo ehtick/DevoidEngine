@@ -42,9 +42,9 @@ namespace DevoidEngine.Engine.Components
             rb = gameObject.GetComponent<RigidBodyComponent>();
             meshRenderer = gameObject.GetComponent<MeshRenderer>();
 
-            HealthBarObject = gameObject.Scene.addGameObject("HealthBarObject");
+            HealthBarObject = gameObject.Scene.AddGameObject("HealthBarObject");
             HealthBarObject.SetParent(gameObject, true);
-            HealthBarObject.transform.LocalPosition = new Vector3(0, 0.7f, 0);
+            HealthBarObject.Transform.LocalPosition = new Vector3(0, 0.7f, 0);
 
             HealthBarUI = HealthBarObject.AddComponent<CanvasComponent>();
             FontInternal font = FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32);
@@ -75,9 +75,9 @@ namespace DevoidEngine.Engine.Components
         {
             deathTimer += dt;
 
-            var euler = gameObject.transform.EulerAngles;
+            var euler = gameObject.Transform.EulerAngles;
             euler.Z = MathHelper.Lerp(euler.Z, 90f, dt * 5f);
-            gameObject.transform.EulerAngles = euler;
+            gameObject.Transform.EulerAngles = euler;
 
             if (deathTimer >= deathDuration)
             {
@@ -93,7 +93,7 @@ namespace DevoidEngine.Engine.Components
                 return;
 
             Vector3 direction =
-                player.transform.Position - gameObject.transform.Position;
+                player.Transform.Position - gameObject.Transform.Position;
 
             direction.Y = 0f;
 

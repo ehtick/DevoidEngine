@@ -82,8 +82,8 @@ namespace DevoidEngine.Engine.Components
 
             var desc = new PhysicsStaticDescription
             {
-                Position = gameObject.transform.Position,
-                Rotation = gameObject.transform.Rotation,
+                Position = gameObject.Transform.Position,
+                Rotation = gameObject.Transform.Rotation,
                 Shape = internalShape,
                 Material = internalMaterial
             };
@@ -96,13 +96,13 @@ namespace DevoidEngine.Engine.Components
             //Matrix4x4 world = gameObject.transform.WorldMatrix;
 
             Matrix4x4 model = RenderBase.BuildModel(
-                gameObject.transform.Position,
+                gameObject.Transform.Position,
                 Shape.Size,
-                gameObject.transform.Rotation
+                gameObject.Transform.Rotation
             );
 
             //DebugRenderSystem.DrawCube(model);
-            DebugRenderSystem.DrawMesh(debugView, gameObject.transform.WorldMatrix);
+            DebugRenderSystem.DrawMesh(debugView, gameObject.Transform.WorldMatrix);
         }
 
         Mesh debugView;
@@ -117,8 +117,8 @@ namespace DevoidEngine.Engine.Components
                 return;
 
             // Keep debug object synced with collider transform
-            _debugObject.transform.Position = gameObject.transform.Position;
-            _debugObject.transform.Rotation = gameObject.transform.Rotation;
+            _debugObject.Transform.Position = gameObject.Transform.Position;
+            _debugObject.Transform.Rotation = gameObject.Transform.Rotation;
         }
 
         public override void OnDestroy()

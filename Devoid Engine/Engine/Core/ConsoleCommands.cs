@@ -86,7 +86,7 @@ namespace DevoidEngine.Engine.Core
             cmds["spawn"] = (args, c) =>
             {
                 string name = args.Length > 0 ? args[0] : "GameObject";
-                var go = SceneManager.CurrentScene.addGameObject(name);
+                var go = SceneManager.CurrentScene.AddGameObject(name);
                 c.Log($"Spawned {go.Name}");
             };
 
@@ -149,7 +149,7 @@ namespace DevoidEngine.Engine.Core
                 var go = FindObject(args[0]);
                 if (go == null) return;
 
-                Vector3 p = go.transform.Position;
+                Vector3 p = go.Transform.Position;
                 c.Log($"{go.Name} position {p.X} {p.Y} {p.Z}");
             };
 
@@ -160,7 +160,7 @@ namespace DevoidEngine.Engine.Core
                 var go = FindObject(args[0]);
                 if (go == null) return;
 
-                go.transform.Position = new Vector3(
+                go.Transform.Position = new Vector3(
                     float.Parse(args[1]),
                     float.Parse(args[2]),
                     float.Parse(args[3])
@@ -176,7 +176,7 @@ namespace DevoidEngine.Engine.Core
                 var go = FindObject(args[0]);
                 if (go == null) return;
 
-                go.transform.Position += new Vector3(
+                go.Transform.Position += new Vector3(
                     float.Parse(args[1]),
                     float.Parse(args[2]),
                     float.Parse(args[3])
@@ -192,7 +192,7 @@ namespace DevoidEngine.Engine.Core
                 var go = FindObject(args[0]);
                 if (go == null) return;
 
-                go.transform.EulerAngles = new Vector3(
+                go.Transform.EulerAngles = new Vector3(
                     float.Parse(args[1]),
                     float.Parse(args[2]),
                     float.Parse(args[3])
@@ -208,7 +208,7 @@ namespace DevoidEngine.Engine.Core
                 var go = FindObject(args[0]);
                 if (go == null) return;
 
-                go.transform.Scale = new Vector3(
+                go.Transform.Scale = new Vector3(
                     float.Parse(args[1]),
                     float.Parse(args[2]),
                     float.Parse(args[3])
@@ -240,7 +240,7 @@ namespace DevoidEngine.Engine.Core
                 rb.Shape = new Physics.PhysicsShapeDescription()
                 {
                     Type = Physics.PhysicsShapeType.Box,
-                    Size = go.transform.Scale
+                    Size = go.Transform.Scale
                 };
 
 
@@ -262,7 +262,7 @@ namespace DevoidEngine.Engine.Core
                 rb.Shape = new Physics.PhysicsShapeDescription()
                 {
                     Type = Physics.PhysicsShapeType.Box,
-                    Size = go.transform.Scale
+                    Size = go.Transform.Scale
                 };
 
 
@@ -338,14 +338,14 @@ namespace DevoidEngine.Engine.Core
                 Mesh mesh = new Mesh();
                 mesh.SetVertices(Primitives.GetCubeVertex());
 
-                var go = SceneManager.CurrentScene.addGameObject("ConsoleCube");
+                var go = SceneManager.CurrentScene.AddGameObject("ConsoleCube");
 
                 var mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
 
                 if (args.Length == 3)
                 {
-                    go.transform.Position = new Vector3(
+                    go.Transform.Position = new Vector3(
                         float.Parse(args[0]),
                         float.Parse(args[1]),
                         float.Parse(args[2])
@@ -357,13 +357,13 @@ namespace DevoidEngine.Engine.Core
 
             cmds["spawnlight"] = (args, c) =>
             {
-                var go = SceneManager.CurrentScene.addGameObject("ConsoleLight");
+                var go = SceneManager.CurrentScene.AddGameObject("ConsoleLight");
 
                 var light = go.AddComponent<LightComponent>();
 
                 if (args.Length == 3)
                 {
-                    go.transform.Position = new Vector3(
+                    go.Transform.Position = new Vector3(
                         float.Parse(args[0]),
                         float.Parse(args[1]),
                         float.Parse(args[2])

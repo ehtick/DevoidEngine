@@ -104,7 +104,7 @@ namespace DevoidEngine.Engine.Components
             Vector2 center = screen * 0.5f;
 
             Vector3 screenPoint = camera.WorldToScreen(
-                TargetObject.transform.Position,
+                TargetObject.Transform.Position,
                 screen.X,
                 screen.Y
             );

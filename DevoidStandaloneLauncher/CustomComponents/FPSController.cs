@@ -129,7 +129,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnStart()
         {
-            GameObject canvas = gameObject.Scene.addGameObject("InteractionObject");
+            GameObject canvas = gameObject.Scene.AddGameObject("InteractionObject");
             UICanvas = canvas.AddComponent<CanvasComponent>();
 
             FlexboxNode ROOT = new FlexboxNode()
@@ -161,8 +161,8 @@ namespace DevoidEngine.Engine.Components
 
             yaw = MathHelper.RadToDeg(
                 MathF.Atan2(
-                    gameObject.transform.Forward.X,
-                    gameObject.transform.Forward.Z
+                    gameObject.Transform.Forward.X,
+                    gameObject.Transform.Forward.Z
                 )
             );
         }
@@ -329,7 +329,7 @@ namespace DevoidEngine.Engine.Components
 
             Vector3 spawnPosition = cameraPivot != null
                 ? cameraPivot.Position
-                : gameObject.transform.Position;
+                : gameObject.Transform.Position;
 
             Quaternion rotation = cameraPivot != null
                 ? cameraPivot.Rotation
@@ -538,7 +538,7 @@ namespace DevoidEngine.Engine.Components
 
         private bool IsGrounded()
         {
-            Vector3 origin = gameObject.transform.Position;
+            Vector3 origin = gameObject.Transform.Position;
 
             return gameObject.Scene.Physics.Raycast(
                 new Ray(origin - Vector3.UnitY, -Vector3.UnitY),

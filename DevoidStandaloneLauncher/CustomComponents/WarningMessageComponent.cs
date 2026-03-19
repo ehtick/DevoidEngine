@@ -54,7 +54,7 @@ namespace DevoidEngine.Engine.Components
         {
             timer += dt;
 
-            gameObject.transform.Position = new Vector3(0, (float)Math.Sin(timer) * 5, 0);
+            gameObject.Transform.Position = new Vector3(0, (float)Math.Sin(timer) * 5, 0);
 
             //if (timer >= Duration)
             //{

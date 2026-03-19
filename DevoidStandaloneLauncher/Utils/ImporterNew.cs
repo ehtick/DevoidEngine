@@ -1,9 +1,11 @@
 ﻿using Assimp;
+using DevoidEngine.Engine.Animation;
 using DevoidEngine.Engine.Core;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Utilities;
 using DevoidGPU;
 using System.Numerics;
+using System.Threading.Channels;
 
 namespace DevoidStandaloneLauncher.Utils
 {
@@ -157,6 +159,158 @@ namespace DevoidStandaloneLauncher.Utils
             meshCache[meshIndex] = mesh;
             return mesh;
         }
+
+        public static AnimationPlayer CreateAnimationPlayer(GameObject root, Assimp.Animation anim)
+        {
+            var clip = ConvertAnimation(anim);
+
+            var player = new AnimationPlayer();
+            player.Play(clip);
+
+            // Bind directly using your hierarchy
+            player.Bind(
+                path => ResolveVec3(root, path),
+                path => ResolveQuat(root, path),
+                path => null // no float support yet
+            );
+
+            return player;
+        }
+
+        static Action<Vector3> ResolveVec3(GameObject root, string path)
+        {
+            int sep = path.IndexOf(':');
+            if (sep == -1) return null;
+
+            string nodeName = path.Substring(0, sep);
+            string property = path.Substring(sep + 1);
+
+            var go = FindNodeByName(root, nodeName);
+            if (go == null) return null;
+
+            var t = go.Transform;
+
+            if (property == "position")
+                return v => t.LocalPosition = v;
+
+            if (property == "scale")
+                return v => t.LocalScale = v;
+
+            return null;
+        }
+
+        static AnimationClip ConvertAnimation(Assimp.Animation anim)
+        {
+            var clip = new AnimationClip();
+
+            float tps = anim.TicksPerSecond != 0 ? (float)anim.TicksPerSecond : 25f;
+
+            clip.TicksPerSecond = tps;
+            clip.Length = (float)(anim.DurationInTicks / tps);
+
+            foreach (var channel in anim.NodeAnimationChannels)
+            {
+                string node = channel.NodeName;
+
+                // POSITION
+                if (channel.PositionKeyCount > 0)
+                {
+                    var track = new AnimationTrack<Vector3>(Vector3.Lerp);
+
+                    foreach (var key in channel.PositionKeys)
+                    {
+                        track.Keyframes.Add(new Keyframe<Vector3>
+                        {
+                            Time = (float)(key.Time / tps),
+                            Value = new Vector3(key.Value.X, key.Value.Y, key.Value.Z)
+                        });
+                    }
+
+                    clip.Vec3Channels.Add(new AnimationChannel<Vector3>
+                    {
+                        Path = node + ":position",
+                        Track = track
+                    });
+                }
+
+                // ROTATION
+                if (channel.RotationKeyCount > 0)
+                {
+                    var track = new AnimationTrack<Quaternion>(Quaternion.Slerp);
+
+                    foreach (var key in channel.RotationKeys)
+                    {
+                        track.Keyframes.Add(new Keyframe<Quaternion>
+                        {
+                            Time = (float)(key.Time / tps),
+                            Value = new Quaternion(
+                                key.Value.X,
+                                key.Value.Y,
+                                key.Value.Z,
+                                key.Value.W)
+                        });
+                    }
+
+                    clip.QuatChannels.Add(new AnimationChannel<Quaternion>
+                    {
+                        Path = node + ":rotation",
+                        Track = track
+                    });
+                }
+
+                // SCALE
+                if (channel.ScalingKeyCount > 0)
+                {
+                    var track = new AnimationTrack<Vector3>(Vector3.Lerp);
+
+                    foreach (var key in channel.ScalingKeys)
+                    {
+                        track.Keyframes.Add(new Keyframe<Vector3>
+                        {
+                            Time = (float)(key.Time / tps),
+                            Value = new Vector3(key.Value.X, key.Value.Y, key.Value.Z)
+                        });
+                    }
+
+                    clip.Vec3Channels.Add(new AnimationChannel<Vector3>
+                    {
+                        Path = node + ":scale",
+                        Track = track
+                    });
+                }
+            }
+
+            return clip;
+        }
+
+        static Action<Quaternion> ResolveQuat(GameObject root, string path)
+        {
+            var parts = path.Split(':');
+            var nodeName = parts[0];
+
+            var go = FindNodeByName(root, nodeName);
+            if (go == null) return null;
+
+            var t = go.Transform;
+
+            return v => t.LocalRotation = v;
+        }
+
+        static GameObject FindNodeByName(GameObject root, string name)
+        {
+            if (root.Name == name)
+                return root;
+
+            foreach (var child in root.children)
+            {
+                var found = FindNodeByName(child, name);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
+        }
+
 
         public static DevoidEngine.Engine.Core.MaterialInstance ConvertMaterial(Node node, Assimp.Scene scene, string baseModelPath)
         {
@@ -383,9 +537,9 @@ namespace DevoidStandaloneLauncher.Utils
                 out Quaternion rotation,
                 out Vector3 translation);
 
-            go.transform.Position = translation;
-            go.transform.Rotation = rotation;
-            go.transform.Scale = scale;
+            go.Transform.Position = translation;
+            go.Transform.Rotation = rotation;
+            go.Transform.Scale = scale;
         }
     }
 }

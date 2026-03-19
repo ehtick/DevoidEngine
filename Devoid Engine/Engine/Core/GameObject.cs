@@ -10,7 +10,7 @@ namespace DevoidEngine.Engine.Core
 
         public bool Enabled = true;
 
-        public Transform transform { get; set; }
+        public Transform Transform { get; set; }
 
         private Scene scene;
 
@@ -33,6 +33,7 @@ namespace DevoidEngine.Engine.Core
 
         public GameObject()
         {
+
             children = new List<GameObject>();
             Components = new List<Component>();
 
@@ -42,9 +43,9 @@ namespace DevoidEngine.Engine.Core
 
         public void Initialize()
         {
-            transform = new Transform();
-            transform.gameObject = this;
-            Components.Add(transform);
+            Transform = new Transform();
+            Transform.gameObject = this;
+            Components.Add(Transform);
 
 
         }
@@ -179,7 +180,7 @@ namespace DevoidEngine.Engine.Core
                 if (!newParent.children.Contains(this))
                     newParent.children.Add(this);
             }
-            transform.SetParent(newParent?.transform, keepWorld);
+            Transform.SetParent(newParent?.Transform, keepWorld);
         }
 
 

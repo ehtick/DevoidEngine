@@ -147,4 +147,3 @@ namespace Elemental.Editor.Utils
         public static Vector4 YellowGreen => new Vector4(154f / 255f, 205f / 255f, 50f / 255f, 1f);
     }
 }
-

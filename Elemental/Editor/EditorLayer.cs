@@ -56,7 +56,7 @@ namespace Elemental.Editor
 
         void SetupSandbox()
         {
-            GameObject gameObject = SceneManager.CurrentScene.addGameObject("SandboxObj#1");
+            GameObject gameObject = SceneManager.CurrentScene.AddGameObject("SandboxObj#1");
             CameraComponent3D camera = gameObject.AddComponent<CameraComponent3D>();
             camera.IsDefault = true;
         }
