@@ -59,7 +59,8 @@ namespace DevoidEngine.Engine.Components
             {
                 Material = material,
                 Mesh = mesh,
-                Model = gameObject.Transform.WorldMatrix
+                TransformSnapshot = gameObject.Transform.GetSnapshot(),
+                useInterpolation = true
             });
 
             //if (isTransparent)

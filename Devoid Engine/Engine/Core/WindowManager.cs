@@ -85,7 +85,7 @@ namespace DevoidEngine.Engine.Core
                             continue;
                         }
 
-                        wrs.window.Render(renderStep);
+                        wrs.window.Render(renderStep, 0);
                     }
 
                     nextRender += renderStep;
@@ -171,7 +171,7 @@ namespace DevoidEngine.Engine.Core
                         continue;
                     }
 
-                    window.Render(dt);
+                    window.Render(dt, 0);
                 }
 
                 _running = windows.Count > 0;
@@ -181,5 +181,102 @@ namespace DevoidEngine.Engine.Core
             updateStart.Set();
             updateThread.Join();
         }
+
+        public void RunTickedTrue()
+        {
+            const double tickRate = 60.0; // or 128
+            const double tickDelta = 1.0 / tickRate;
+
+            foreach (var wrs in windows)
+                wrs.window.Load();
+
+            _running = true;
+
+            float latestAlpha = 0f;
+
+            // ---------------- UPDATE THREAD ----------------
+            Thread updateThread = new Thread(() =>
+            {
+                Stopwatch timer = Stopwatch.StartNew();
+                double last = timer.Elapsed.TotalSeconds;
+                double accumulator = 0.0;
+
+                while (_running)
+                {
+                    double now = timer.Elapsed.TotalSeconds;
+                    double dt = now - last;
+                    last = now;
+
+                    if (dt > 0.25)
+                        dt = 0.25;
+
+                    accumulator += dt;
+
+                    while (accumulator >= tickDelta)
+                    {
+
+
+                        // 2. simulate one fixed tick
+                        for (int i = windows.Count - 1; i >= 0; i--)
+                            windows[i].window.Update((float)tickDelta);
+
+                        accumulator -= tickDelta;
+                    }
+
+                    float a = (float)(accumulator / tickDelta);
+                    a = Math.Clamp(a, 0f, 1f);
+
+                    Volatile.Write(ref latestAlpha, a);
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "Update Thread"
+            };
+
+            updateThread.Start();
+
+            Stopwatch renderTimer = Stopwatch.StartNew();
+            double lastRenderTime = renderTimer.Elapsed.TotalSeconds;
+
+            while (_running)
+            {
+                if (windows.Count == 0)
+                    break;
+
+                double now = renderTimer.Elapsed.TotalSeconds;
+                double dt = now - lastRenderTime;
+                lastRenderTime = now;
+
+                if (dt > 0.25)
+                    dt = 0.25;
+
+                // 🔥 read alpha safely
+                float alpha = Volatile.Read(ref latestAlpha);
+
+                for (int i = windows.Count - 1; i >= 0; i--)
+                {
+                    var window = windows[i].window;
+
+                    window.ProcessEvents();
+
+                    if (window.IsExiting)
+                    {
+                        window.Close();
+                        windows.RemoveAt(i);
+                        continue;
+                    }
+
+                    // 🔥 pass dt + alpha + snapshot buffer
+                    window.Render((float)dt, alpha);
+                }
+
+                _running = windows.Count > 0;
+            }
+
+            _running = false;
+            updateThread.Join();
+        }
+
     }
 }

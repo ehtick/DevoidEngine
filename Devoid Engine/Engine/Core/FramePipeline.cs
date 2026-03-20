@@ -79,7 +79,7 @@ namespace DevoidEngine.Engine.Core
             SwapBuffer.Publish();
         }
 
-        public static void ExecuteRenderThread(float deltaTime)
+        public static void ExecuteRenderThread(float deltaTime, float alpha)
         {
 
             RenderThread.MainThreadStarted = true;
@@ -92,6 +92,7 @@ namespace DevoidEngine.Engine.Core
             for (int i = 0; i < cameraContextList.Count; i++)
             {
                 CameraRenderContext ctx = cameraContextList[i];
+                RenderUtil.ResolveInterpolatedTransforms(ctx.renderItems3D, alpha);
                 RenderBase.Render(ctx);
             }
 

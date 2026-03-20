@@ -54,7 +54,7 @@ namespace DevoidEngine.Engine.Core
 
         public event Action<double>? OnFixedUpdate;
         public event Action<double>? OnUpdateFrame;
-        public event Action<double>? OnRenderFrame;
+        public event Action<double, double>? OnRenderFrame;
 
         public WindowSpecification WindowSpecification;
 
@@ -97,9 +97,9 @@ namespace DevoidEngine.Engine.Core
             OnFixedUpdate?.Invoke(deltaTime);
         }
 
-        public void Render(double deltaTime)
+        public void Render(double deltaTime, double alpha)
         {
-            OnRenderFrame?.Invoke(deltaTime);
+            OnRenderFrame?.Invoke(deltaTime, alpha);
         }
 
         public void Close()

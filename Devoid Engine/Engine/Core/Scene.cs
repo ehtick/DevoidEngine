@@ -30,7 +30,9 @@ namespace DevoidEngine.Engine.Core
 
 
         public float fixedDeltaTime = 1f / 300f;
+
         private float accumulator = 0f;
+        private uint transformIdCounter = 1;
 
         public Scene()
         {
@@ -49,6 +51,7 @@ namespace DevoidEngine.Engine.Core
             gameObject.Name = name;
             gameObject.Scene = this;
             gameObject.Initialize();
+            gameObject.Transform.TransformID = transformIdCounter++;
             GameObjects.Add(gameObject);
             return gameObject;
         }
@@ -56,6 +59,7 @@ namespace DevoidEngine.Engine.Core
         public void AddGameObject(GameObject gameObject)
         {
             gameObject.Scene = this;
+            gameObject.Transform.TransformID = transformIdCounter++;
             GameObjects.Add(gameObject);
         }
 

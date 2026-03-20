@@ -12,10 +12,15 @@ namespace DevoidEngine.Engine.Components
         // Hierarchy
         // ===============================
 
+        private uint transformId;
         private Transform parent;
         private readonly List<Transform> children = new();
 
         public Transform Parent => parent;
+        public uint TransformID {
+            get => transformId;
+            set => transformId = value;
+        }
         public IReadOnlyList<Transform> Children => children;
 
         // ===============================
@@ -267,6 +272,8 @@ namespace DevoidEngine.Engine.Components
         {
             TransformSnapshot snapshot = new TransformSnapshot()
             {
+                Id = transformId,
+                parentId = (parent != null) ? parent.transformId : 0,
                 PrevLocalPosition = prevLocalPosition,
                 PrevLocalRotation = prevLocalRotation,
                 PrevLocalScale = prevLocalScale,

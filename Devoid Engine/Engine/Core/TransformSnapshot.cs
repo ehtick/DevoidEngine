@@ -9,6 +9,9 @@ namespace DevoidEngine.Engine.Core
 {
     public struct TransformSnapshot
     {
+        public uint Id; // 0 is invalid
+        public uint parentId; // 0 is invalid
+
         public Vector3 PrevLocalPosition;
         public Quaternion PrevLocalRotation;
         public Vector3 PrevLocalScale;

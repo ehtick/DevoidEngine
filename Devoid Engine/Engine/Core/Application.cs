@@ -170,7 +170,7 @@ namespace DevoidEngine.Engine.Core
 
         public void Run()
         {
-            windowManager.RunTicked();
+            windowManager.RunTickedTrue();
         }
 
         public void AddLayer(Layer layer)
@@ -178,7 +178,7 @@ namespace DevoidEngine.Engine.Core
             layer.application = this;
             LayerHandler.AddLayer(layer);
         }
-        private void OnRenderFrame(double deltaTime)
+        private void OnRenderFrame(double deltaTime, double alpha)
         {
             UpdateMainWindowState();
 
@@ -186,7 +186,7 @@ namespace DevoidEngine.Engine.Core
 
             LayerHandler.RenderLayers((float)deltaTime);
 
-            FramePipeline.ExecuteRenderThread((float)deltaTime);
+            FramePipeline.ExecuteRenderThread((float)deltaTime, (float)alpha);
 
             LayerHandler.LateRenderLayers();
 
