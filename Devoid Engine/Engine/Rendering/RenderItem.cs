@@ -10,6 +10,9 @@ namespace DevoidEngine.Engine.Rendering
         public MaterialInstance Material;
         public RenderState RenderState;
 
+        public TransformSnapshot TransformSnapshot;
+        public bool useInterpolation;
+
         public bool useClipping;
         public Vector4 ClipRegion;
     }

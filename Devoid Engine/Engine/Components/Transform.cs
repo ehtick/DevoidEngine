@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Utilities;
+﻿using DevoidEngine.Engine.Core;
+using DevoidEngine.Engine.Utilities;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Components
@@ -24,6 +25,15 @@ namespace DevoidEngine.Engine.Components
         private Vector3 localPosition = Vector3.Zero;
         private Quaternion localRotation = Quaternion.Identity;
         private Vector3 localScale = Vector3.One;
+
+        // ===============================
+
+        private Vector3 prevLocalPosition;
+        private Quaternion prevLocalRotation;
+        private Vector3 prevLocalScale;
+        // ===============================
+
+        // yes i like these designs.
 
         // ===============================
         // Cached World
@@ -244,6 +254,33 @@ namespace DevoidEngine.Engine.Components
             }
 
             MarkDirty();
+        }
+
+        public void CapturePrevious()
+        {
+            prevLocalPosition = localPosition;
+            prevLocalRotation = localRotation;
+            prevLocalScale = localScale;
+        }
+
+        public TransformSnapshot GetSnapshot()
+        {
+            TransformSnapshot snapshot = new TransformSnapshot()
+            {
+                PrevLocalPosition = prevLocalPosition,
+                PrevLocalRotation = prevLocalRotation,
+                PrevLocalScale = prevLocalScale,
+
+                CurrLocalPosition = localPosition,
+                CurrLocalRotation = localRotation,
+                CurrLocalScale = localScale
+            };
+            return snapshot;
+        }
+
+        public override void OnUpdate(float dt)
+        {
+            CapturePrevious();
         }
 
         // ===============================

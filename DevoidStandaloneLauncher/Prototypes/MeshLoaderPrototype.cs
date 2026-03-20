@@ -187,8 +187,13 @@ namespace DevoidStandaloneLauncher.Prototypes
         int mode = 0;
         int mode1 = 0;
 
+        int tickCount = 0;
+
         public override void OnUpdate(float delta)
         {
+            tickCount++;
+            Console.WriteLine($"Tick {tickCount} dt={delta}");
+
             reloader?.Consume();
 
             if (DevoidEngine.Engine.Core.Input.GetKeyDown(DevoidEngine.Engine.Core.Keys.P))

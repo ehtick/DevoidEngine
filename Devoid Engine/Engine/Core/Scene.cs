@@ -354,8 +354,6 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-        // The consumer object can call
-        // the below dispose method
         public void Dispose()
         {
             Dispose(true);
