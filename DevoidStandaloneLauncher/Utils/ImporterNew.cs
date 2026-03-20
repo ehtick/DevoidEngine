@@ -177,21 +177,39 @@ namespace DevoidStandaloneLauncher.Utils
             return player;
         }
 
+        static string NormalizeName(string name)
+        {
+            int colon = name.IndexOf(':');
+            if (colon != -1)
+                return name.Substring(0, colon);
+
+            return name;
+        }
+
         static Action<Vector3> ResolveVec3(GameObject root, string path)
         {
-            int sep = path.IndexOf(':');
-            if (sep == -1) return null;
+            char seperator = ':';
 
-            string nodeName = path.Substring(0, sep);
-            string property = path.Substring(sep + 1);
+            string[] segments = path.Split(seperator);
+            string nodeName = segments[0];
+            string nodeModifier = segments[1];
+            string property = segments[2];
 
             var go = FindNodeByName(root, nodeName);
-            if (go == null) return null;
+            if (go == null)
+            {
+                return null;
+            }
 
             var t = go.Transform;
 
+            Console.WriteLine(path);
+
             if (property == "position")
-                return v => t.LocalPosition = v;
+                return v =>
+                {
+                    t.LocalPosition = v;
+                };
 
             if (property == "scale")
                 return v => t.LocalScale = v;
@@ -298,7 +316,7 @@ namespace DevoidStandaloneLauncher.Utils
 
         static GameObject FindNodeByName(GameObject root, string name)
         {
-            if (root.Name == name)
+            if (NormalizeName(root.Name) == NormalizeName(name))
                 return root;
 
             foreach (var child in root.children)

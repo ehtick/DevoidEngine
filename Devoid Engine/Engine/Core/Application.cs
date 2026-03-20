@@ -170,7 +170,7 @@ namespace DevoidEngine.Engine.Core
 
         public void Run()
         {
-            windowManager.RunTicked();
+            windowManager.RunTickedTrue();
         }
 
         public void AddLayer(Layer layer)

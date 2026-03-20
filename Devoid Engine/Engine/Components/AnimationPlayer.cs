@@ -28,14 +28,13 @@ namespace DevoidEngine.Engine.Components
             Players.Clear();
         }
 
-        public override void OnUpdate(float dt)
+        public override void OnFixedUpdate(float dt)
         {
             if (!Playing) return;
 
             for (int i = 0; i < Players.Count; i++)
             {
                 Players[i].Update(dt);
-                Console.WriteLine("Updating Animation");
             }
         }
     }

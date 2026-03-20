@@ -1,5 +1,6 @@
 ﻿using DevoidEngine.Engine.Components;
 using System.Numerics;
+using System.Threading.Channels;
 
 namespace DevoidEngine.Engine.Animation
 {
@@ -27,6 +28,7 @@ namespace DevoidEngine.Engine.Animation
 
             if (Clip == null)
                 return;
+
 
             // Vector3 channels
             if (Clip.Vec3Channels != null)
@@ -78,17 +80,21 @@ namespace DevoidEngine.Engine.Animation
                     });
                 }
             }
+
         }
 
         // -------------------------
         // UPDATE (hot path)
         // -------------------------
+        public float FrameRate = 165f;
+        public bool UseStepped = true;
+
         public void Update(float deltaTime)
         {
             if (Clip == null)
                 return;
 
-            Time += deltaTime * Clip.TicksPerSecond;
+            Time += deltaTime;
 
             if (Loop)
             {
@@ -101,25 +107,32 @@ namespace DevoidEngine.Engine.Animation
                     Time = Clip.Length;
             }
 
+            float evalTime = Time;
+
+            if (UseStepped)
+            {
+                evalTime = MathF.Floor(Time * FrameRate) / FrameRate;
+            }
+
             // Evaluate Vector3
             for (int i = 0; i < _vec3.Count; i++)
             {
                 var ch = _vec3[i];
-                ch.Setter(ch.Track.Evaluate(Time));
+                ch.Setter(ch.Track.Evaluate(evalTime));
             }
 
-            // Evaluate Quaternion
+            // Quaternion
             for (int i = 0; i < _quat.Count; i++)
             {
                 var ch = _quat[i];
-                ch.Setter(ch.Track.Evaluate(Time));
+                ch.Setter(ch.Track.Evaluate(evalTime));
             }
 
-            // Evaluate float
+            // Float
             for (int i = 0; i < _float.Count; i++)
             {
                 var ch = _float[i];
-                ch.Setter(ch.Track.Evaluate(Time));
+                ch.Setter(ch.Track.Evaluate(evalTime));
             }
         }
 

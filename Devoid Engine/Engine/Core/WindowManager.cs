@@ -329,44 +329,36 @@ namespace DevoidEngine.Engine.Core
             updateThread.Join();
         }
 
-        public void RunTickedParallel()
+        public void RunTickedTrue()
         {
-            const int ticksPerRender = 4;
+            const double tickRate = 64.0;
+            const double tickStep = 1.0 / tickRate;
 
             foreach (var wrs in windows)
-            {
                 wrs.window.Load();
-                wrs.window.Update(0);
-            }
 
             _running = true;
 
-            Stopwatch timer = Stopwatch.StartNew();
+            double accumulator = 0.0;
 
             // ---------------- UPDATE THREAD ----------------
             Thread updateThread = new Thread(() =>
             {
-                double lastTime = timer.Elapsed.TotalSeconds;
-
                 while (_running)
                 {
-                    double now = timer.Elapsed.TotalSeconds;
-                    double dt = now - lastTime;
-                    lastTime = now;
+                    updateStart.Wait();
+                    updateStart.Reset();
 
-                    if (dt > 0.25)
-                        dt = 0.25;
+                    if (!_running)
+                        break;
 
-                    double step = dt / ticksPerRender;
+                    double step = Interlocked.CompareExchange(ref _currentUpdateStep, 0, 0);
 
-                    for (int u = 0; u < ticksPerRender; u++)
-                    {
-                        for (int i = windows.Count - 1; i >= 0; i--)
-                            windows[i].window.Update(step);
-                    }
+                    // ONE tick per signal (IMPORTANT)
+                    for (int i = windows.Count - 1; i >= 0; i--)
+                        windows[i].window.Update(step);
 
-                    // publish render snapshot
-                    FramePipeline.ExecuteUpdateThread((float)dt);
+                    updateDone.Set();
                 }
             })
             {
@@ -377,7 +369,8 @@ namespace DevoidEngine.Engine.Core
             updateThread.Start();
 
             // ---------------- RENDER THREAD ----------------
-            double lastRenderTime = timer.Elapsed.TotalSeconds;
+            Stopwatch timer = Stopwatch.StartNew();
+            double lastTime = timer.Elapsed.TotalSeconds;
 
             while (_running)
             {
@@ -385,9 +378,34 @@ namespace DevoidEngine.Engine.Core
                     break;
 
                 double now = timer.Elapsed.TotalSeconds;
-                double dt = now - lastRenderTime;
-                lastRenderTime = now;
+                double dt = now - lastTime;
+                lastTime = now;
 
+                // clamp huge spikes (pause, breakpoint, etc.)
+                if (dt > 0.25)
+                    dt = 0.25;
+
+                accumulator += dt;
+
+                int tickCount = 0;
+
+                // ---- RUN FIXED TICKS ----
+                while (accumulator >= tickStep)
+                {
+                    Interlocked.Exchange(ref _currentUpdateStep, tickStep);
+
+                    updateDone.Reset();
+                    updateStart.Set();
+                    updateDone.Wait();
+
+                    accumulator -= tickStep;
+                    tickCount++;
+                }
+
+                // (optional debug)
+                // Console.WriteLine($"Ticks this frame: {tickCount}");
+
+                // ---- RENDER ----
                 for (int i = windows.Count - 1; i >= 0; i--)
                 {
                     var window = windows[i].window;
@@ -404,12 +422,11 @@ namespace DevoidEngine.Engine.Core
                     window.Render(dt);
                 }
 
-                FramePipeline.ExecuteRenderThread((float)dt);
-
                 _running = windows.Count > 0;
             }
 
             _running = false;
+            updateStart.Set();
             updateThread.Join();
         }
 
