@@ -29,7 +29,7 @@ namespace DevoidEngine.Engine.Core
             windows.Add(new WindowRunState { window = window });
         }
 
-        public void RunAllSync()
+        public void RunSync()
         {
             const double updateHz = 165;
             const double renderHz = 165;
@@ -96,145 +96,6 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-
-        public void RunAll()
-        {
-            const double updateHz = 200;
-            const double renderHz = 60.0;
-
-            double updateStep = 1.0 / updateHz;
-            double renderStep = 1.0 / renderHz;
-
-            foreach (var wrs in windows)
-                wrs.window.Load();
-
-            // Shared global timer
-            Stopwatch globalTimer = Stopwatch.StartNew();
-
-            double nextRender = globalTimer.Elapsed.TotalSeconds;
-            double lastRender = globalTimer.Elapsed.TotalSeconds;
-
-            double nextUpdate = globalTimer.Elapsed.TotalSeconds;
-            double lastUpdate = globalTimer.Elapsed.TotalSeconds;
-
-            // ---------------- UPDATE THREAD ----------------
-            Thread updateThread = new Thread(() =>
-            {
-                double accumulator = 0.0;
-                double lastTime = globalTimer.Elapsed.TotalSeconds;
-
-                while (_running)
-                {
-                    double now = globalTimer.Elapsed.TotalSeconds;
-                    double frameTime = now - lastTime;
-                    lastTime = now;
-
-                    // Prevent spiral of death
-                    if (frameTime > 0.25)
-                        frameTime = 0.25;
-
-                    accumulator += frameTime;
-
-                    while (accumulator >= updateStep)
-                    {
-                        for (int i = windows.Count - 1; i >= 0; i--)
-                        {
-                            windows[i].window.Update(updateStep);
-                        }
-
-                        accumulator -= updateStep;
-                    }
-
-                    // Yield CPU a little
-                    Thread.Sleep(0);
-                }
-            })
-            {
-                IsBackground = true,
-                Name = "Update Thread"
-            };
-
-            updateThread.Start();
-
-
-            UpdateThreadID = updateThread.ManagedThreadId;
-
-
-            // ---------------- RENDER / EVENT THREAD ----------------
-            double lastRenderTime = globalTimer.Elapsed.TotalSeconds;
-
-            int frameCounter = 0;
-            double fpsTimer = 0;
-            while (_running)
-            {
-                if (windows.Count == 0)
-                    break;
-
-                double frameStart = globalTimer.Elapsed.TotalSeconds;
-
-                double dt = frameStart - lastRenderTime;
-                lastRenderTime = frameStart;
-
-                if (dt > 0.25)
-                    dt = 0.25;
-
-                frameCounter++;
-                fpsTimer += dt;
-
-                if (fpsTimer >= 1.0)
-                {
-                    // Console.WriteLine($"FPS: {frameCounter}");
-                    frameCounter = 0;
-                    fpsTimer -= 1.0;
-                }
-
-                for (int i = windows.Count - 1; i >= 0; i--)
-                {
-                    var wrs = windows[i];
-                    var window = wrs.window;
-
-                    window.ProcessEvents();
-
-                    if (window.IsExiting)
-                    {
-                        window.Close();
-                        windows.RemoveAt(i);
-                        continue;
-                    }
-
-                    window.Render(dt); // Present(1) or Present(0)
-                }
-
-                _running = windows.Count > 0;
-
-                // --------- MANUAL FRAME CAP (ONLY IF VSYNC OFF) ---------
-                if (!useVsyncLimiter)
-                {
-                    double frameEnd = globalTimer.Elapsed.TotalSeconds;
-                    double elapsed = frameEnd - frameStart;
-
-                    double remaining = renderStep - elapsed;
-
-                    if (remaining > 0)
-                    {
-                        // Sleep most of it
-                        if (remaining > 0.002) // 2ms threshold
-                        {
-                            Thread.Sleep((int)((remaining - 0.001) * 1000));
-                        }
-
-                        // Spin-wait the last ~1ms for precision
-                        while (globalTimer.Elapsed.TotalSeconds - frameStart < renderStep)
-                        {
-                            Thread.SpinWait(10);
-                        }
-                    }
-                }
-            }
-            _running = false;
-            updateThread.Join();
-        }
-
         ManualResetEventSlim updateStart = new(false);
         ManualResetEventSlim updateDone = new(false);
         double _currentUpdateStep;
@@ -250,8 +111,6 @@ namespace DevoidEngine.Engine.Core
 
 
             _running = true;
-
-            // ---------------- UPDATE THREAD ----------------
             Thread updateThread = new Thread(() =>
             {
                 while (_running)
@@ -279,8 +138,6 @@ namespace DevoidEngine.Engine.Core
             };
 
             updateThread.Start();
-
-            // ---------------- RENDER THREAD ----------------
             Stopwatch timer = Stopwatch.StartNew();
             double lastRenderTime = timer.Elapsed.TotalSeconds;
 
@@ -295,117 +152,12 @@ namespace DevoidEngine.Engine.Core
 
                 if (dt > 0.25)
                     dt = 0.25;
-
-                // Split real frame time into 6 equal update steps
                 Interlocked.Exchange(ref _currentUpdateStep, dt / updatesPerFrame);
 
-                // ---- Sync: force 6 updates ----
                 updateDone.Reset();
                 updateStart.Set();
                 updateDone.Wait();
-                // --------------------------------
 
-                for (int i = windows.Count - 1; i >= 0; i--)
-                {
-                    var window = windows[i].window;
-
-                    window.ProcessEvents();
-
-                    if (window.IsExiting)
-                    {
-                        window.Close();
-                        windows.RemoveAt(i);
-                        continue;
-                    }
-
-                    window.Render(dt);
-                }
-
-                _running = windows.Count > 0;
-            }
-
-            _running = false;
-            updateStart.Set();   // release update thread if waiting
-            updateThread.Join();
-        }
-
-        public void RunTickedTrue()
-        {
-            const double tickRate = 64.0;
-            const double tickStep = 1.0 / tickRate;
-
-            foreach (var wrs in windows)
-                wrs.window.Load();
-
-            _running = true;
-
-            double accumulator = 0.0;
-
-            // ---------------- UPDATE THREAD ----------------
-            Thread updateThread = new Thread(() =>
-            {
-                while (_running)
-                {
-                    updateStart.Wait();
-                    updateStart.Reset();
-
-                    if (!_running)
-                        break;
-
-                    double step = Interlocked.CompareExchange(ref _currentUpdateStep, 0, 0);
-
-                    // ONE tick per signal (IMPORTANT)
-                    for (int i = windows.Count - 1; i >= 0; i--)
-                        windows[i].window.Update(step);
-
-                    updateDone.Set();
-                }
-            })
-            {
-                IsBackground = true,
-                Name = "Update Thread"
-            };
-
-            updateThread.Start();
-
-            // ---------------- RENDER THREAD ----------------
-            Stopwatch timer = Stopwatch.StartNew();
-            double lastTime = timer.Elapsed.TotalSeconds;
-
-            while (_running)
-            {
-                if (windows.Count == 0)
-                    break;
-
-                double now = timer.Elapsed.TotalSeconds;
-                double dt = now - lastTime;
-                lastTime = now;
-
-                // clamp huge spikes (pause, breakpoint, etc.)
-                if (dt > 0.25)
-                    dt = 0.25;
-
-                accumulator += dt;
-
-                int tickCount = 0;
-
-                // ---- RUN FIXED TICKS ----
-                while (accumulator >= tickStep)
-                {
-                    Interlocked.Exchange(ref _currentUpdateStep, tickStep);
-
-                    updateDone.Reset();
-                    updateStart.Set();
-                    updateDone.Wait();
-
-                    accumulator -= tickStep;
-                    tickCount++;
-                }
-
-                // (optional debug)
-                // Console.WriteLine($"Ticks this frame: {tickCount}");
-
-                // ---- RENDER ----
                 for (int i = windows.Count - 1; i >= 0; i--)
                 {
                     var window = windows[i].window;
@@ -429,6 +181,5 @@ namespace DevoidEngine.Engine.Core
             updateStart.Set();
             updateThread.Join();
         }
-
     }
 }
