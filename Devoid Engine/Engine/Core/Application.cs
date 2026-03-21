@@ -33,6 +33,8 @@ namespace DevoidEngine.Engine.Core
 
     public class Application
     {
+        public EngineSingleton Engine;
+
         public WindowManager windowManager;
         public Window MainWindow;
 
@@ -67,9 +69,9 @@ namespace DevoidEngine.Engine.Core
                 Windowed = true
             };
 
+            Engine = new EngineSingleton();
+
             LayerHandler = new LayerHandler();
-
-
             windowManager = new WindowManager();
             windowManager.useVsyncLimiter = AppSpec.forceVsync;
 
@@ -170,7 +172,7 @@ namespace DevoidEngine.Engine.Core
 
         public void Run()
         {
-            windowManager.RunTicked();
+            windowManager.RunTickedTrue();
         }
 
         public void AddLayer(Layer layer)
@@ -178,15 +180,17 @@ namespace DevoidEngine.Engine.Core
             layer.application = this;
             LayerHandler.AddLayer(layer);
         }
-        private void OnRenderFrame(double deltaTime)
+        private void OnRenderFrame(double deltaTime, float alpha)
         {
+            Engine.FrameIndex = windowManager.FrameIndex;
+
             UpdateMainWindowState();
 
             ImGuiRenderer.PerFrame((float)deltaTime);
 
-            LayerHandler.RenderLayers((float)deltaTime);
+            LayerHandler.RenderLayers((float)deltaTime, alpha);
 
-            FramePipeline.ExecuteRenderThread((float)deltaTime);
+            FramePipeline.ExecuteRenderThread((float)deltaTime, alpha);
 
             LayerHandler.LateRenderLayers();
 

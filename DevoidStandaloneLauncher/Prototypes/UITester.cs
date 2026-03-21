@@ -36,7 +36,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             //cube.transform.Rotation = new System.Numerics.Vector3(cube.transform.Rotation.X + delta * 10, cube.transform.Rotation.Y + delta, cube.transform.Rotation.Z + delta);
         }
 
-        public override void OnRender(float delta)
+        public override void OnRender(float delta, float alpha)
         {
             //testRender.VertexBuffer.Bind();
             //Renderer.GetInputLayout(testRender, testRenderMat.Shader).Bind();

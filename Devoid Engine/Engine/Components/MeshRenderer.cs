@@ -55,12 +55,22 @@ namespace DevoidEngine.Engine.Components
 
             bool isTransparent = material.BaseMaterial.BlendMode == DevoidGPU.BlendMode.AlphaBlend;
 
-            viewData.renderItems3D.Add(new RenderItem()
+            RenderItem renderItem = new RenderItem()
             {
                 Material = material,
-                Mesh = mesh,
-                Model = gameObject.Transform.WorldMatrix
-            });
+                Mesh = mesh
+            };
+
+            if (gameObject.Transform.Interpolated)
+            {
+                renderItem.useInterpolation = true;
+                renderItem.TransformSnapshot = gameObject.Transform;
+            } else
+            {
+                renderItem.Model = gameObject.Transform.WorldMatrix;
+            }
+
+            viewData.renderItems3D.Add(renderItem);
 
             //if (isTransparent)
             //{

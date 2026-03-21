@@ -18,6 +18,11 @@ namespace DevoidEngine.Engine.Components
         public Transform Parent => parent;
         public IReadOnlyList<Transform> Children => children;
 
+        public bool Interpolated
+        {
+            get; private set;
+        } = false;
+
         // ===============================
         // Local Transform
         // ===============================
@@ -43,6 +48,9 @@ namespace DevoidEngine.Engine.Components
         private bool dirty = true;
 
         public bool hasMoved = false;
+
+        private Matrix4x4 interpolatedWorldMatrix;
+        private int interpolatedFrame = -1; // cache guard
 
         // ===============================
         // Local Properties
@@ -263,19 +271,81 @@ namespace DevoidEngine.Engine.Components
             prevLocalScale = localScale;
         }
 
-        public TransformSnapshot GetSnapshot()
+        public Matrix4x4 GetGlobalTransformInterpolated(int frameIndex)
         {
-            TransformSnapshot snapshot = new TransformSnapshot()
-            {
-                PrevLocalPosition = prevLocalPosition,
-                PrevLocalRotation = prevLocalRotation,
-                PrevLocalScale = prevLocalScale,
 
-                CurrLocalPosition = localPosition,
-                CurrLocalRotation = localRotation,
-                CurrLocalScale = localScale
+            float alpha = EngineSingleton.Instance.InterpolationAlpha;
+
+            // 2. Cached result
+            if (interpolatedFrame == frameIndex)
+                return interpolatedWorldMatrix;
+
+            // 3. Compute local interpolated
+            Matrix4x4 local;
+
+            if (Interpolated)
+            {
+                Vector3 pos = Vector3.Lerp(prevLocalPosition, localPosition, alpha);
+                Quaternion rot = Quaternion.Slerp(prevLocalRotation, localRotation, alpha);
+                Vector3 scale = Vector3.Lerp(prevLocalScale, localScale, alpha);
+
+                local =
+                    Matrix4x4.CreateScale(scale) *
+                    Matrix4x4.CreateFromQuaternion(rot) *
+                    Matrix4x4.CreateTranslation(pos);
+            }
+            else
+            {
+                local = LocalMatrix;
+            }
+
+            // 4. Combine with parent (recursive + cached)
+            Matrix4x4 result;
+
+            if (parent != null)
+            {
+                Matrix4x4 parentGlobal;
+
+                if (parent.interpolatedFrame == frameIndex)
+                {
+                    parentGlobal = parent.interpolatedWorldMatrix;
+                }
+                else
+                {
+                    parentGlobal = parent.GetGlobalTransformInterpolated(frameIndex);
+                }
+
+                result = local * parentGlobal;
+            }
+            else
+            {
+                result = local;
+            }
+
+            // 5. Cache
+            interpolatedWorldMatrix = result;
+            interpolatedFrame = frameIndex;
+
+            return result;
+        }
+
+        public (TransformData, TransformData) GetSnapshot()
+        {
+            TransformData prevData = new TransformData()
+            {
+                Position = prevLocalPosition,
+                Rotation = prevLocalRotation,
+                Scale = prevLocalScale,
             };
-            return snapshot;
+
+            TransformData currData = new TransformData()
+            {
+                Position = LocalPosition,
+                Rotation = LocalRotation,
+                Scale = LocalScale,
+            };
+
+            return (prevData, currData);
         }
 
         public override void OnUpdate(float dt)

@@ -42,12 +42,12 @@ namespace DevoidStandaloneLauncher
             splashTimer += deltaTime;
         }
 
-        public override void OnRender(float deltaTime)
+        public override void OnRender(float deltaTime, float alpha)
         {
-            CurrentScene.OnRender(deltaTime);
+            CurrentScene.OnRender(deltaTime, alpha);
             if (prototypeLoaded)
             {
-                GamePrototype.OnRender(deltaTime);
+                GamePrototype.OnRender(deltaTime, alpha);
             }
 
         }

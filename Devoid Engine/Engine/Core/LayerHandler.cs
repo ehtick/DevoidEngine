@@ -128,11 +128,11 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-        public void RenderLayers(float deltaTime)
+        public void RenderLayers(float deltaTime, float alpha)
         {
             for (int i = 0; i < layers.Count; i++)
             {
-                layers[i].OnRender(deltaTime);
+                layers[i].OnRender(deltaTime, alpha);
             }
         }
 

@@ -124,7 +124,7 @@ namespace DevoidStandaloneLauncher.Prototypes
             //    Console.WriteLine("FBX changed. Reloading level...");
             //    LoadLevel();
             //});
-            //DebugRenderSystem.AllowDebugDraw = false;
+            DebugRenderSystem.AllowDebugDraw = false;
             LoadLevel();
 
             //Cursor.SetCursorState(CursorState.Normal);
@@ -191,8 +191,6 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         public override void OnUpdate(float delta)
         {
-            tickCount++;
-            Console.WriteLine($"Tick {tickCount} dt={delta}");
 
             reloader?.Consume();
 

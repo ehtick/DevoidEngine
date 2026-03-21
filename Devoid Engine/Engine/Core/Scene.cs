@@ -256,7 +256,7 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-        public void OnRender(float dt)
+        public void OnRender(float dt, float alpha)
         {
             if (!IsPlaying) { return; }
 
@@ -267,7 +267,7 @@ namespace DevoidEngine.Engine.Core
 
             foreach (CameraComponent3D camera in Cameras)
             {
-
+                camera.OnRenderInterpolated(alpha);
             }
         }
 

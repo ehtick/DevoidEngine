@@ -1,4 +1,5 @@
-﻿using DevoidEngine.Engine.Core;
+﻿using DevoidEngine.Engine.Components;
+using DevoidEngine.Engine.Core;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Rendering
@@ -10,7 +11,7 @@ namespace DevoidEngine.Engine.Rendering
         public MaterialInstance Material;
         public RenderState RenderState;
 
-        public TransformSnapshot TransformSnapshot;
+        public Transform TransformSnapshot;
         public bool useInterpolation;
 
         public bool useClipping;

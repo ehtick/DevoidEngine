@@ -198,7 +198,7 @@ namespace DevoidEngine.Engine.Core
 
         }
 
-        public override void OnRender(float deltaTime)
+        public override void OnRender(float deltaTime, float alpha)
         {
             //Matrix4x4 model = UISystem.BuildModel(new UITransform(new Vector2(10, 10), new Vector2(100, 100)));
             //DebugRenderSystem.DrawRectUI(model);

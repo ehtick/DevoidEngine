@@ -71,21 +71,42 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnLateUpdate(float dt)
         {
+            //var transform = gameObject.Transform;
+
+            //Vector3 position = transform.Position;
+
+            //Vector3 forward = Vector3.Normalize(
+            //    Vector3.Transform(Vector3.UnitZ, transform.Rotation)
+            //);
+
+            //Vector3 up = Vector3.Normalize(
+            //    Vector3.Transform(Vector3.UnitY, transform.Rotation)
+            //);
+
+            //Camera.UpdateView(position, forward, up);
+
+
+        }
+
+        public void OnRenderInterpolated(float alpha)
+        {
             var transform = gameObject.Transform;
 
-            Vector3 position = transform.Position;
+            Matrix4x4 world =
+                transform.GetGlobalTransformInterpolated(EngineSingleton.Instance.FrameIndex);
+
+            Vector3 position = world.Translation;
 
             Vector3 forward = Vector3.Normalize(
-                Vector3.Transform(Vector3.UnitZ, transform.Rotation)
+                Vector3.TransformNormal(Vector3.UnitZ, world)
             );
 
             Vector3 up = Vector3.Normalize(
-                Vector3.Transform(Vector3.UnitY, transform.Rotation)
+                Vector3.TransformNormal(Vector3.UnitY, world)
             );
 
             Camera.UpdateView(position, forward, up);
         }
-
 
         public override void OnDestroy()
         {

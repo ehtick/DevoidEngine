@@ -79,13 +79,29 @@ namespace DevoidEngine.Engine.Core
             SwapBuffer.Publish();
         }
 
-        public static void ExecuteRenderThread(float deltaTime)
+        public static void ExecuteRenderThread(float deltaTime, float alpha)
         {
 
             RenderThread.MainThreadStarted = true;
             RenderThread.Execute();
 
             List<CameraRenderContext> cameraContextList = SwapBuffer.Front;
+
+
+            for (int i = 0; i <  cameraContextList.Count; i++)
+            {
+                CameraRenderContext ctx = cameraContextList[i];
+                for (int j = 0; j < ctx.renderItems3D.Count; j++)
+                {
+                    var renderItems3D = ctx.renderItems3D[j];
+                    if (renderItems3D.useInterpolation)
+                    {
+                        RenderItem renderItem = ctx.renderItems3D[j];
+                        renderItem.Model = renderItem.TransformSnapshot.GetGlobalTransformInterpolated(EngineSingleton.Instance.FrameIndex);
+                        ctx.renderItems3D[j] = renderItem;
+                    }
+                }
+            }
 
             // Frame level shader bindings go here
 

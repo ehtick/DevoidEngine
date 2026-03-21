@@ -17,7 +17,7 @@ namespace DevoidEngine.Engine.Content.Splash
             SceneManager.LoadScene(splashScene);
         }
 
-        public override void OnRender(float deltaTime)
+        public override void OnRender(float deltaTime, float alpha)
         {
             timer += deltaTime;
 

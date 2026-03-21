@@ -42,7 +42,8 @@ namespace DevoidEngine.Engine.Rendering.GPUResource
         {
             RenderThread.Enqueue(() =>
             {
-                _vertexBuffers[handle.Id].Bind(slot, offset);
+                if (_vertexBuffers.ContainsKey(handle.Id))
+                    _vertexBuffers[handle.Id].Bind(slot, offset);
             });
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using DevoidEngine.Engine.Rendering;
+using System.Diagnostics;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -12,9 +13,11 @@ namespace DevoidEngine.Engine.Core
     {
         public int MainThreadID = -1;
         public int UpdateThreadID = -1;
+        public int FrameIndex => _frameIndex;
 
         private readonly List<WindowRunState> windows = new();
         private volatile bool _running = true;
+        private int _frameIndex = 0;
 
         public static WindowManager Instance { get; } = new WindowManager();
         public bool useVsyncLimiter = false;
@@ -49,7 +52,6 @@ namespace DevoidEngine.Engine.Core
             {
                 double now = timer.Elapsed.TotalSeconds;
 
-                // -------- UPDATE --------
                 if (now >= nextUpdate)
                 {
                     for (int i = 0; i < windows.Count; i++)
@@ -69,7 +71,6 @@ namespace DevoidEngine.Engine.Core
                     nextUpdate += updateStep;
                 }
 
-                // -------- RENDER --------
                 if (now >= nextRender)
                 {
                     for (int i = windows.Count - 1; i >= 0; i--)
@@ -85,13 +86,13 @@ namespace DevoidEngine.Engine.Core
                             continue;
                         }
 
-                        wrs.window.Render(renderStep);
+                        wrs.window.Render(renderStep, 0);
                     }
 
                     nextRender += renderStep;
                 }
 
-                Thread.Sleep(0); // yield
+                Thread.Sleep(0);
                 _running = windows.Count > 0;
             }
         }
@@ -102,7 +103,7 @@ namespace DevoidEngine.Engine.Core
 
         public void RunTicked()
         {
-            const int updatesPerFrame = 4;
+            const int updatesPerFrame = 1;
 
             foreach (var wrs in windows)
             {
@@ -171,7 +172,7 @@ namespace DevoidEngine.Engine.Core
                         continue;
                     }
 
-                    window.Render(dt);
+                    window.Render(dt, 0);
                 }
 
                 _running = windows.Count > 0;
@@ -179,6 +180,112 @@ namespace DevoidEngine.Engine.Core
 
             _running = false;
             updateStart.Set();
+            updateThread.Join();
+        }
+
+        private volatile float _interpolationAlpha = 0f;
+        private double _simulationTime = 0.0;
+
+        public void RunTickedTrue()
+        {
+            const int updatesPerFrame = 1;
+
+            foreach (var wrs in windows)
+            {
+                wrs.window.Load();
+            }
+
+
+            _running = true;
+            const double fixedDt = 1.0 / 128.0;
+
+            Thread updateThread = new Thread(() =>
+            {
+                Stopwatch timer = Stopwatch.StartNew();
+                double lastTime = timer.Elapsed.TotalSeconds;
+
+                double accumulator = 0.0;
+
+                while (_running)
+                {
+                    double now = timer.Elapsed.TotalSeconds;
+                    double dt = now - lastTime;
+                    lastTime = now;
+
+                    if (dt > 0.25)
+                        dt = 0.25;
+
+                    accumulator += dt;
+
+                    for (int i = 0; i < windows.Count; i++)
+                        windows[i].window.Update(dt);
+
+                    // ---- FIXED UPDATE ----
+                    while (accumulator >= fixedDt)
+                    {
+                        // capture previous BEFORE simulation
+
+                        for (int i = 0; i < windows.Count; i++)
+                            windows[i].window.FixedUpdate(fixedDt);
+
+                        accumulator -= fixedDt;
+                    }
+
+                    // ---- COMPUTE ALPHA ----
+                    float alpha = (float)(accumulator / fixedDt);
+                    alpha = Math.Clamp(alpha, 0f, 1f);
+
+                    Volatile.Write(ref _interpolationAlpha, alpha);
+
+                    Thread.Yield();
+                }
+            })
+            {
+                Name = "Update Thread",
+                IsBackground = true
+            };
+
+            updateThread.Start();
+            Stopwatch timer = Stopwatch.StartNew();
+            double lastRenderTime = timer.Elapsed.TotalSeconds;
+
+            while (_running)
+            {
+                if (windows.Count == 0)
+                {
+                    _running = false;
+                    break;
+                }
+
+                double now = timer.Elapsed.TotalSeconds;
+                double dt = now - lastRenderTime;
+                lastRenderTime = now;
+
+                if (dt > 0.25)
+                    dt = 0.25;
+
+                float alpha = Volatile.Read(ref _interpolationAlpha);
+                EngineSingleton.Instance.InterpolationAlpha = alpha;
+
+                for (int i = windows.Count - 1; i >= 0; i--)
+                {
+                    var window = windows[i].window;
+
+                    window.ProcessEvents();
+
+                    if (window.IsExiting)
+                    {
+                        window.Close();
+                        windows.RemoveAt(i);
+                        continue;
+                    }
+
+                    window.Render((float)dt, alpha);
+                }
+
+                _frameIndex++;
+            }
+            _running = false;
             updateThread.Join();
         }
     }
