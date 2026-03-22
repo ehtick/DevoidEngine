@@ -88,6 +88,20 @@ namespace DevoidStandaloneLauncher.Prototypes
                 }
             });
 
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.Engine.InputSystem.InputBinding()
+            {
+                DeviceType = InputDeviceType.Mouse,
+                Control = (ushort)MouseAxis.DeltaX,
+                isClamped = false
+            });
+
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.Engine.InputSystem.InputBinding()
+            {
+                DeviceType = InputDeviceType.Mouse,
+                Control = (ushort)MouseAxis.DeltaY,
+                isClamped = false
+            });
+
             DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookY", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
                 DeviceType = InputDeviceType.Gamepad,
@@ -191,7 +205,7 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         public override void OnUpdate(float delta)
         {
-
+            Console.WriteLine(DevoidEngine.Engine.InputSystem.Input.GetAction("LookX"));
             reloader?.Consume();
 
             if (DevoidEngine.Engine.Core.Input.GetKeyDown(DevoidEngine.Engine.Core.Keys.P))

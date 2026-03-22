@@ -348,10 +348,10 @@ namespace DevoidEngine.Engine.Components
             return (prevData, currData);
         }
 
-        public override void OnFixedUpdate(float dt)
-        {
-            CapturePrevious();
-        }
+        //public override void OnFixedUpdate(float dt)
+        //{
+        //    CapturePrevious();
+        //}
 
         // ===============================
         // Decomposition Helper

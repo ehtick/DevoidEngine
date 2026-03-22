@@ -26,10 +26,16 @@
                 foreach (var p in b.Processors)
                     raw = p.Process(raw);
 
-                value += raw * b.Scale;
+                if (b.isClamped)
+                {
+                    value += Math.Clamp(raw * b.Scale, -1, 1);
+                } else
+                {
+                    value += raw * b.Scale;
+                }
             }
 
-            return Math.Clamp(value, -1f, 1f);
+            return value;
         }
 
         public bool EvaluateDown(string action, InputState state)

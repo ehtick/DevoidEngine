@@ -71,9 +71,7 @@ namespace DevoidEngine.Engine.Components
         private float yaw;
         private float pitch;
 
-        private Vector2 moveInput;
         private Vector2 mouseDelta;
-        private bool jumpRequested;
 
         public event Action OnDeath;
 
@@ -110,6 +108,13 @@ namespace DevoidEngine.Engine.Components
 
         private Vector2 lastMouseDelta;
         private Vector2 mouseVelocity;
+        private Vector2 frameMouseDelta;
+        private Vector2 fixedMouseDelta;
+
+        private Vector2 moveInput;
+        private bool jumpRequested;
+        private bool shootRequested;
+        private bool reloadRequested;
 
         public Vector2 GetMouseVelocity() => mouseVelocity;
         public Transform GetCameraPivot() => cameraPivot;
@@ -180,41 +185,26 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnUpdate(float dt)
         {
-            float lookX = InputSystem.Input.GetAction("LookX");
-            float lookY = InputSystem.Input.GetAction("LookY");
+            // === SAMPLE INPUT (ONCE PER FRAME) ===
 
-            lastMouseDelta = new Vector2(lookX, lookY);
-            mouseVelocity = lastMouseDelta / dt;
+            frameMouseDelta = new Vector2(
+                InputSystem.Input.GetAction("LookX"),
+                InputSystem.Input.GetAction("LookY")
+            );
 
-            // movement (assuming you mapped these too)
             moveInput = new Vector2(
                 InputSystem.Input.GetAction("Left"),
                 InputSystem.Input.GetAction("Forward") - InputSystem.Input.GetAction("Backward")
             );
 
-            mouseDelta += lastMouseDelta;
-
-
             if (InputSystem.Input.GetActionDown("Jump"))
                 jumpRequested = true;
 
-            fireTimer -= dt;
-
-            HandleReload(dt);
-
             if (InputSystem.Input.GetActionDown("Shoot"))
-                TryShoot();
+                shootRequested = true;
 
             if (Input.GetKey(Keys.R))
-                StartReload();
-
-            HandleDamage(dt);
-            HandleRegen(dt);
-
-
-            TryInteract();
-            UpdateGunAnimation(dt);
-
+                reloadRequested = true;
         }
 
         private void UpdateGunAnimation(float dt)
@@ -311,8 +301,13 @@ namespace DevoidEngine.Engine.Components
         // Shooting
         // ===============================
 
-        private void TryShoot()
+        private void HandleShooting(float fixedDt)
         {
+            fireTimer -= fixedDt;
+
+            if (!shootRequested)
+                return;
+
             if (fireTimer > 0f || isReloading)
                 return;
 
@@ -340,7 +335,6 @@ namespace DevoidEngine.Engine.Components
                     Vector3.Transform(Vector3.UnitZ, rotation)
                 );
 
-            // spawn projectile
             BulletComponent.Spawn(
                 gameObject.Scene,
                 projectileMesh,
@@ -351,10 +345,7 @@ namespace DevoidEngine.Engine.Components
                 ProjectileMass
             );
 
-            // --------------------------
-            // PLAYER RECOIL PUSHBACK
-            // --------------------------
-
+            // recoil impulse
             if (rb != null)
             {
                 Vector3 recoilImpulse =
@@ -364,8 +355,6 @@ namespace DevoidEngine.Engine.Components
 
                 velocity.X += recoilImpulse.X;
                 velocity.Z += recoilImpulse.Z;
-
-                // apply vertical recoil but prevent stacking infinitely
                 velocity.Y = MathF.Max(velocity.Y, recoilImpulse.Y);
 
                 rb.LinearVelocity = velocity;
@@ -453,16 +442,26 @@ namespace DevoidEngine.Engine.Components
         {
             if (rb == null) return;
 
-            HandleRotation();
-            HandleMovement(fixedDt);
+            // === LATCH INPUT INTO FIXED STEP ===
+            fixedMouseDelta = frameMouseDelta;
 
+            HandleRotation(fixedDt);
+            HandleMovement(fixedDt);
+            HandleShooting(fixedDt);
+            HandleReload(fixedDt);
+            HandleDamage(fixedDt);
+            HandleRegen(fixedDt);
+
+            // reset one-shot inputs
             jumpRequested = false;
+            shootRequested = false;
+            reloadRequested = false;
         }
 
-        private void HandleRotation()
+        private void HandleRotation(float fixedDt)
         {
-            yaw += mouseDelta.X * MouseSensitivity;
-            pitch -= mouseDelta.Y * MouseSensitivity;
+            yaw += fixedMouseDelta.X * MouseSensitivity;
+            pitch -= fixedMouseDelta.Y * MouseSensitivity;
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
@@ -474,15 +473,12 @@ namespace DevoidEngine.Engine.Components
 
             if (cameraPivot != null)
             {
-
                 cameraPivot.LocalRotation =
                     Quaternion.CreateFromAxisAngle(
                         -Vector3.UnitX,
                         MathHelper.DegToRad(pitch)
                     );
             }
-
-            mouseDelta = Vector2.Zero;
         }
 
         private void HandleMovement(float fixedDt)
@@ -508,8 +504,7 @@ namespace DevoidEngine.Engine.Components
             Vector3 horizontalVelocity =
                 new Vector3(currentVelocity.X, 0, currentVelocity.Z);
 
-            Vector3 targetVelocity =
-                desiredMove * MoveSpeed;
+            Vector3 targetVelocity = desiredMove * MoveSpeed;
 
             bool grounded = IsGrounded();
             float control = grounded ? 1f : AirControl;

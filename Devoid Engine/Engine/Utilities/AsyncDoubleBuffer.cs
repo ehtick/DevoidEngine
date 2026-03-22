@@ -4,6 +4,7 @@
     {
         private T _front; // render reads this
         private T _back;  // update writes this
+        private int _hasNewFrame = 0;
 
         public T Front => Volatile.Read(ref _front);
 
@@ -18,14 +19,22 @@
         // Called ONLY from update thread
         public void Publish()
         {
-            // Ensure writes to Back are visible before swap
             Thread.MemoryBarrier();
 
-            // Atomically swap front and back
             var oldFront = Interlocked.Exchange(ref _front, _back);
-
-            // Now oldFront becomes new back
             _back = oldFront;
+
+            Volatile.Write(ref _hasNewFrame, 1);
+        }
+
+        public T Consume()
+        {
+            if (Interlocked.Exchange(ref _hasNewFrame, 0) == 1)
+            {
+                return Volatile.Read(ref _front);
+            }
+
+            return _front; // reuse previous frame safely
         }
     }
 

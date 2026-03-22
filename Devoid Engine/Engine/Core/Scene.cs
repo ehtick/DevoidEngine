@@ -242,6 +242,11 @@ namespace DevoidEngine.Engine.Core
         {
             for (int i = 0; i < GameObjects.Count; i++)
             {
+                GameObjects[i].Transform.CapturePrevious();
+            }
+
+            for (int i = 0; i < GameObjects.Count; i++)
+            {
                 GameObjects[i].OnFixedUpdate(dt);
             }
 
@@ -253,14 +258,14 @@ namespace DevoidEngine.Engine.Core
         {
             if (!IsPlaying) { return; }
 
-            for (int i = 0; i < GameObjects.Count; i++)
-            {
-                GameObjects[i].OnRender(dt);
-            }
-
             foreach (CameraComponent3D camera in Cameras)
             {
                 camera.OnRenderInterpolated(alpha);
+            }
+
+            for (int i = 0; i < GameObjects.Count; i++)
+            {
+                GameObjects[i].OnRender(dt);
             }
         }
 

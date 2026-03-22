@@ -1,4 +1,5 @@
 ﻿using DevoidEngine.Engine.Core;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.InputSystem
 {
@@ -14,8 +15,9 @@ namespace DevoidEngine.Engine.InputSystem
         public static void Initialize(Window window)
         {
             currentWindow = window;
-            Backend.AddInputDevice(new InputSystem.InputDevices.KeyboardInputHandler(currentWindow.KeyboardState));
-            Backend.AddInputDevice(new InputSystem.InputDevices.GamepadInputHandler(currentWindow.JoystickStates));
+            Backend.AddInputDevice(new InputDevices.KeyboardInputHandler(currentWindow.KeyboardState));
+            Backend.AddInputDevice(new InputDevices.MouseInputHandler(currentWindow.MouseState));
+            Backend.AddInputDevice(new InputDevices.GamepadInputHandler(currentWindow.JoystickStates));
         }
 
         public static void Update()

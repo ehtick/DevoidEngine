@@ -29,7 +29,7 @@ namespace DevoidEngine.Engine.Components
 
         public override void OnRender(float dt)
         {
-            DebugRenderSystem.DrawCube(mesh.LocalBounds.min, mesh.LocalBounds.max, gameObject.Transform.WorldMatrix);
+            //DebugRenderSystem.DrawCube(mesh.LocalBounds.min, mesh.LocalBounds.max, gameObject.Transform.WorldMatrix);
             //DebugRenderSystem.DrawMesh(mesh, gameObject.transform.WorldMatrix);
         }
 

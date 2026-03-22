@@ -36,11 +36,11 @@ namespace DevoidEngine.Engine.Core
     {
         //static Pool<CameraRenderContext> CameraContextPool = new Pool<CameraRenderContext>();
 
-        static AsyncDoubleBuffer<List<CameraRenderContext>> SwapBuffer;
+        static AsyncTripleBuffer<List<CameraRenderContext>> SwapBuffer;
 
         static FramePipeline()
         {
-            SwapBuffer = new AsyncDoubleBuffer<List<CameraRenderContext>>(new List<CameraRenderContext>(), new List<CameraRenderContext>());
+            SwapBuffer = new AsyncTripleBuffer<List<CameraRenderContext>>(new List<CameraRenderContext>(), new List<CameraRenderContext>(), new List<CameraRenderContext>());
         }
 
         public static void Reset()
@@ -85,10 +85,10 @@ namespace DevoidEngine.Engine.Core
             RenderThread.MainThreadStarted = true;
             RenderThread.Execute();
 
-            List<CameraRenderContext> cameraContextList = SwapBuffer.Front;
+            var cameraContextList = SwapBuffer.Front.ToArray();
 
 
-            for (int i = 0; i <  cameraContextList.Count; i++)
+            for (int i = 0; i <  cameraContextList.Length; i++)
             {
                 CameraRenderContext ctx = cameraContextList[i];
                 for (int j = 0; j < ctx.renderItems3D.Count; j++)
@@ -105,7 +105,7 @@ namespace DevoidEngine.Engine.Core
 
             // Frame level shader bindings go here
 
-            for (int i = 0; i < cameraContextList.Count; i++)
+            for (int i = 0; i < cameraContextList.Length; i++)
             {
                 CameraRenderContext ctx = cameraContextList[i];
                 RenderBase.Render(ctx);

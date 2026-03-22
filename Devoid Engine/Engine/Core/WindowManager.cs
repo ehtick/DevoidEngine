@@ -197,7 +197,7 @@ namespace DevoidEngine.Engine.Core
 
 
             _running = true;
-            const double fixedDt = 1.0 / 30.0;
+            const double fixedDt = 1.0 / 128.0;
 
             Thread updateThread = new Thread(() =>
             {
