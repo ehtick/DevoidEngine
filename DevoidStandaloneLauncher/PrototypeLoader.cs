@@ -42,6 +42,11 @@ namespace DevoidStandaloneLauncher
             splashTimer += deltaTime;
         }
 
+        public override void OnFixedUpdate(float deltaTime)
+        {
+            CurrentScene.OnFixedUpdate(deltaTime);
+        }
+
         public override void OnRender(float deltaTime, float alpha)
         {
             CurrentScene.OnRender(deltaTime, alpha);

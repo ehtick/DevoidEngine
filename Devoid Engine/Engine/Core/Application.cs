@@ -89,6 +89,7 @@ namespace DevoidEngine.Engine.Core
             UISystem.Initialize();
 
             MainWindow.OnLoad += OnLoad;
+            MainWindow.OnFixedUpdate += OnFixedUpdateFrame;
             MainWindow.OnUpdateFrame += OnUpdateFrame;
             MainWindow.OnRenderFrame += OnRenderFrame;
 
@@ -213,6 +214,11 @@ namespace DevoidEngine.Engine.Core
             FramePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();
+        }
+
+        private void OnFixedUpdateFrame(double deltaTime)
+        {
+            LayerHandler.FixedUpdateLayers((float)deltaTime);
         }
 
         private void OnWindowFocusChange(FocusedChangedEventArgs obj)

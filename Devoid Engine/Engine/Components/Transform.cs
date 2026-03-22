@@ -21,7 +21,7 @@ namespace DevoidEngine.Engine.Components
         public bool Interpolated
         {
             get; private set;
-        } = false;
+        } = true;
 
         // ===============================
         // Local Transform
@@ -348,7 +348,7 @@ namespace DevoidEngine.Engine.Components
             return (prevData, currData);
         }
 
-        public override void OnUpdate(float dt)
+        public override void OnFixedUpdate(float dt)
         {
             CapturePrevious();
         }

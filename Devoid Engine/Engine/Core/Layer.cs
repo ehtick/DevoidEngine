@@ -9,6 +9,8 @@
         public virtual void OnAttach() { }
         // This method is called when the layer is removed from the application
         public virtual void OnDetach() { }
+
+        public virtual void OnFixedUpdate(float deltaTime) { }
         // This method is called every frame to update the logic of the application
         public virtual void OnUpdate(float deltaTime) { }
         // This method is called before the renderer commences rendering, this is for submitting the meshes to be rendered to the renderer

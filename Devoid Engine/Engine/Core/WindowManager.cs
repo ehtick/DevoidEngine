@@ -197,7 +197,7 @@ namespace DevoidEngine.Engine.Core
 
 
             _running = true;
-            const double fixedDt = 1.0 / 128.0;
+            const double fixedDt = 1.0 / 30.0;
 
             Thread updateThread = new Thread(() =>
             {
@@ -217,9 +217,6 @@ namespace DevoidEngine.Engine.Core
 
                     accumulator += dt;
 
-                    for (int i = 0; i < windows.Count; i++)
-                        windows[i].window.Update(dt);
-
                     // ---- FIXED UPDATE ----
                     while (accumulator >= fixedDt)
                     {
@@ -230,6 +227,9 @@ namespace DevoidEngine.Engine.Core
 
                         accumulator -= fixedDt;
                     }
+
+                    for (int i = 0; i < windows.Count; i++)
+                        windows[i].window.Update(dt);
 
                     // ---- COMPUTE ALPHA ----
                     float alpha = (float)(accumulator / fixedDt);

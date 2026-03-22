@@ -128,6 +128,14 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
+        public void FixedUpdateLayers(float dt)
+        {
+            for (int i = 0; i < layers.Count; i++)
+            {
+                layers[i].OnFixedUpdate(dt);
+            }
+        }
+
         public void RenderLayers(float deltaTime, float alpha)
         {
             for (int i = 0; i < layers.Count; i++)

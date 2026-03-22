@@ -219,7 +219,7 @@ namespace DevoidEngine.Engine.Core
             {
                 GameObjects[i].OnUpdate(dt);
             }
-            DoFixedUpdate(dt);
+            //DoFixedUpdate(dt);
 
             for (int i = 0; i < GameObjects.Count; i++)
             {
@@ -238,22 +238,15 @@ namespace DevoidEngine.Engine.Core
             Audio.SetListener(mainCamera.gameObject.Transform.Position, mainCamera.gameObject.Transform.Forward, mainCamera.gameObject.Transform.Up);
         }
 
-        public void DoFixedUpdate(float dt)
+        public void OnFixedUpdate(float dt)
         {
-            accumulator += dt;
-
-            while (accumulator >= fixedDeltaTime)
+            for (int i = 0; i < GameObjects.Count; i++)
             {
-                for (int i = 0; i < GameObjects.Count; i++)
-                {
-                    GameObjects[i].OnFixedUpdate(fixedDeltaTime);
-                }
-
-                Physics.Step(fixedDeltaTime);
-                Physics.ResolveFrameCollisions();
-
-                accumulator -= fixedDeltaTime;
+                GameObjects[i].OnFixedUpdate(dt);
             }
+
+            Physics.Step(dt);
+            Physics.ResolveFrameCollisions();
         }
 
         public void OnRender(float dt, float alpha)
