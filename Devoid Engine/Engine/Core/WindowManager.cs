@@ -127,6 +127,9 @@ namespace DevoidEngine.Engine.Core
                     for (int u = 0; u < updatesPerFrame; u++)
                     {
                         for (int i = windows.Count - 1; i >= 0; i--)
+                            windows[i].window.FixedUpdate(step);
+
+                        for (int i = windows.Count - 1; i >= 0; i--)
                             windows[i].window.Update(step);
                     }
 
@@ -159,6 +162,8 @@ namespace DevoidEngine.Engine.Core
                 updateStart.Set();
                 updateDone.Wait();
 
+                EngineSingleton.Instance.InterpolationAlpha = 0f;
+
                 for (int i = windows.Count - 1; i >= 0; i--)
                 {
                     var window = windows[i].window;
@@ -172,9 +177,9 @@ namespace DevoidEngine.Engine.Core
                         continue;
                     }
 
-                    window.Render(dt, 0);
+                    window.Render(dt, 0f);
                 }
-
+                _frameIndex++;
                 _running = windows.Count > 0;
             }
 

@@ -205,7 +205,6 @@ namespace DevoidStandaloneLauncher.Prototypes
 
         public override void OnUpdate(float delta)
         {
-            Console.WriteLine(DevoidEngine.Engine.InputSystem.Input.GetAction("LookX"));
             reloader?.Consume();
 
             if (DevoidEngine.Engine.Core.Input.GetKeyDown(DevoidEngine.Engine.Core.Keys.P))

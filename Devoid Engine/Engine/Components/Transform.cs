@@ -276,11 +276,9 @@ namespace DevoidEngine.Engine.Components
 
             float alpha = EngineSingleton.Instance.InterpolationAlpha;
 
-            // 2. Cached result
             if (interpolatedFrame == frameIndex)
                 return interpolatedWorldMatrix;
 
-            // 3. Compute local interpolated
             Matrix4x4 local;
 
             if (Interpolated)
@@ -289,19 +287,15 @@ namespace DevoidEngine.Engine.Components
                 Quaternion rot = Quaternion.Slerp(prevLocalRotation, localRotation, alpha);
                 Vector3 scale = Vector3.Lerp(prevLocalScale, localScale, alpha);
 
-                local =
-                    Matrix4x4.CreateScale(scale) *
-                    Matrix4x4.CreateFromQuaternion(rot) *
-                    Matrix4x4.CreateTranslation(pos);
+                local = Matrix4x4.CreateScale(scale) * Matrix4x4.CreateFromQuaternion(rot) * Matrix4x4.CreateTranslation(pos);
             }
             else
             {
                 local = LocalMatrix;
             }
-
-            // 4. Combine with parent (recursive + cached)
             Matrix4x4 result;
 
+            // i hate life
             if (parent != null)
             {
                 Matrix4x4 parentGlobal;
@@ -322,7 +316,6 @@ namespace DevoidEngine.Engine.Components
                 result = local;
             }
 
-            // 5. Cache
             interpolatedWorldMatrix = result;
             interpolatedFrame = frameIndex;
 
@@ -347,15 +340,6 @@ namespace DevoidEngine.Engine.Components
 
             return (prevData, currData);
         }
-
-        //public override void OnFixedUpdate(float dt)
-        //{
-        //    CapturePrevious();
-        //}
-
-        // ===============================
-        // Decomposition Helper
-        // ===============================
 
         private void Decompose(Matrix4x4 matrix)
         {

@@ -80,7 +80,7 @@ namespace DevoidEngine.Engine.InputSystem.InputDevices
                 DeviceId = _deviceId,
                 DeviceType = InputDeviceType.Mouse,
                 Control = (ushort)MouseAxis.DeltaX,
-                Value = delta.X
+                Value = _state.Delta.X
             });
 
             backend.Emit(new InputEvent
@@ -88,11 +88,10 @@ namespace DevoidEngine.Engine.InputSystem.InputDevices
                 DeviceId = _deviceId,
                 DeviceType = InputDeviceType.Mouse,
                 Control = (ushort)MouseAxis.DeltaY,
-                Value = delta.Y
+                Value = _state.Delta.Y
             });
 
             Vector2 pos = _state.Position;
-            Console.WriteLine(pos);
 
             backend.Emit(new InputEvent
             {

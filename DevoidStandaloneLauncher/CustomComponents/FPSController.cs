@@ -18,7 +18,7 @@ namespace DevoidEngine.Engine.Components
         public float Acceleration = 20f;
         public float AirControl = 0.3f;
         public float JumpForce = 100f;
-        public float MouseSensitivity = 0.12f;
+        public float MouseSensitivity = 1.2f;
         public float MinPitch = -89f;
         public float MaxPitch = 89f;
         public float GroundCheckDistance = 1f;
@@ -205,6 +205,8 @@ namespace DevoidEngine.Engine.Components
 
             if (Input.GetKey(Keys.R))
                 reloadRequested = true;
+
+            HandleRotation(dt);
         }
 
         private void UpdateGunAnimation(float dt)
@@ -445,7 +447,6 @@ namespace DevoidEngine.Engine.Components
             // === LATCH INPUT INTO FIXED STEP ===
             fixedMouseDelta = frameMouseDelta;
 
-            HandleRotation(fixedDt);
             HandleMovement(fixedDt);
             HandleShooting(fixedDt);
             HandleReload(fixedDt);
@@ -460,8 +461,8 @@ namespace DevoidEngine.Engine.Components
 
         private void HandleRotation(float fixedDt)
         {
-            yaw += fixedMouseDelta.X * MouseSensitivity;
-            pitch -= fixedMouseDelta.Y * MouseSensitivity;
+            yaw += fixedMouseDelta.X * MouseSensitivity * fixedDt * 100;
+            pitch -= fixedMouseDelta.Y * MouseSensitivity * fixedDt * 100;
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
