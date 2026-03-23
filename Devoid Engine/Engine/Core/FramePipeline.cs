@@ -95,6 +95,7 @@ namespace DevoidEngine.Engine.Core
                 for (int j = 0; j < ctx.renderItems3D.Count; j++)
                 {
                     var renderItem = ctx.renderItems3D[j];
+
                     if (renderItem.useInterpolation)
                     {
                         var s = renderItem.TransformData;
@@ -107,6 +108,9 @@ namespace DevoidEngine.Engine.Core
                             Matrix4x4.CreateScale(scale) *
                             Matrix4x4.CreateFromQuaternion(rot) *
                             Matrix4x4.CreateTranslation(pos);
+
+                        // 🔴 THIS LINE IS MISSING
+                        ctx.renderItems3D[j] = renderItem;
                     }
                 }
             }

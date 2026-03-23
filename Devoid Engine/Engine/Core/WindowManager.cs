@@ -237,7 +237,7 @@ namespace DevoidEngine.Engine.Core
                         windows[i].window.Update(dt);
 
                     // ---- COMPUTE ALPHA ----
-                    float alpha = (float)(accumulator / fixedDt);
+                    float alpha = (float)(accumulator / dt);
                     alpha = Math.Clamp(alpha, 0f, 1f);
 
                     Volatile.Write(ref _interpolationAlpha, alpha);
