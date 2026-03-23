@@ -36,6 +36,11 @@ namespace DevoidEngine.Engine.Components
         private Vector3 prevLocalPosition;
         private Quaternion prevLocalRotation;
         private Vector3 prevLocalScale;
+        private Matrix4x4 prevWorldMatrix;
+
+        private Vector3 prevWorldScale;
+        private Quaternion prevWorldRotation;
+        private Vector3 prevWorldPosition;
         // ===============================
 
         // yes i like these designs.
@@ -269,6 +274,13 @@ namespace DevoidEngine.Engine.Components
             prevLocalPosition = localPosition;
             prevLocalRotation = localRotation;
             prevLocalScale = localScale;
+
+            prevWorldMatrix = WorldMatrix;
+
+            Matrix4x4.Decompose(prevWorldMatrix,
+                out prevWorldScale,
+                out prevWorldRotation,
+                out prevWorldPosition);
         }
 
         public Matrix4x4 GetGlobalTransformInterpolated(int frameIndex)
@@ -322,23 +334,26 @@ namespace DevoidEngine.Engine.Components
             return result;
         }
 
-        public (TransformData, TransformData) GetSnapshot()
+        public TransformData GetSnapshot()
         {
-            TransformData prevData = new TransformData()
-            {
-                Position = prevLocalPosition,
-                Rotation = prevLocalRotation,
-                Scale = prevLocalScale,
-            };
+            // current world
+            Matrix4x4.Decompose(
+                WorldMatrix,
+                out Vector3 currScale,
+                out Quaternion currRot,
+                out Vector3 currPos
+            );
 
-            TransformData currData = new TransformData()
+            return new TransformData
             {
-                Position = LocalPosition,
-                Rotation = LocalRotation,
-                Scale = LocalScale,
-            };
+                PrevPos = prevWorldPosition,
+                PrevRot = prevWorldRotation,
+                PrevScale = prevWorldScale,
 
-            return (prevData, currData);
+                CurrPos = currPos,
+                CurrRot = currRot,
+                CurrScale = currScale
+            };
         }
 
         private void Decompose(Matrix4x4 matrix)

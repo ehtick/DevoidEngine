@@ -9,8 +9,8 @@ namespace DevoidEngine.Engine.Core
 {
     public struct TransformData
     {
-        public Vector3 Position;
-        public Quaternion Rotation;
-        public Vector3 Scale;
+        public Vector3 PrevPos, CurrPos;
+        public Quaternion PrevRot, CurrRot;
+        public Vector3 PrevScale, CurrScale;
     }
 }

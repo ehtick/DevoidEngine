@@ -1,6 +1,7 @@
 ﻿using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Utilities;
+using System.Numerics;
 
 namespace DevoidEngine.Engine.Core
 {
@@ -93,12 +94,19 @@ namespace DevoidEngine.Engine.Core
                 CameraRenderContext ctx = cameraContextList[i];
                 for (int j = 0; j < ctx.renderItems3D.Count; j++)
                 {
-                    var renderItems3D = ctx.renderItems3D[j];
-                    if (renderItems3D.useInterpolation)
+                    var renderItem = ctx.renderItems3D[j];
+                    if (renderItem.useInterpolation)
                     {
-                        RenderItem renderItem = ctx.renderItems3D[j];
-                        renderItem.Model = renderItem.TransformSnapshot.GetGlobalTransformInterpolated(EngineSingleton.Instance.FrameIndex);
-                        ctx.renderItems3D[j] = renderItem;
+                        var s = renderItem.TransformData;
+
+                        Vector3 pos = Vector3.Lerp(s.PrevPos, s.CurrPos, alpha);
+                        Quaternion rot = Quaternion.Slerp(s.PrevRot, s.CurrRot, alpha);
+                        Vector3 scale = Vector3.Lerp(s.PrevScale, s.CurrScale, alpha);
+
+                        renderItem.Model =
+                            Matrix4x4.CreateScale(scale) *
+                            Matrix4x4.CreateFromQuaternion(rot) *
+                            Matrix4x4.CreateTranslation(pos);
                     }
                 }
             }

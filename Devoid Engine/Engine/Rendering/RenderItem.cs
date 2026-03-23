@@ -11,7 +11,7 @@ namespace DevoidEngine.Engine.Rendering
         public MaterialInstance Material;
         public RenderState RenderState;
 
-        public Transform TransformSnapshot;
+        public TransformData TransformData;
         public bool useInterpolation;
 
         public bool useClipping;

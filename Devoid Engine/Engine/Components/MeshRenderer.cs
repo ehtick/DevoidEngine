@@ -63,8 +63,11 @@ namespace DevoidEngine.Engine.Components
 
             if (gameObject.Transform.Interpolated)
             {
-                renderItem.useInterpolation = true;
-                renderItem.TransformSnapshot = gameObject.Transform;
+                var transformData = gameObject.Transform.GetSnapshot();
+
+                renderItem.useInterpolation = gameObject.Transform.Interpolated;
+
+                renderItem.TransformData = transformData;
             } else
             {
                 renderItem.Model = gameObject.Transform.WorldMatrix;
