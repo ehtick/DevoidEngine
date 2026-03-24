@@ -122,7 +122,7 @@ namespace DevoidEngine.Engine.Core
 
         private void OnUnLoad()
         {
-            FramePipeline.Shutdown();
+
         }
 
         private void OnMouseMove(OpenTK.Windowing.Common.MouseMoveEventArgs obj)
@@ -179,7 +179,7 @@ namespace DevoidEngine.Engine.Core
 
         public void Run()
         {
-            windowManager.RunTickedTrue();
+            windowManager.Run();
         }
 
         public void AddLayer(Layer layer)
@@ -197,7 +197,7 @@ namespace DevoidEngine.Engine.Core
 
             LayerHandler.RenderLayers((float)deltaTime, alpha);
 
-            FramePipeline.ExecuteRenderThread((float)deltaTime, alpha);
+            EnginePipeline.ExecuteRenderThread((float)deltaTime, alpha);
 
             LayerHandler.LateRenderLayers();
 
@@ -217,7 +217,7 @@ namespace DevoidEngine.Engine.Core
 
             ImGuiRenderer.UpdateInput();
 
-            FramePipeline.ExecuteUpdateThread((float)deltaTime);
+            EnginePipeline.ExecuteUpdateThread((float)deltaTime);
 
             UpdateThreadDispatcher.ExecutePending();
         }

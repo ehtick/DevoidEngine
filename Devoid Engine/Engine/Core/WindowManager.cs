@@ -18,6 +18,8 @@ namespace DevoidEngine.Engine.Core
         private readonly List<WindowRunState> windows = new();
         private volatile bool _running = true;
         private int _frameIndex = 0;
+        private volatile float _interpolationAlpha = 0f;
+        private double _simulationTime = 0.0;
 
         public static WindowManager Instance { get; } = new WindowManager();
         public bool useVsyncLimiter = false;
@@ -97,201 +99,48 @@ namespace DevoidEngine.Engine.Core
             }
         }
 
-        ManualResetEventSlim updateStart = new(false);
-        ManualResetEventSlim updateDone = new(false);
-        double _currentUpdateStep;
-
-        public void RunTicked()
+        public void Run()
         {
-            const int updatesPerFrame = 1;
+            const float updateHz = 165;
+            const float physicsHz = 60;
+
+            const float updateStep = 1f / updateHz;
 
             foreach (var wrs in windows)
-            {
                 wrs.window.Load();
-            }
 
-
-            _running = true;
-            Thread updateThread = new Thread(() =>
-            {
-                while (_running)
-                {
-                    updateStart.Wait();
-                    updateStart.Reset();
-
-                    if (!_running)
-                        break;
-
-                    double step = Interlocked.CompareExchange(ref _currentUpdateStep, 0, 0);
-
-                    for (int u = 0; u < updatesPerFrame; u++)
-                    {
-                        for (int i = windows.Count - 1; i >= 0; i--)
-                            windows[i].window.FixedUpdate(step);
-
-                        for (int i = windows.Count - 1; i >= 0; i--)
-                            windows[i].window.Update(step);
-                    }
-
-                    updateDone.Set();
-                }
-            })
-            {
-                IsBackground = true,
-                Name = "Update Thread"
-            };
-
-            updateThread.Start();
             Stopwatch timer = Stopwatch.StartNew();
-            double lastRenderTime = timer.Elapsed.TotalSeconds;
+
+            double accumulator = 0;
+            double lastTime = timer.Elapsed.TotalSeconds;
 
             while (_running)
             {
-                if (windows.Count == 0)
-                    break;
-
                 double now = timer.Elapsed.TotalSeconds;
-                double dt = now - lastRenderTime;
-                lastRenderTime = now;
+                double frameTime = now - lastTime;
+                lastTime = now;
 
-                if (dt > 0.25)
-                    dt = 0.25;
-                Interlocked.Exchange(ref _currentUpdateStep, dt / updatesPerFrame);
+                accumulator += frameTime;
 
-                updateDone.Reset();
-                updateStart.Set();
-                updateDone.Wait();
 
-                EngineSingleton.Instance.InterpolationAlpha = 0f;
-
-                for (int i = windows.Count - 1; i >= 0; i--)
+                while (accumulator >= updateStep)
                 {
-                    var window = windows[i].window;
-
-                    window.ProcessEvents();
-
-                    if (window.IsExiting)
-                    {
-                        window.Close();
-                        windows.RemoveAt(i);
-                        continue;
-                    }
-
-                    window.Render(dt, 0f);
-                }
-                _frameIndex++;
-                _running = windows.Count > 0;
-            }
-
-            _running = false;
-            updateStart.Set();
-            updateThread.Join();
-        }
-
-        private volatile float _interpolationAlpha = 0f;
-        private double _simulationTime = 0.0;
-
-        public void RunTickedTrue()
-        {
-
-            foreach (var wrs in windows)
-            {
-                wrs.window.Load();
-            }
-
-
-            _running = true;
-            const double fixedDt = 1.0 / 165.0;
-
-            Thread updateThread = new Thread(() =>
-            {
-                Stopwatch timer = Stopwatch.StartNew();
-                double lastTime = timer.Elapsed.TotalSeconds;
-
-                double accumulator = 0.0;
-
-                while (_running)
-                {
-                    double now = timer.Elapsed.TotalSeconds;
-                    double dt = now - lastTime;
-                    lastTime = now;
-
-                    if (dt > 0.25)
-                        dt = 0.25;
-
-                    accumulator += dt;
-
-                    // ---- FIXED UPDATE ----
-                    while (accumulator >= fixedDt)
-                    {
-                        // capture previous BEFORE simulation
-
-                        for (int i = 0; i < windows.Count; i++)
-                            windows[i].window.FixedUpdate(fixedDt);
-
-                        accumulator -= fixedDt;
-                    }
-
                     for (int i = 0; i < windows.Count; i++)
-                        windows[i].window.Update(dt);
-
-                    float alpha = (float)(accumulator / fixedDt);
-                    alpha = Math.Clamp(alpha, 0f, 1f);
-
-                    Volatile.Write(ref _interpolationAlpha, alpha);
-
-                    Thread.Yield();
-                }
-            })
-            {
-                Name = "Update Thread",
-                IsBackground = true
-            };
-
-            updateThread.Start();
-            Stopwatch timer = Stopwatch.StartNew();
-            double lastRenderTime = timer.Elapsed.TotalSeconds;
-
-            while (_running)
-            {
-                if (windows.Count == 0)
-                {
-                    _running = false;
-                    break;
-                }
-
-                double now = timer.Elapsed.TotalSeconds;
-                double dt = now - lastRenderTime;
-                lastRenderTime = now;
-
-                if (dt > 0.25)
-                    dt = 0.25;
-
-                float alpha = Volatile.Read(ref _interpolationAlpha);
-                EngineSingleton.Instance.InterpolationAlpha = alpha;
-
-                for (int i = windows.Count - 1; i >= 0; i--)
-                {
-                    var window = windows[i].window;
-
-                    window.ProcessEvents();
-
-                    if (window.IsExiting)
                     {
-                        Console.WriteLine("Window closing");
-                        window.Close();
-                        windows.RemoveAt(i);
-                        continue;
+                        windows[i].window.Update(updateStep);
                     }
-
-                    window.Render((float)dt, alpha);
+                    accumulator -= updateStep;
                 }
-                _frameIndex++;
-                _running = windows.Count > 0;
-                Console.WriteLine(_running);
+
+                double alpha = accumulator / updateStep;
+
+
+                for (int i = 0; i < windows.Count; i++)
+                {
+                    windows[i].window.Render(frameTime, (float)alpha);
+                }
             }
-            _running = false;
-            updateThread.Join();
         }
+
     }
 }

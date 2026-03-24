@@ -299,13 +299,10 @@ namespace DevoidStandaloneLauncher.Prototypes
 
                 GameObject cameraObject = scene.GetGameObject("CAMERA_SURV");
 
-                RenderThread.Enqueue(() =>
-                {
-                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
-                    mr.material = material;
-                    //mr.material.SetTexture("MAT_AlbedoMap", scene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0));
-                    mr.material.SetTexture("MAT_AlbedoMap", cameraObject.GetComponent<CameraComponent3D>().Camera.RenderTarget.GetRenderTexture(0));
-                });
+                MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                mr.material = material;
+                //mr.material.SetTexture("MAT_AlbedoMap", scene.GetMainCamera().Camera.RenderTarget.GetRenderTexture(0));
+                mr.material.SetTexture("MAT_AlbedoMap", cameraObject.GetComponent<CameraComponent3D>().Camera.RenderTarget.GetRenderTexture(0));
             });
 
             LevelSpawnRegistry.Register("Surv_Cam", (assimpNode, assimpScene) =>

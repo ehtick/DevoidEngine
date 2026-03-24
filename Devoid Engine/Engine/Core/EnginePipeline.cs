@@ -1,62 +1,43 @@
 ﻿using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Rendering;
-using DevoidEngine.Engine.Utilities;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DevoidEngine.Engine.Core
 {
-    enum RenderResourceType
+    public class CameraRenderContext
     {
-        Screen,
-        SceneDepth,
-        GBufferNormal,
-        GBufferPosition,
+        public CameraData cameraData;
+        public Framebuffer cameraTargetSurface;
+
+        public List<RenderItem> renderItems3D = new();
+        public List<RenderItem> renderItems2D = new();
+        public List<RenderItem> renderItemsUI = new();
+
+        public List<GPUPointLight> pointLights = new();
+        public List<GPUSpotLight> spotLights = new();
+        public List<GPUDirectionalLight> directionalLights = new();
+
+        public void Clear()
+        {
+            renderItems3D.Clear(); renderItems2D.Clear(); renderItemsUI.Clear(); pointLights.Clear();
+            spotLights.Clear(); directionalLights.Clear();
+        }
     }
-
-    //public class CameraRenderContext
-    //{
-    //    public CameraData cameraData;
-    //    public Framebuffer cameraTargetSurface;
-
-    //    public List<RenderItem> renderItems3D = new();
-    //    public List<RenderItem> renderItems2D = new();
-    //    public List<RenderItem> renderItemsUI = new();
-
-    //    public List<GPUPointLight> pointLights = new();
-    //    public List<GPUSpotLight> spotLights = new();
-    //    public List<GPUDirectionalLight> directionalLights = new();
-
-    //    public void Clear()
-    //    {
-    //        renderItems3D.Clear(); renderItems2D.Clear(); renderItemsUI.Clear(); pointLights.Clear();
-    //        spotLights.Clear(); directionalLights.Clear();
-    //    }
-    //}
-
-    public static class FramePipeline
+    public static class EnginePipeline
     {
-        //static Pool<CameraRenderContext> CameraContextPool = new Pool<CameraRenderContext>();
-
-        static AsyncTripleBuffer<List<CameraRenderContext>> SwapBuffer;
-
-        static FramePipeline()
-        {
-            SwapBuffer = new AsyncTripleBuffer<List<CameraRenderContext>>(new List<CameraRenderContext>(), new List<CameraRenderContext>(), new List<CameraRenderContext>());
-        }
-
-        public static void Reset()
-        {
-            //SwapBuffer.Front.Clear();
-            //SwapBuffer.Back.Clear();
-        }
+        static List<CameraRenderContext> FrameState = new List<CameraRenderContext>();
 
         public static void ExecuteUpdateThread(float deltaTime)
         {
+            FrameState.Clear();
             if (!SceneManager.IsSceneLoaded()) return;
 
-            var backList = SwapBuffer.AcquireBackBuffer(out int backIndex);
-            backList.Clear();
             Scene scene = SceneManager.CurrentScene;
             var cameras = scene.GetComponentsOfType<CameraComponent3D>();
 
@@ -74,10 +55,8 @@ namespace DevoidEngine.Engine.Core
                     renderable.Collect(cameraComponent, ctx);
                 }
 
-                backList.Add(ctx);
+                FrameState.Add(ctx);
             }
-
-            SwapBuffer.Publish(backIndex);
         }
 
         public static void ExecuteRenderThread(float deltaTime, float alpha)
@@ -86,12 +65,10 @@ namespace DevoidEngine.Engine.Core
             RenderThread.MainThreadStarted = true;
             RenderThread.Execute();
 
-            var cameraContextList = SwapBuffer.GetFrontBuffer();
 
-
-            for (int i = 0; i <  cameraContextList.Count; i++)
+            for (int i = 0; i < FrameState.Count; i++)
             {
-                CameraRenderContext ctx = cameraContextList[i];
+                CameraRenderContext ctx = FrameState[i];
                 for (int j = 0; j < ctx.renderItems3D.Count; j++)
                 {
                     var renderItem = ctx.renderItems3D[j];
@@ -117,25 +94,17 @@ namespace DevoidEngine.Engine.Core
 
             // Frame level shader bindings go here
 
-            int count = cameraContextList.Count;
+            int count = FrameState.Count;
 
             for (int i = 0; i < count; i++)
             {
-                Debug.Assert(i < cameraContextList.Count);
-                var ctx = cameraContextList[i];
+                Debug.Assert(i < FrameState.Count);
+                var ctx = FrameState[i];
                 RenderBase.Render(ctx);
             }
 
             RenderThread.ExecuteFrameEnd();
-
-            SwapBuffer.ReleasePreviousFront();
         }
-
-        public static void Shutdown()
-        {
-            SwapBuffer.ReleasePreviousFront();
-        }
-
 
     }
 }
