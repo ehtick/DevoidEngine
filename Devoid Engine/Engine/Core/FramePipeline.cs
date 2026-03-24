@@ -1,6 +1,7 @@
 ﻿using DevoidEngine.Engine.Components;
 using DevoidEngine.Engine.Rendering;
 using DevoidEngine.Engine.Utilities;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace DevoidEngine.Engine.Core
@@ -46,20 +47,19 @@ namespace DevoidEngine.Engine.Core
 
         public static void Reset()
         {
-            SwapBuffer.Front.Clear();
-            SwapBuffer.Back.Clear();
+            //SwapBuffer.Front.Clear();
+            //SwapBuffer.Back.Clear();
         }
 
         public static void ExecuteUpdateThread(float deltaTime)
         {
             if (!SceneManager.IsSceneLoaded()) return;
 
-            var backList = SwapBuffer.Back;
+            var backList = SwapBuffer.AcquireBackBuffer(out int backIndex);
+            backList.Clear();
             Scene scene = SceneManager.CurrentScene;
             var cameras = scene.GetComponentsOfType<CameraComponent3D>();
 
-            // CRITICAL FIX
-            backList.Clear();
 
             for (int i = 0; i < cameras.Count; i++)
             {
@@ -77,7 +77,7 @@ namespace DevoidEngine.Engine.Core
                 backList.Add(ctx);
             }
 
-            SwapBuffer.Publish();
+            SwapBuffer.Publish(backIndex);
         }
 
         public static void ExecuteRenderThread(float deltaTime, float alpha)
@@ -86,7 +86,7 @@ namespace DevoidEngine.Engine.Core
             RenderThread.MainThreadStarted = true;
             RenderThread.Execute();
 
-            var cameraContextList = SwapBuffer.Front;
+            var cameraContextList = SwapBuffer.GetFrontBuffer();
 
 
             for (int i = 0; i <  cameraContextList.Count; i++)
@@ -117,14 +117,18 @@ namespace DevoidEngine.Engine.Core
 
             // Frame level shader bindings go here
 
-            for (int i = 0; i < cameraContextList.Count; i++)
+            int count = cameraContextList.Count;
+
+            for (int i = 0; i < count; i++)
             {
-                CameraRenderContext ctx = cameraContextList[i];
+                Debug.Assert(i < cameraContextList.Count);
+                var ctx = cameraContextList[i];
                 RenderBase.Render(ctx);
             }
 
             RenderThread.ExecuteFrameEnd();
 
+            SwapBuffer.ReleasePreviousFront();
         }
 
 
