@@ -105,6 +105,7 @@ namespace DevoidEngine.Engine.Core
             const float physicsHz = 60;
 
             const float updateStep = 1f / updateHz;
+            const float physicsStep = 1f / physicsHz;
 
             foreach (var wrs in windows)
                 wrs.window.Load();
@@ -125,17 +126,21 @@ namespace DevoidEngine.Engine.Core
                 accumulator += frameTime;
 
 
-                while (accumulator >= updateStep)
+                for (int i = 0; i < windows.Count; i++)
+                {
+                    windows[i].window.Update(frameTime);
+                }
+
+                while (accumulator >= physicsStep)
                 {
                     for (int i = 0; i < windows.Count; i++)
                     {
-                        windows[i].window.FixedUpdate(updateStep);
-                        windows[i].window.Update(updateStep);
+                        windows[i].window.FixedUpdate(physicsStep);
                     }
-                    accumulator -= updateStep;
+                    accumulator -= physicsStep;
                 }
 
-                double alpha = accumulator / updateStep;
+                double alpha = accumulator / physicsStep;
                 EngineSingleton.Instance.InterpolationAlpha = (float)alpha;
 
 

@@ -39,6 +39,7 @@ namespace DevoidEngine.Engine.Core
 
         public bool Handle(InputEvent e)
         {
+            Console.WriteLine(e);
             if (e.Control == (ushort)InputSystem.InputDevices.Keys.F7 && e.Value == 1f)
             {
                 rootNode.Visible = !rootNode.Visible;

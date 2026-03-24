@@ -71,27 +71,19 @@ namespace DevoidEngine.Engine.Components
         private float yaw;
         private float pitch;
 
-        private Vector2 mouseDelta;
-
         public event Action OnDeath;
 
         public float InteractionDistance = 20f;
 
         public CanvasComponent UICanvas;
-        //public LabelNode UIInteractionText;
-
         private PortalCubeComponent heldCube;
 
-
-
-
-        public Transform GunTransform;   // assign from gun object
+        public Transform GunTransform;
 
         public float RecoilAngle = 25f;
         public float RecoilSpeed = 14f;
         public float RecoilReturnSpeed = 10f;
-
-        public float ReloadSpinSpeed = 1500f; // degrees per second
+        public float ReloadSpinSpeed = 1500f;
 
         private float recoilCurrent = 0f;
         private float recoilTarget = 0f;
@@ -101,36 +93,22 @@ namespace DevoidEngine.Engine.Components
 
         public Vector3 PlayerRecoilForce = new Vector3(0f, 0f, 0f);
 
+        // ===============================
+        // Input State (Fixed Only)
+        // ===============================
+
+        private Vector2 moveInput;
+        private Vector2 mouseDelta;
+        private bool jumpRequested;
+        private bool shootRequested;
+        private bool reloadRequested;
+        private bool interactRequested;
+
+        float totalTime = 0f;
 
         // ===============================
         // Setup
         // ===============================
-
-        private Vector2 lastMouseDelta;
-        private Vector2 mouseVelocity;
-        private Vector2 frameMouseDelta;
-        private Vector2 fixedMouseDelta;
-
-        private Vector2 moveInput;
-        private bool jumpRequested;
-        private bool shootRequested;
-        private bool reloadRequested;
-
-        public Vector2 GetMouseVelocity() => mouseVelocity;
-        public Transform GetCameraPivot() => cameraPivot;
-        public Vector2 GetMouseDelta() => lastMouseDelta;
-        public Vector3 GetLinearVelocity()
-        {
-            return rb != null ? rb.LinearVelocity : Vector3.Zero;
-        }
-
-        public void SetGunTransform(Transform gun)
-        {
-            GunTransform = gun;
-
-            // store the gun's original orientation
-            gunBaseRotation = gun.LocalRotation;
-        }
 
         public override void OnStart()
         {
@@ -144,11 +122,6 @@ namespace DevoidEngine.Engine.Components
                 Align = AlignItems.End
             };
 
-            //UIInteractionText = new LabelNode("T to interact", FontLibrary.LoadFont("Engine/Content/Fonts/JetBrainsMono-Regular.ttf", 32), 21)
-            //{
-
-            //};
-            //ROOT.Add(UIInteractionText);
             UICanvas.Canvas.Add(ROOT);
 
             projectileMesh = new Mesh();
@@ -157,8 +130,7 @@ namespace DevoidEngine.Engine.Components
             currentAmmo = MaxAmmo;
 
             rb = gameObject.GetComponent<RigidBodyComponent>();
-            if (rb == null)
-                return;
+            if (rb == null) return;
 
             rb.FreezeRotationX = true;
             rb.FreezeRotationY = true;
@@ -177,17 +149,54 @@ namespace DevoidEngine.Engine.Components
             cameraPivot = pivot;
         }
 
-        // ===============================
-        // Update
-        // ===============================
+        public Transform GetCameraPivot() => cameraPivot;
 
-        float totalTime = 0f;
-
-        public override void OnUpdate(float dt)
+        public void SetGunTransform(Transform gun)
         {
-            // === SAMPLE INPUT (ONCE PER FRAME) ===
+            GunTransform = gun;
+            gunBaseRotation = gun.LocalRotation;
+        }
 
-            frameMouseDelta = new Vector2(
+        public Vector3 GetLinearVelocity()
+        {
+            return rb != null ? rb.LinearVelocity : Vector3.Zero;
+        }
+
+        // ===============================
+        // Fixed Update ONLY
+        // ===============================
+
+        public override void OnFixedUpdate(float dt)
+        {
+            if (rb == null) return;
+
+            totalTime += dt;
+
+            SampleInput();
+
+            HandleRotation(dt);
+            HandleMovement(dt);
+            HandleShooting(dt);
+            HandleReload(dt);
+            HandleDamage(dt);
+            HandleRegen(dt);
+            TryInteract();
+            UpdateGunAnimation(dt);
+
+            // reset one-shot inputs
+            jumpRequested = false;
+            shootRequested = false;
+            reloadRequested = false;
+            interactRequested = false;
+        }
+
+        // ===============================
+        // Input
+        // ===============================
+
+        private void SampleInput()
+        {
+            mouseDelta = new Vector2(
                 InputSystem.Input.GetAction("LookX"),
                 InputSystem.Input.GetAction("LookY")
             );
@@ -197,272 +206,20 @@ namespace DevoidEngine.Engine.Components
                 InputSystem.Input.GetAction("Forward") - InputSystem.Input.GetAction("Backward")
             );
 
-            if (InputSystem.Input.GetActionDown("Jump"))
-                jumpRequested = true;
-
-            if (InputSystem.Input.GetActionDown("Shoot"))
-                shootRequested = true;
-
-            if (Input.GetKey(Keys.R))
-                reloadRequested = true;
-
-            HandleRotation(dt);
-        }
-
-        private void UpdateGunAnimation(float dt)
-        {
-            if (GunTransform == null)
-                return;
-
-            // Smooth recoil motion
-            recoilCurrent = MathHelper.Lerp(
-                recoilCurrent,
-                recoilTarget,
-                RecoilSpeed * dt
-            );
-
-            recoilTarget = MathHelper.Lerp(
-                recoilTarget,
-                0f,
-                RecoilReturnSpeed * dt
-            );
-
-            // Reload spinning
-            if (isReloading)
-                reloadSpin += ReloadSpinSpeed * dt;
-            else
-                reloadSpin = 0f;
-
-            // Gun local axes from base rotation
-            Vector3 gunRight = Vector3.Normalize(
-                Vector3.Transform(Vector3.UnitX, gunBaseRotation)
-            );
-
-            Vector3 gunForward = Vector3.Normalize(
-                Vector3.Transform(Vector3.UnitZ, gunBaseRotation)
-            );
-
-            Quaternion recoilRot =
-                Quaternion.CreateFromAxisAngle(
-                    gunForward,
-                    MathHelper.DegToRad(-recoilCurrent)
-                );
-
-            Quaternion reloadRot =
-                Quaternion.CreateFromAxisAngle(
-                    gunForward,
-                    MathHelper.DegToRad(-reloadSpin)
-                );
-
-            GunTransform.LocalRotation =
-                gunBaseRotation *
-                recoilRot *
-                reloadRot;
-        }
-
-        private void TryInteract()
-        {
-            if (cameraPivot == null)
-                return;
-
-            Vector3 origin = cameraPivot.Position;
-
-            Vector3 forward =
-                Vector3.Normalize(
-                    Vector3.Transform(Vector3.UnitZ, cameraPivot.Rotation)
-                );
-
-            if (InputSystem.Input.GetActionDown("Interact"))
-            {
-                // If holding cube -> drop
-                if (heldCube != null)
-                {
-                    heldCube.Drop();
-                    heldCube = null;
-                    return;
-                }
-
-                // Try pickup
-                if (gameObject.Scene.Physics.Raycast(
-                    new Ray(origin + forward, forward),
-                    InteractionDistance,
-                    out RaycastHit hit))
-                {
-                    var cube = hit.HitObject?.GetComponent<PortalCubeComponent>();
-
-                    if (cube != null && !cube.IsHeld)
-                    {
-                        heldCube = cube;
-                        cube.PickUp(this);
-                    }
-                }
-            }
+            jumpRequested = InputSystem.Input.GetActionDown("Jump");
+            shootRequested = InputSystem.Input.GetActionDown("Shoot");
+            interactRequested = InputSystem.Input.GetActionDown("Interact");
+            reloadRequested = Input.GetKey(Keys.R);
         }
 
         // ===============================
-        // Shooting
+        // Rotation
         // ===============================
 
-        private void HandleShooting(float fixedDt)
+        private void HandleRotation(float dt)
         {
-            fireTimer -= fixedDt;
-
-            if (!shootRequested)
-                return;
-
-            if (fireTimer > 0f || isReloading)
-                return;
-
-            if (currentAmmo <= 0)
-            {
-                StartReload();
-                return;
-            }
-
-            fireTimer = FireRate;
-            currentAmmo--;
-
-            recoilTarget += RecoilAngle;
-
-            Vector3 spawnPosition = cameraPivot != null
-                ? cameraPivot.Position
-                : gameObject.Transform.Position;
-
-            Quaternion rotation = cameraPivot != null
-                ? cameraPivot.Rotation
-                : rb.Rotation;
-
-            Vector3 forward =
-                Vector3.Normalize(
-                    Vector3.Transform(Vector3.UnitZ, rotation)
-                );
-
-            BulletComponent.Spawn(
-                gameObject.Scene,
-                projectileMesh,
-                spawnPosition + forward * 2f,
-                rotation,
-                ProjectileScale,
-                ProjectileSpeed,
-                ProjectileMass
-            );
-
-            // recoil impulse
-            if (rb != null)
-            {
-                Vector3 recoilImpulse =
-                    Vector3.Transform(PlayerRecoilForce, rotation);
-
-                Vector3 velocity = rb.LinearVelocity;
-
-                velocity.X += recoilImpulse.X;
-                velocity.Z += recoilImpulse.Z;
-                velocity.Y = MathF.Max(velocity.Y, recoilImpulse.Y);
-
-                rb.LinearVelocity = velocity;
-            }
-        }
-
-        private void StartReload()
-        {
-            if (isReloading || currentAmmo == MaxAmmo)
-                return;
-
-            isReloading = true;
-            reloadTimer = ReloadTime;
-        }
-
-        private void HandleReload(float dt)
-        {
-            if (!isReloading)
-                return;
-
-            reloadTimer -= dt;
-
-            if (reloadTimer <= 0f)
-            {
-                isReloading = false;
-                currentAmmo = MaxAmmo;
-            }
-        }
-
-        // ===============================
-        // Health + Damage
-        // ===============================
-
-        private void HandleDamage(float dt)
-        {
-            if (!inDamageZone)
-                return;
-
-            damageTimer += dt;
-
-            if (!delayPassed && damageTimer >= DamageDelay)
-                delayPassed = true;
-
-            if (delayPassed)
-                ApplyDamage(DamagePerSecond * dt);
-        }
-
-        private void HandleRegen(float dt)
-        {
-            if (inDamageZone)
-                return;
-
-            if (TimeSinceLastDamage() < RegenDelay)
-                return;
-
-            if (Health < MaxHealth)
-            {
-                Health += RegenPerSecond * dt;
-                Health = Math.Min(Health, MaxHealth);
-            }
-        }
-
-        private float TimeSinceLastDamage()
-        {
-            return (float)(totalTime - lastDamageTime);
-        }
-
-        private void ApplyDamage(float amount)
-        {
-            Health -= amount;
-            lastDamageTime = (float)totalTime;
-
-            if (Health <= 0f)
-            {
-                Health = 0f;
-                OnDeath?.Invoke();
-            }
-        }
-
-        // ===============================
-        // Physics
-        // ===============================
-
-        public override void OnFixedUpdate(float fixedDt)
-        {
-            if (rb == null) return;
-
-            // === LATCH INPUT INTO FIXED STEP ===
-            fixedMouseDelta = frameMouseDelta;
-
-            HandleMovement(fixedDt);
-            HandleShooting(fixedDt);
-            HandleReload(fixedDt);
-            HandleDamage(fixedDt);
-            HandleRegen(fixedDt);
-
-            // reset one-shot inputs
-            jumpRequested = false;
-            shootRequested = false;
-            reloadRequested = false;
-        }
-
-        private void HandleRotation(float fixedDt)
-        {
-            yaw += frameMouseDelta.X * MouseSensitivity;
-            pitch -= frameMouseDelta.Y * MouseSensitivity;
+            yaw += mouseDelta.X * MouseSensitivity;
+            pitch -= mouseDelta.Y * MouseSensitivity;
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
@@ -482,7 +239,11 @@ namespace DevoidEngine.Engine.Components
             }
         }
 
-        private void HandleMovement(float fixedDt)
+        // ===============================
+        // Movement
+        // ===============================
+
+        private void HandleMovement(float dt)
         {
             Vector3 forward = Vector3.Transform(Vector3.UnitZ, rb.Rotation);
             Vector3 right = Vector3.Transform(-Vector3.UnitX, rb.Rotation);
@@ -493,18 +254,13 @@ namespace DevoidEngine.Engine.Components
             forward = Vector3.Normalize(forward);
             right = Vector3.Normalize(right);
 
-            Vector3 desiredMove =
-                forward * moveInput.Y +
-                right * moveInput.X;
+            Vector3 desiredMove = forward * moveInput.Y + right * moveInput.X;
 
             if (desiredMove.LengthSquared() > 1f)
                 desiredMove = Vector3.Normalize(desiredMove);
 
             Vector3 currentVelocity = rb.LinearVelocity;
-
-            Vector3 horizontalVelocity =
-                new Vector3(currentVelocity.X, 0, currentVelocity.Z);
-
+            Vector3 horizontalVelocity = new Vector3(currentVelocity.X, 0, currentVelocity.Z);
             Vector3 targetVelocity = desiredMove * MoveSpeed;
 
             bool grounded = IsGrounded();
@@ -513,7 +269,7 @@ namespace DevoidEngine.Engine.Components
             horizontalVelocity = Vector3.Lerp(
                 horizontalVelocity,
                 targetVelocity,
-                Acceleration * control * fixedDt
+                Acceleration * control * dt
             );
 
             rb.LinearVelocity = new Vector3(
@@ -544,13 +300,214 @@ namespace DevoidEngine.Engine.Components
         }
 
         // ===============================
-        // Collision Events
+        // Shooting / Reload
+        // ===============================
+
+        private void HandleShooting(float dt)
+        {
+            fireTimer -= dt;
+
+            if (!shootRequested) return;
+            if (fireTimer > 0f || isReloading) return;
+
+            if (currentAmmo <= 0)
+            {
+                StartReload();
+                return;
+            }
+
+            fireTimer = FireRate;
+            currentAmmo--;
+
+            recoilTarget += RecoilAngle;
+
+            Vector3 spawnPosition = cameraPivot != null
+                ? cameraPivot.Position
+                : gameObject.Transform.Position;
+
+            Quaternion rotation = cameraPivot != null
+                ? cameraPivot.Rotation
+                : rb.Rotation;
+
+            Vector3 forward = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitZ, rotation)
+            );
+
+            BulletComponent.Spawn(
+                gameObject.Scene,
+                projectileMesh,
+                spawnPosition + forward * 2f,
+                rotation,
+                ProjectileScale,
+                ProjectileSpeed,
+                ProjectileMass
+            );
+
+            if (rb != null)
+            {
+                Vector3 recoilImpulse =
+                    Vector3.Transform(PlayerRecoilForce, rotation);
+
+                var v = rb.LinearVelocity;
+
+                v.X += recoilImpulse.X;
+                v.Z += recoilImpulse.Z;
+                v.Y = MathF.Max(v.Y, recoilImpulse.Y);
+
+                rb.LinearVelocity = v;
+            }
+        }
+
+        private void StartReload()
+        {
+            if (isReloading || currentAmmo == MaxAmmo)
+                return;
+
+            isReloading = true;
+            reloadTimer = ReloadTime;
+        }
+
+        private void HandleReload(float dt)
+        {
+            if (!isReloading) return;
+
+            reloadTimer -= dt;
+
+            if (reloadTimer <= 0f)
+            {
+                isReloading = false;
+                currentAmmo = MaxAmmo;
+            }
+        }
+
+        // ===============================
+        // Interaction
+        // ===============================
+
+        private void TryInteract()
+        {
+            if (!interactRequested || cameraPivot == null)
+                return;
+
+            Vector3 origin = cameraPivot.Position;
+
+            Vector3 forward = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitZ, cameraPivot.Rotation)
+            );
+
+            if (heldCube != null)
+            {
+                heldCube.Drop();
+                heldCube = null;
+                return;
+            }
+
+            if (gameObject.Scene.Physics.Raycast(
+                new Ray(origin + forward, forward),
+                InteractionDistance,
+                out RaycastHit hit))
+            {
+                var cube = hit.HitObject?.GetComponent<PortalCubeComponent>();
+
+                if (cube != null && !cube.IsHeld)
+                {
+                    heldCube = cube;
+                    cube.PickUp(this);
+                }
+            }
+        }
+
+        // ===============================
+        // Gun Animation
+        // ===============================
+
+        private void UpdateGunAnimation(float dt)
+        {
+            if (GunTransform == null) return;
+
+            recoilCurrent = MathHelper.Lerp(
+                recoilCurrent,
+                recoilTarget,
+                RecoilSpeed * dt
+            );
+
+            recoilTarget = MathHelper.Lerp(
+                recoilTarget,
+                0f,
+                RecoilReturnSpeed * dt
+            );
+
+            if (isReloading)
+                reloadSpin += ReloadSpinSpeed * dt;
+            else
+                reloadSpin = 0f;
+
+            Vector3 forward = Vector3.Normalize(
+                Vector3.Transform(Vector3.UnitZ, gunBaseRotation)
+            );
+
+            Quaternion recoilRot =
+                Quaternion.CreateFromAxisAngle(forward, MathHelper.DegToRad(-recoilCurrent));
+
+            Quaternion reloadRot =
+                Quaternion.CreateFromAxisAngle(forward, MathHelper.DegToRad(-reloadSpin));
+
+            GunTransform.LocalRotation =
+                gunBaseRotation *
+                recoilRot *
+                reloadRot;
+        }
+
+        // ===============================
+        // Health
+        // ===============================
+
+        private void HandleDamage(float dt)
+        {
+            if (!inDamageZone) return;
+
+            damageTimer += dt;
+
+            if (!delayPassed && damageTimer >= DamageDelay)
+                delayPassed = true;
+
+            if (delayPassed)
+                ApplyDamage(DamagePerSecond * dt);
+        }
+
+        private void HandleRegen(float dt)
+        {
+            if (inDamageZone) return;
+
+            if ((totalTime - lastDamageTime) < RegenDelay)
+                return;
+
+            if (Health < MaxHealth)
+            {
+                Health += RegenPerSecond * dt;
+                Health = Math.Min(Health, MaxHealth);
+            }
+        }
+
+        private void ApplyDamage(float amount)
+        {
+            Health -= amount;
+            lastDamageTime = totalTime;
+
+            if (Health <= 0f)
+            {
+                Health = 0f;
+                OnDeath?.Invoke();
+            }
+        }
+
+        // ===============================
+        // Collision
         // ===============================
 
         public void OnCollisionEnter(GameObject other)
         {
             if (other.Name == "Ground") return;
-            //Console.WriteLine("ENTER");
 
             inDamageZone = true;
             damageTimer = 0f;
@@ -564,6 +521,7 @@ namespace DevoidEngine.Engine.Components
         public void OnCollisionExit(GameObject other)
         {
             if (other.Name == "Ground") return;
+
             inDamageZone = false;
             damageTimer = 0f;
             delayPassed = false;

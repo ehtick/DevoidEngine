@@ -32,7 +32,6 @@ namespace DevoidEngine.Engine.Core
         {
             if (IsRenderThread())
             {
-                Console.WriteLine("OnRenderThread");
                 action();
                 return;
             }
