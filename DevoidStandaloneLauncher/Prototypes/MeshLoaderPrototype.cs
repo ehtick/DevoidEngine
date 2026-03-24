@@ -94,6 +94,13 @@ namespace DevoidStandaloneLauncher.Prototypes
             //    }
             //});
 
+            DevoidEngine.Engine.InputSystem.Input.Map.Bind("MCLICK", new DevoidEngine.Engine.InputSystem.InputBinding()
+            {
+                DeviceType = InputDeviceType.Mouse,
+                Control = (ushort)DevoidEngine.Engine.InputSystem.InputDevices.MouseButton.Left,
+                isClamped = true
+            });
+
             DevoidEngine.Engine.InputSystem.Input.Map.Bind("LookX", new DevoidEngine.Engine.InputSystem.InputBinding()
             {
                 DeviceType = InputDeviceType.Mouse,

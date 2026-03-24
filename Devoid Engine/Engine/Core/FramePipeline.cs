@@ -86,10 +86,10 @@ namespace DevoidEngine.Engine.Core
             RenderThread.MainThreadStarted = true;
             RenderThread.Execute();
 
-            var cameraContextList = SwapBuffer.Front.ToArray();
+            var cameraContextList = SwapBuffer.Front;
 
 
-            for (int i = 0; i <  cameraContextList.Length; i++)
+            for (int i = 0; i <  cameraContextList.Count; i++)
             {
                 CameraRenderContext ctx = cameraContextList[i];
                 for (int j = 0; j < ctx.renderItems3D.Count; j++)
@@ -117,7 +117,7 @@ namespace DevoidEngine.Engine.Core
 
             // Frame level shader bindings go here
 
-            for (int i = 0; i < cameraContextList.Length; i++)
+            for (int i = 0; i < cameraContextList.Count; i++)
             {
                 CameraRenderContext ctx = cameraContextList[i];
                 RenderBase.Render(ctx);

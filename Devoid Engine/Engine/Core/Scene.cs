@@ -220,7 +220,7 @@ namespace DevoidEngine.Engine.Core
                 GameObjects[i].OnUpdate(dt);
             }
 
-            OnFixedUpdate(dt);
+            //OnFixedUpdate(dt);
 
             for (int i = 0; i < GameObjects.Count; i++)
             {

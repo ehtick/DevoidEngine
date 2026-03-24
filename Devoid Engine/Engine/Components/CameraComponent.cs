@@ -70,7 +70,7 @@ namespace DevoidEngine.Engine.Components
             //if (IsDefault) gameObject.Scene.SetMainCamera(this);
         }
 
-        public override void OnLateUpdate(float dt)
+        public override void OnUpdate(float dt)
         {
             var transform = gameObject.Transform;
 

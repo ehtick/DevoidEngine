@@ -49,8 +49,13 @@ namespace DevoidStandaloneLauncher.CustomComponents
             screenArrow.StartIndicator();
         }
 
-        public override void OnUpdate(float dt)
+        public override void OnFixedUpdate(float dt)
         {
+            if (DevoidEngine.Engine.InputSystem.Input.GetActionDown("MCLICK"))
+            {
+                Console.WriteLine("Hello");
+            }
+
             bobTimer += dt;
 
             var cam = gameObject.Scene.GetMainCamera()?.gameObject;

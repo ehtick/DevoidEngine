@@ -227,14 +227,14 @@ namespace DevoidEngine.Engine.Core
                     {
                         // capture previous BEFORE simulation
 
-                        //for (int i = 0; i < windows.Count; i++)
-                        //    windows[i].window.FixedUpdate(fixedDt);
-
                         for (int i = 0; i < windows.Count; i++)
-                            windows[i].window.Update(fixedDt);
+                            windows[i].window.FixedUpdate(fixedDt);
 
                         accumulator -= fixedDt;
                     }
+
+                    for (int i = 0; i < windows.Count; i++)
+                        windows[i].window.Update(dt);
 
                     float alpha = (float)(accumulator / fixedDt);
                     alpha = Math.Clamp(alpha, 0f, 1f);
