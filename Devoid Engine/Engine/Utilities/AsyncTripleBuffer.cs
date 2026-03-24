@@ -53,6 +53,7 @@ namespace DevoidEngine.Engine.Utilities
 
                 // no free buffer → wait briefly
                 spinner.SpinOnce();
+                Console.WriteLine("Waiting");
             }
         }
 

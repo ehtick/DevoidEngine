@@ -193,7 +193,6 @@ namespace DevoidEngine.Engine.Core
 
         public void RunTickedTrue()
         {
-            const int updatesPerFrame = 1;
 
             foreach (var wrs in windows)
             {
@@ -202,7 +201,7 @@ namespace DevoidEngine.Engine.Core
 
 
             _running = true;
-            const double fixedDt = 1.0 / 128.0;
+            const double fixedDt = 1.0 / 165.0;
 
             Thread updateThread = new Thread(() =>
             {
@@ -279,6 +278,7 @@ namespace DevoidEngine.Engine.Core
 
                     if (window.IsExiting)
                     {
+                        Console.WriteLine("Window closing");
                         window.Close();
                         windows.RemoveAt(i);
                         continue;
@@ -286,8 +286,9 @@ namespace DevoidEngine.Engine.Core
 
                     window.Render((float)dt, alpha);
                 }
-
                 _frameIndex++;
+                _running = windows.Count > 0;
+                Console.WriteLine(_running);
             }
             _running = false;
             updateThread.Join();

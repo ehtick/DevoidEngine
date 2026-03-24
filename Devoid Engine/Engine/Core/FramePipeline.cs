@@ -131,6 +131,11 @@ namespace DevoidEngine.Engine.Core
             SwapBuffer.ReleasePreviousFront();
         }
 
+        public static void Shutdown()
+        {
+            SwapBuffer.ReleasePreviousFront();
+        }
+
 
     }
 }

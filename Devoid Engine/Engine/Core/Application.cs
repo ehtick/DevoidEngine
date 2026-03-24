@@ -89,6 +89,7 @@ namespace DevoidEngine.Engine.Core
             UISystem.Initialize();
 
             MainWindow.OnLoad += OnLoad;
+            MainWindow.OnUnload += OnUnLoad;
             MainWindow.OnFixedUpdate += OnFixedUpdateFrame;
             MainWindow.OnUpdateFrame += OnUpdateFrame;
             MainWindow.OnRenderFrame += OnRenderFrame;
@@ -117,6 +118,11 @@ namespace DevoidEngine.Engine.Core
 
             // TODO: Add by conditional applicationSpec.useDebugConsole
             AddLayer(new DebugConsole());
+        }
+
+        private void OnUnLoad()
+        {
+            FramePipeline.Shutdown();
         }
 
         private void OnMouseMove(OpenTK.Windowing.Common.MouseMoveEventArgs obj)
