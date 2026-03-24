@@ -20,7 +20,7 @@ namespace DevoidEngine.Engine.Components
 
         public bool Interpolated
         {
-            get; private set;
+            get; set;
         } = true;
 
         // ===============================

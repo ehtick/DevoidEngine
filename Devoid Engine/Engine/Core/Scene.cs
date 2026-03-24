@@ -219,7 +219,8 @@ namespace DevoidEngine.Engine.Core
             {
                 GameObjects[i].OnUpdate(dt);
             }
-            //DoFixedUpdate(dt);
+
+            OnFixedUpdate(dt);
 
             for (int i = 0; i < GameObjects.Count; i++)
             {
@@ -257,11 +258,6 @@ namespace DevoidEngine.Engine.Core
         public void OnRender(float dt, float alpha)
         {
             if (!IsPlaying) { return; }
-
-            foreach (CameraComponent3D camera in Cameras)
-            {
-                camera.OnRenderInterpolated(alpha);
-            }
 
             for (int i = 0; i < GameObjects.Count; i++)
             {

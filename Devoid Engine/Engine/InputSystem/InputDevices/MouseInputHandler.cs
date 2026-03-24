@@ -75,12 +75,15 @@ namespace DevoidEngine.Engine.InputSystem.InputDevices
             Vector2 currentPos = _state.Position;
             Vector2 delta = currentPos - _previousPosition;
 
+            // scale it down (VERY IMPORTANT)
+            //delta *= 0.002f;
+
             backend.Emit(new InputEvent
             {
                 DeviceId = _deviceId,
                 DeviceType = InputDeviceType.Mouse,
                 Control = (ushort)MouseAxis.DeltaX,
-                Value = _state.Delta.X
+                Value = delta.X
             });
 
             backend.Emit(new InputEvent
@@ -88,8 +91,10 @@ namespace DevoidEngine.Engine.InputSystem.InputDevices
                 DeviceId = _deviceId,
                 DeviceType = InputDeviceType.Mouse,
                 Control = (ushort)MouseAxis.DeltaY,
-                Value = _state.Delta.Y
+                Value = delta.Y
             });
+
+            _previousPosition = currentPos;
 
             Vector2 pos = _state.Position;
 
@@ -116,7 +121,7 @@ namespace DevoidEngine.Engine.InputSystem.InputDevices
             // SCROLL
             // -------------------------
             Vector2 scroll = _state.Scroll;
-            Vector2 scrollDelta = scroll - _previousScroll;
+            Vector2 scrollDelta = _state.ScrollDelta;
 
             if (scrollDelta.X != 0f)
             {

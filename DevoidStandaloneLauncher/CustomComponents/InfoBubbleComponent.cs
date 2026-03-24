@@ -30,6 +30,7 @@ namespace DevoidStandaloneLauncher.CustomComponents
 
         public override void OnStart()
         {
+            gameObject.Transform.Interpolated = false;
             startPos = gameObject.Transform.Position;
             startRot = gameObject.Transform.EulerAngles;
 
@@ -117,6 +118,8 @@ namespace DevoidStandaloneLauncher.CustomComponents
                 rot.Y,
                 startRot.Z
             );
+
+            Console.WriteLine(rot);
         }
 
         private void TryInteract()
