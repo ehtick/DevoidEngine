@@ -109,6 +109,8 @@ namespace DevoidEngine.Engine.Core
             foreach (var wrs in windows)
                 wrs.window.Load();
 
+            _running = true;
+
             Stopwatch timer = Stopwatch.StartNew();
 
             double accumulator = 0;
@@ -127,17 +129,26 @@ namespace DevoidEngine.Engine.Core
                 {
                     for (int i = 0; i < windows.Count; i++)
                     {
+                        windows[i].window.FixedUpdate(updateStep);
                         windows[i].window.Update(updateStep);
                     }
                     accumulator -= updateStep;
                 }
 
                 double alpha = accumulator / updateStep;
+                EngineSingleton.Instance.InterpolationAlpha = (float)alpha;
 
 
                 for (int i = 0; i < windows.Count; i++)
                 {
                     windows[i].window.Render(frameTime, (float)alpha);
+
+                    if (windows[i].window.IsExiting)
+                    {
+                        windows[i].window.Close();
+                        windows.RemoveAt(i);
+                        continue;
+                    }
                 }
             }
         }

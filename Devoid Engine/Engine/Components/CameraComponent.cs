@@ -30,11 +30,7 @@ namespace DevoidEngine.Engine.Components
         public CameraComponent3D()
         {
             Camera = new Camera();
-        }
 
-        public override void OnStart()
-        {
-            gameObject.Transform.Interpolated = false;
             Camera.RenderTarget = new Framebuffer();
 
             Camera.RenderTarget.AttachRenderTexture(new Texture2D(new DevoidGPU.TextureDescription()
@@ -64,8 +60,12 @@ namespace DevoidEngine.Engine.Components
             height = (int)Screen.Size.Y;
 
             UpdateProjection();
+        }
 
+        public override void OnStart()
+        {
 
+            UpdateProjection();
             //gameObject.Scene.AddCamera(this);
             //if (IsDefault) gameObject.Scene.SetMainCamera(this);
         }
