@@ -146,6 +146,7 @@ namespace DevoidEngine.Engine.Core
 
                 for (int i = 0; i < windows.Count; i++)
                 {
+                    windows[i].window.ProcessEvents();
                     windows[i].window.Render(frameTime, (float)alpha);
 
                     if (windows[i].window.IsExiting)
@@ -155,6 +156,8 @@ namespace DevoidEngine.Engine.Core
                         continue;
                     }
                 }
+
+                _running = windows.Count > 0;
             }
         }
 

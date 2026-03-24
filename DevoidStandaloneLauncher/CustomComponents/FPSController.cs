@@ -166,15 +166,17 @@ namespace DevoidEngine.Engine.Components
         // Fixed Update ONLY
         // ===============================
 
+        public override void OnUpdate(float dt)
+        {
+            SampleInput();
+            HandleRotation(dt);
+        }
+
         public override void OnFixedUpdate(float dt)
         {
             if (rb == null) return;
 
             totalTime += dt;
-
-            SampleInput();
-
-            HandleRotation(dt);
             HandleMovement(dt);
             HandleShooting(dt);
             HandleReload(dt);

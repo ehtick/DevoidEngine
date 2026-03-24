@@ -165,8 +165,8 @@ namespace DevoidStandaloneLauncher.Prototypes
             SceneManager.LoadScene(scene);
             loader.CurrentScene = scene;
 
-            Importer.LoadModel(levelPath);
             scene.Play();
+            Importer.LoadModel(levelPath);
         }
 
         //void LoadLevel()
@@ -253,20 +253,17 @@ namespace DevoidStandaloneLauncher.Prototypes
             LevelSpawnRegistry.Register("INFO_SPEECH", (assimpNode, assimpScene) =>
             {
                 var go = scene.AddGameObject(assimpNode.Name);
-                go.AddComponent<AudioSourceComponent3D>();
-                go.AddComponent<InfoBubbleComponent>();
 
                 Importer.ApplyTransform(go, assimpNode);
+
+                go.AddComponent<InfoBubbleComponent>();
 
                 var mesh = Importer.ConvertMesh(assimpNode, assimpScene);
                 MeshRenderer mr = go.AddComponent<MeshRenderer>();
                 mr.AddMesh(mesh);
 
-                RenderThread.Enqueue(() =>
-                {
-                    MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
-                    mr.material = material;
-                });
+                MaterialInstance material = Importer.ConvertMaterial(assimpNode, assimpScene, levelPath);
+                mr.material = material;
             });
 
             LevelSpawnRegistry.Register("CAM_MAIN_MONITOR", (assimpNode, assimpScene) =>
