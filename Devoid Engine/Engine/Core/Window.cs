@@ -52,9 +52,11 @@ namespace DevoidEngine.Engine.Core
         public event Action? OnLoad;
         public event Action? OnUnload;
 
+        public event Action? OnStartFrame;
         public event Action<double>? OnFixedUpdate;
         public event Action<double>? OnUpdateFrame;
         public event Action<double, float>? OnRenderFrame;
+        public event Action? OnEndFrame;
 
         public WindowSpecification WindowSpecification;
 
@@ -85,6 +87,17 @@ namespace DevoidEngine.Engine.Core
         {
             OnLoad?.Invoke();
             this.IsVisible = true;
+        }
+
+
+        public void StartFrame()
+        {
+            OnStartFrame?.Invoke();
+        }
+
+        public void EndFrame()
+        {
+            OnEndFrame?.Invoke();
         }
 
         public void Update(double deltaTime)

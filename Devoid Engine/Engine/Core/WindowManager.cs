@@ -102,7 +102,7 @@ namespace DevoidEngine.Engine.Core
         public void Run()
         {
             const float updateHz = 165;
-            const float physicsHz = 60;
+            const float physicsHz = 120;
 
             const float updateStep = 1f / updateHz;
             const float physicsStep = 1f / physicsHz;
@@ -128,6 +128,7 @@ namespace DevoidEngine.Engine.Core
 
                 for (int i = 0; i < windows.Count; i++)
                 {
+                    windows[i].window.StartFrame();
                     windows[i].window.Update(frameTime);
                 }
 
@@ -155,6 +156,7 @@ namespace DevoidEngine.Engine.Core
                         windows.RemoveAt(i);
                         continue;
                     }
+                    windows[i].window.EndFrame();
                 }
 
                 _running = windows.Count > 0;

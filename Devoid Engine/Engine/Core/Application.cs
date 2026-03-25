@@ -93,6 +93,8 @@ namespace DevoidEngine.Engine.Core
             MainWindow.OnFixedUpdate += OnFixedUpdateFrame;
             MainWindow.OnUpdateFrame += OnUpdateFrame;
             MainWindow.OnRenderFrame += OnRenderFrame;
+            MainWindow.OnStartFrame += OnStartFrame;
+            MainWindow.OnEndFrame += OnEndFrame;
 
             MainWindow.KeyDown += OnKeyDown;
             MainWindow.KeyUp += OnKeyUp;
@@ -118,6 +120,17 @@ namespace DevoidEngine.Engine.Core
 
             // TODO: Add by conditional applicationSpec.useDebugConsole
             AddLayer(new DebugConsole());
+        }
+
+
+        private void OnStartFrame()
+        {
+            InputSystem.Input.Update();
+        }
+
+        private void OnEndFrame()
+        {
+            InputSystem.Input.EndFrame();
         }
 
         private void OnUnLoad()
@@ -209,8 +222,6 @@ namespace DevoidEngine.Engine.Core
 
         private void OnUpdateFrame(double deltaTime)
         {
-            InputSystem.Input.EndFrame();
-            InputSystem.Input.Update();
             LayerHandler.UpdateLayers((float)deltaTime);
 
             UISystem.Update((float)deltaTime);

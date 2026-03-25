@@ -26,6 +26,8 @@ namespace DevoidEngine.Engine.Components
 
         public bool StartKinematic = false;
 
+        public bool OverrideRotation = false;
+
         public bool FreezeRotationX = false;
         public bool FreezeRotationY = false;
         public bool FreezeRotationZ = false;
@@ -191,7 +193,7 @@ namespace DevoidEngine.Engine.Components
             }
         }
 
-        public override void OnLateUpdate(float dt)
+        public override void OnFixedUpdate(float dt)
         {
             if (internalBody == null)
                 return;
@@ -208,7 +210,14 @@ namespace DevoidEngine.Engine.Components
                 internalBody.AngularVelocity = angVel;
 
                 gameObject.Transform.Position = internalBody.Position;
-                gameObject.Transform.Rotation = internalBody.Rotation;
+                if (OverrideRotation)
+                {
+                    internalBody.Rotation = gameObject.Transform.Rotation;
+                }
+                else
+                {
+                    gameObject.Transform.Rotation = internalBody.Rotation;
+                }
             }
         }
 

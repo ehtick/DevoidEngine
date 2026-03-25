@@ -63,7 +63,7 @@ namespace DevoidEngine.Engine.Physics.Bepu
             pairMaterial = new PairMaterialProperties
             {
                 FrictionCoefficient = friction,
-                MaximumRecoveryVelocity = restitution > 0f ? restitution * 10f : 0.1f,
+                MaximumRecoveryVelocity = 1,
                 SpringSettings = spring
             };
 

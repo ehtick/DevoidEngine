@@ -135,6 +135,7 @@ namespace DevoidEngine.Engine.Components
             rb.FreezeRotationX = true;
             rb.FreezeRotationY = true;
             rb.FreezeRotationZ = true;
+            rb.OverrideRotation = true;
 
             yaw = MathHelper.RadToDeg(
                 MathF.Atan2(
@@ -220,17 +221,22 @@ namespace DevoidEngine.Engine.Components
 
         private void HandleRotation(float dt)
         {
+            // Apply input (frame-rate)
             yaw += mouseDelta.X * MouseSensitivity;
             pitch -= mouseDelta.Y * MouseSensitivity;
 
             pitch = Math.Clamp(pitch, MinPitch, MaxPitch);
 
-            rb.Rotation =
+            // ✅ Rotate the PLAYER TRANSFORM (not physics)
+            Quaternion yawRotation =
                 Quaternion.CreateFromAxisAngle(
                     -Vector3.UnitY,
                     MathHelper.DegToRad(yaw)
                 );
 
+            gameObject.Transform.Rotation = yawRotation;
+
+            // ✅ Camera pitch (unchanged)
             if (cameraPivot != null)
             {
                 cameraPivot.LocalRotation =
@@ -247,8 +253,10 @@ namespace DevoidEngine.Engine.Components
 
         private void HandleMovement(float dt)
         {
-            Vector3 forward = Vector3.Transform(Vector3.UnitZ, rb.Rotation);
-            Vector3 right = Vector3.Transform(-Vector3.UnitX, rb.Rotation);
+            Quaternion rotation = gameObject.Transform.Rotation;
+
+            Vector3 forward = Vector3.Transform(Vector3.UnitZ, rotation);
+            Vector3 right = Vector3.Transform(-Vector3.UnitX, rotation);
 
             forward.Y = 0;
             right.Y = 0;
